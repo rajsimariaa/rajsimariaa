@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if user is admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'rajsimariaa@gmail.com';
+    }
+
+    // Payments / Orders
+    match /payments/{paymentId} {
+      // ANYONE can create a payment (Guest checkout)
+      allow create: if true;
+      
+      // Users can read their own payments based on EMAIL
+      // Only allowed if user has verified their email in Auth
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        request.auth.token.email_verified == true &&
+        request.auth.token.email == resource.data.email
+      );
+      
+      // Admin can verify (update)
+      allow update: if isAdmin();
+      
+      // Users can delete their own payments (cancel). Only if verified email matches.
+      allow delete: if isAdmin() || (
+        request.auth != null && 
+        request.auth.token.email_verified == true &&
+        request.auth.token.email == resource.data.email
+      );
+    }
+
+    // Works / Products
+    match /works/{workId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

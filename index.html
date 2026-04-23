@@ -1,307 +1,247 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raj Simaria | Freelance Developer</title>
-    
-    <!-- Tailwind CSS (via CDN for static hosting) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <title>Raj Simaria | Elite Web Design</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Custom Font (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen bg-[#050505] text-slate-300 selection:bg-cyan-500/30 selection:text-cyan-200">
-    
-    <!-- Background Effects -->
-    <div class="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/40 via-[#050505] to-[#050505]"></div>
-    <div class="fixed inset-0 z-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]"></div>
 
-    <!-- Navigation -->
-    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 bg-transparent py-6">
-        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i data-lucide="terminal" class="text-cyan-400 w-6 h-6"></i>
-                <span class="text-white font-bold tracking-wider text-xl">RAJ<span class="text-cyan-400">.</span></span>
-            </div>
-            
-            <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a href="#about" class="hover:text-cyan-400 transition-colors">About</a>
-                <a href="#experience" class="hover:text-cyan-400 transition-colors">Experience</a>
-                <a href="#skills" class="hover:text-cyan-400 transition-colors">Skills</a>
-                <a href="#testimonials" class="hover:text-cyan-400 transition-colors">Testimonials</a>
-                <a href="#contact" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white transition-all">
-                    Let's Talk
-                </a>
-            </div>
+<body>
+    <div class="grid-background"></div>
 
-            <!-- Mobile Menu Toggle -->
-            <button id="menu-btn" class="md:hidden text-slate-300 focus:outline-none">
-                <i id="icon-menu" data-lucide="menu" class="w-6 h-6 block"></i>
-                <i id="icon-close" data-lucide="x" class="w-6 h-6 hidden"></i>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">R</div>
+                RAJ.
+            </a>
+            <div class="nav-links">
+                <a href="#expertise">Expertise</a>
+                <a href="#work">Work</a>
+                <a href="#shop">Shop</a>
+                <a href="#contact">Contact</a>
+                <a href="login.html" class="admin-nav-link"><i data-lucide="user" style="width:14px;"></i> Portal</a>
+            </div>
+            <a href="#contact" class="cta-button">Hire Me <i data-lucide="arrow-right"></i></a>
+            <button class="mobile-menu-btn" id="menu-btn">
+                <i data-lucide="menu"></i>
             </button>
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="hidden fixed inset-0 z-40 bg-[#050505] pt-24 px-6 flex-col gap-6 text-xl md:hidden">
-        <a href="#about" class="mobile-link border-b border-white/10 pb-4">About</a>
-        <a href="#experience" class="mobile-link border-b border-white/10 pb-4">Experience</a>
-        <a href="#skills" class="mobile-link border-b border-white/10 pb-4">Skills</a>
-        <a href="#testimonials" class="mobile-link border-b border-white/10 pb-4">Testimonials</a>
-        <a href="#contact" class="mobile-link text-cyan-400">Contact Me</a>
+    <div class="mobile-menu" id="mobile-menu">
+        <button class="close-menu-btn" id="close-btn"><i data-lucide="x"></i></button>
+        <div class="mobile-nav-links">
+            <a href="#expertise" class="mobile-link">Expertise</a>
+            <a href="#work" class="mobile-link">Work</a>
+            <a href="#shop" class="mobile-link">Shop</a>
+            <a href="#contact" class="mobile-link">Contact</a>
+            <a href="login.html" class="mobile-link">Portal Login</a>
+        </div>
     </div>
 
-    <main class="relative z-10">
+    <main>
         <!-- Hero Section -->
-        <section id="about" class="min-h-screen flex items-center justify-center pt-20 px-6">
-            <div class="max-w-4xl mx-auto text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 text-sm font-medium mb-8">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                    </span>
-                    Available for Freelance Projects
+        <section class="hero">
+            <div class="hero-content reveal">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    Available for Work
                 </div>
-                
-                <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-tight mb-6">
-                    Crafting Digital <br class="hidden md:block"/>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                        Experiences & Vibes.
-                    </span>
+                <h1 class="hero-title">
+                    I build <br>
+                    websites that <br>
+                    <span class="gradient-text">stand out.</span>
                 </h1>
-                
-                <p class="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    I'm <strong class="text-white">Raj</strong>, a freelance developer who transforms caffeine and creative ideas into sleek, scalable web applications. I build things that look great and perform beautifully.
+                <p class="hero-subtitle">
+                    Premium web design and development for businesses that refuse to blend in. Elevate your brand today.
                 </p>
-                
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="#contact" class="w-full sm:w-auto px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg transition-all flex items-center justify-center gap-2 group">
-                        Start a Project
-                        <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                    <a href="#experience" class="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2">
-                        View My Work
-                        <i data-lucide="code-2" class="w-4 h-4"></i>
-                    </a>
+                <div class="hero-buttons">
+                    <a href="#contact" class="primary-btn">Let's Talk <i data-lucide="arrow-right"></i></a>
+                    <a href="#shop" class="secondary-btn">Go to Shop <i data-lucide="shopping-bag"></i></a>
+                </div>
+            </div>
+            <div class="hero-visual reveal delay-1">
+                <div class="floating-card">
+                    <div class="glow-bg"></div>
+                    <i data-lucide="code-2" class="card-icon"></i>
+                    <h3>FLAWLESS<br>CODE.</h3>
                 </div>
             </div>
         </section>
 
-        <!-- Experience & Projects Section -->
-        <section id="experience" class="py-24 px-6 border-t border-white/5 bg-[#0a0a0a]/50">
-            <div class="max-w-6xl mx-auto">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Selected Work</h2>
-                <p class="text-slate-400 mb-12">Recent projects and freelance highlights.</p>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
-                    
-                    <!-- Project 1 -->
-                    <div class="group relative bg-[#111] border border-white/5 rounded-2xl p-8 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-fuchsia-500 to-purple-600 opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity"></div>
-                        
-                        <div class="flex justify-between items-start mb-6">
-                            <h3 class="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">Shades of Hue Portal</h3>
-                            <a href="https://shadesofhue.vercel.app" target="_blank" rel="noopener noreferrer" class="z-10 hover:scale-110 transition-transform">
-                                <i data-lucide="external-link" class="w-5 h-5 text-slate-500 hover:text-cyan-400 transition-colors"></i>
-                            </a>
-                        </div>
-                        
-                        <p class="text-sm text-cyan-400 mb-4 font-mono">Lead Developer</p>
-                        <p class="text-slate-400 mb-8 leading-relaxed text-sm">
-                            A comprehensive digital portal featuring vibrant UI/UX, robust data handling, and seamless user experiences. Built to handle complex workflows with an intuitive interface.
-                        </p>
-                        
-                        <div class="flex flex-wrap gap-2 mt-auto">
-                            <span class="text-xs px-3 py-1 bg-white/5 rounded-full text-slate-300 border border-white/5">React</span>
-                            <span class="text-xs px-3 py-1 bg-white/5 rounded-full text-slate-300 border border-white/5">Node.js</span>
-                            <span class="text-xs px-3 py-1 bg-white/5 rounded-full text-slate-300 border border-white/5">Tailwind</span>
-                            <span class="text-xs px-3 py-1 bg-white/5 rounded-full text-slate-300 border border-white/5">Full Stack</span>
-                        </div>
-                    </div>
-
-                    <!-- Project 2 -->
-                    <div class="group relative bg-[#111] border border-white/5 rounded-2xl p-8 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-400 to-blue-500 opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity"></div>
-                        
-                        <div class="flex justify-between items-start mb-6">
-                            <h3 class="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">K Lulla Enterprises</h3>
-                            <a href="https://klulla.com" target="_blank" rel="noopener noreferrer" class="z-10 hover:scale-110 transition-transform">
-                                <i data-lucide="external-link" class="w-5 h-5 text-slate-500 hover:text-cyan-400 transition-colors"></i>
-                            </a>
-                        </div>
-                        
-                        <p class="text-sm text-cyan-400 mb-4 font-mono">Solo Developer</p>
-                        <p class="text-slate-400 mb-8 leading-relaxed text-sm">
-                            High-conversion landing page designed to capture leads and showcase enterprise services. Focus on performance, accessibility, and modern corporate aesthetics.
-                        </p>
-                        
-                        <div class="flex flex-wrap gap-2 mt-auto">
-                            <span class="text-xs px-3 py-1 bg-white/5 rounded-full text-slate-300 border border-white/5">HTML/CSS</span>
-                            <span class="text-xs px-3 py-1 bg-white/5 rounded-full text-slate-300 border border-white/5">JavaScript</span>
-                        </div>
-                    </div>
-
+        <!-- Expertise Section -->
+        <section id="expertise" class="expertise-section">
+            <div class="section-header reveal">
+                <h2>My Expertise</h2>
+                <p>Everything you need to dominate digitally.</p>
+            </div>
+            <div class="cards-grid">
+                <div class="glass-card reveal">
+                    <i data-lucide="layout" class="card-icon-small text-cyan"></i>
+                    <h3>Premium Design</h3>
+                    <p>Custom-tailored, high-end interfaces that instantly build trust and make your business look like
+                        an industry leader.</p>
+                </div>
+                <div class="glass-card reveal delay-1">
+                    <i data-lucide="zap" class="card-icon-small text-fuchsia"></i>
+                    <h3>Blazing Speed</h3>
+                    <p>Slow sites kill sales. I engineer lightweight, highly optimized code so your website loads in the
+                        blink of an eye.</p>
+                </div>
+                <div class="glass-card reveal delay-2">
+                    <i data-lucide="smartphone" class="card-icon-small text-emerald"></i>
+                    <h3>Mobile Perfect</h3>
+                    <p>Over 60% of traffic is mobile. Your site will look and function flawlessly on every screen size,
+                        guaranteed.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Skills Section -->
-        <section id="skills" class="py-24 px-6">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-12">The Tech Stack</h2>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">JavaScript (ES6+)</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">React.js</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">Node.js</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">Tailwind CSS</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">HTML5 & CSS3</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">Responsive Design</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">Vercel / Netlify</div>
-                    <div class="px-6 py-3 bg-[#111] border border-white/5 rounded-xl hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all text-slate-300 cursor-default">SQL / NoSQL</div>
-                </div>
+        <!-- Work Section -->
+        <section id="work" class="work-section">
+            <h2 class="section-title text-center reveal">Selected Work</h2>
+            <div class="projects-container">
+                <!-- Project 1 -->
+                <a href="https://shadesofhue.vercel.app" target="_blank" class="project-card reveal">
+                    <div class="project-image-wrapper">
+                        <div class="project-overlay overlay-cyan"></div>
+                        <h3 class="project-image-title">Shades of Hue<br>Portal</h3>
+                    </div>
+                    <div class="project-info">
+                        <span class="role-badge badge-cyan">Lead Developer</span>
+                        <h3 class="project-title hover-cyan">Shades of Hue <i data-lucide="arrow-up-right"></i></h3>
+                        <p class="project-desc">A comprehensive digital portal featuring vibrant UI/UX, robust data
+                            handling, and seamless user experiences. Built to handle complex workflows with an intuitive
+                            interface.</p>
+                    </div>
+                </a>
+
+                <!-- Project 2 -->
+                <a href="https://klulla.com" target="_blank" class="project-card reverse reveal">
+                    <div class="project-image-wrapper">
+                        <div class="project-overlay overlay-fuchsia"></div>
+                        <h3 class="project-image-title">K Lulla<br>Enterprises</h3>
+                    </div>
+                    <div class="project-info">
+                        <span class="role-badge badge-fuchsia">Solo Developer</span>
+                        <h3 class="project-title hover-fuchsia">K Lulla Enterprises <i data-lucide="arrow-up-right"></i>
+                        </h3>
+                        <p class="project-desc">High-conversion landing page designed to capture leads and showcase
+                            enterprise services. Focus on performance, accessibility, and modern corporate aesthetics.
+                        </p>
+                    </div>
+                </a>
             </div>
         </section>
 
-        <!-- Testimonials Section -->
-        <section id="testimonials" class="py-24 px-6 border-t border-white/5 bg-[#0a0a0a]/50">
-            <div class="max-w-6xl mx-auto">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 text-center">Client Vibes</h2>
-                <p class="text-slate-400 mb-12 text-center max-w-2xl mx-auto">What people are saying about working with me.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                    <!-- Testimonial 1 -->
-                    <div class="bg-[#111] border border-white/5 rounded-2xl p-8 relative hover:border-white/10 transition-all hover:-translate-y-1 duration-300">
-                        <i data-lucide="quote" class="absolute top-6 right-8 w-12 h-12 text-white/5"></i>
-                        <p class="text-slate-300 mb-8 relative z-10 leading-relaxed italic">
-                            "Raj completely elevated our digital portal. The UI is incredibly vibrant and the user experience is exactly what we envisioned. A top-tier developer who truly understands the 'vibe'."
-                        </p>
-                        <div class="flex items-center gap-4 mt-auto">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold bg-fuchsia-400/10 text-fuchsia-400">
-                                KR
-                            </div>
-                            <div>
-                                <h4 class="text-white font-bold">Krutika Rane</h4>
-                                <p class="text-sm text-slate-500">Co-Founder, Shades of Hue</p>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Shop Section -->
+        <section id="shop" class="shop-section">
+            <div class="section-header text-center reveal">
+                <h2>Digital Store</h2>
+                <p>Premium resources, templates, and code assets.</p>
+            </div>
 
-                    <!-- Testimonial 2 -->
-                    <div class="bg-[#111] border border-white/5 rounded-2xl p-8 relative hover:border-white/10 transition-all hover:-translate-y-1 duration-300">
-                        <i data-lucide="quote" class="absolute top-6 right-8 w-12 h-12 text-white/5"></i>
-                        <p class="text-slate-300 mb-8 relative z-10 leading-relaxed italic">
-                            "We needed a high-conversion landing page quickly, and Raj delivered beyond expectations. The code is clean, the performance is stellar, and his communication was flawless."
-                        </p>
-                        <div class="flex items-center gap-4 mt-auto">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold bg-cyan-400/10 text-cyan-400">
-                                S
-                            </div>
-                            <div>
-                                <h4 class="text-white font-bold">Sunil</h4>
-                                <p class="text-sm text-slate-500">Proprietor, K Lulla Enterprises</p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="works-grid" id="public-works-grid">
+                <!-- Works will be injected here dynamically by script.js -->
+                <div class="loading-text"
+                    style="text-align:center; width:100%; color:var(--text-muted); grid-column: 1 / -1;">
+                    <i data-lucide="loader" class="spin"></i> Loading products...
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="py-24 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-[#050505]">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Let's Build Together.</h2>
-                <p class="text-slate-400 text-lg mb-12 max-w-xl mx-auto">
-                    Currently accepting new freelance clients. Whether you have a clear vision or just a spark of an idea, let's connect and make it a reality.
-                </p>
-
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
-                    <a href="mailto:rajsimariaa@gmail.com" class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 bg-[#111] border border-white/10 rounded-xl hover:border-cyan-400/50 hover:bg-cyan-400/10 transition-all group">
-                        <div class="p-2 bg-white/5 rounded-lg group-hover:bg-cyan-400/20 transition-colors">
-                            <i data-lucide="mail" class="w-5 h-5 text-cyan-400"></i>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Email Me</p>
-                            <p class="text-white font-medium">rajsimariaa@gmail.com</p>
-                        </div>
+        <section id="contact" class="contact-section">
+            <div class="contact-card reveal">
+                <div class="glow-bg-large"></div>
+                <h2>Ready to print money?</h2>
+                <p>Let's upgrade your digital presence and build a website that works as hard as you do.</p>
+                <div class="contact-buttons">
+                    <a href="tel:+919702531718" class="contact-btn primary">
+                        <i data-lucide="phone"></i> Call Now
                     </a>
-
-                    <a href="tel:+919833201718" class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 bg-[#111] border border-white/10 rounded-xl hover:border-fuchsia-400/50 hover:bg-fuchsia-400/10 transition-all group">
-                        <div class="p-2 bg-white/5 rounded-lg group-hover:bg-fuchsia-400/20 transition-colors">
-                            <i data-lucide="phone" class="w-5 h-5 text-fuchsia-400"></i>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Call Me</p>
-                            <p class="text-white font-medium">+91 9702531718</p>
-                        </div>
+                    <a href="mailto:rajsimariaa@gmail.com" class="contact-btn secondary">
+                        <i data-lucide="mail"></i> Send Email
                     </a>
                 </div>
+                <div class="contact-info">rajsimariaa@gmail.com • +91 9702531718</div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="py-8 border-t border-white/5 text-center text-slate-500 text-sm relative z-10 bg-[#050505]">
-        <p>© <span id="current-year"></span> Raj Simaria. All vibes reserved.</p>
+    <!-- Buy Me A Coffee Button -->
+    <button class="coffee-btn" id="coffee-btn">
+        <i data-lucide="coffee"></i> Buy me a coffee
+    </button>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="payment-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal"><i data-lucide="x"></i></button>
+            <h2 class="modal-title">Buy Me A Coffee ☕</h2>
+            <p class="modal-desc">Your support keeps the caffeine flowing and the code glowing!</p>
+
+            <div class="payment-form" id="payment-form">
+                <div class="payment-step">
+                    <p class="step-label">Step 1: Enter details</p>
+                    <input type="text" placeholder="Your Name" class="payment-input" id="pay-name" required>
+                    <input type="email" placeholder="Your Email (to receive product)" class="payment-input"
+                        id="pay-email" required>
+                    <input type="number" placeholder="Amount (₹)" class="payment-input" id="pay-amount" required>
+                </div>
+
+                <div class="payment-step">
+                    <p class="step-label">Step 2: Scan & Pay</p>
+                    <div class="upi-visual">
+                        <img id="upi-qr"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=rajsimariaa-2@okaxis%26pn=Raj%20Simaria%26cu=INR"
+                            alt="UPI QR Code" class="qr-code">
+                        <div class="upi-details">
+                            <p class="upi-id-text">UPI ID: <span class="highlight">rajsimariaa-2@okaxis</span></p>
+                            <a id="upi-link" href="upi://pay?pa=rajsimariaa-2@okaxis&pn=Raj%20Simaria&cu=INR"
+                                class="upi-app-btn">
+                                <i data-lucide="smartphone"></i> Pay via App
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-step">
+                    <p class="step-label">Step 3: Confirm</p>
+                    <button class="primary-btn w-full" id="payment-done-btn">I've Made the Payment</button>
+                </div>
+            </div>
+
+            <div class="payment-success" id="payment-success" style="display: none;">
+                <div class="success-icon"><i data-lucide="party-popper"></i></div>
+                <h3>Order Received!</h3>
+                <p>I'll verify your payment and the product will appear in your <b>Portal</b> shortly. Cheers! ☕</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© <span id="year"></span> <a href="login.html"
+                style="color: inherit; text-decoration: none; cursor: default;">Raj Simaria</a> <a href="login.html"
+                style="color:var(--text-muted); opacity: 0.5; margin-left: 8px;"><i data-lucide="lock"
+                    style="width:12px;height:12px;"></i></a>. Elevating the web.</p>
     </footer>
 
-    <!-- Interactive Scripts -->
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // Set Current Year in Footer
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-
-        // Navbar Scroll Effect
-        const nav = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                nav.classList.add('bg-[#0a0a0a]/80', 'backdrop-blur-md', 'border-b', 'border-white/5', 'py-4');
-                nav.classList.remove('bg-transparent', 'py-6');
-            } else {
-                nav.classList.remove('bg-[#0a0a0a]/80', 'backdrop-blur-md', 'border-b', 'border-white/5', 'py-4');
-                nav.classList.add('bg-transparent', 'py-6');
-            }
-        });
-
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const iconMenu = document.getElementById('icon-menu');
-        const iconClose = document.getElementById('icon-close');
-        let isMenuOpen = false;
-
-        function toggleMenu() {
-            isMenuOpen = !isMenuOpen;
-            if (isMenuOpen) {
-                mobileMenu.classList.remove('hidden');
-                mobileMenu.classList.add('flex');
-                iconMenu.classList.replace('block', 'hidden');
-                iconClose.classList.replace('hidden', 'block');
-            } else {
-                mobileMenu.classList.add('hidden');
-                mobileMenu.classList.remove('flex');
-                iconMenu.classList.replace('hidden', 'block');
-                iconClose.classList.replace('block', 'hidden');
-            }
-        }
-
-        menuBtn.addEventListener('click', toggleMenu);
-
-        // Close menu when clicking links
-        document.querySelectorAll('.mobile-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (isMenuOpen) toggleMenu();
-            });
-        });
-    </script>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>

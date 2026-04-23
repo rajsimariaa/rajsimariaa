@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | Raj Simaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        .product-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--emerald);
+            color: black;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .product-link:hover {
+            transform: scale(1.05);
+        }
+
+        .cancel-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+    <div id="dashboard-loader" class="login-screen">
+        <div class="loading-text"><i data-lucide="loader" class="spin"></i> Loading...</div>
+    </div>
+
+    <div id="user-dashboard" class="admin-dashboard" style="display: none;">
+        <div class="admin-sidebar">
+            <div class="admin-logo">
+                <div class="logo-icon">U</div>
+                DASHBOARD
+            </div>
+            <nav class="admin-nav">
+                <button class="admin-nav-item active" data-target="orders-view">
+                    <i data-lucide="shopping-bag"></i> My Orders
+                </button>
+            </nav>
+            <button id="logout-btn" class="logout-btn"><i data-lucide="log-out"></i> Logout</button>
+        </div>
+
+        <div class="admin-main">
+            <div id="orders-view" class="admin-view active">
+                <h1 class="view-title">My Orders</h1>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Download / Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

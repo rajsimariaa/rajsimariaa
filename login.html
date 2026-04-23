@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Raj Simaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            padding: 48px;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(16px);
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-form input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 16px 20px;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--cyan);
+        }
+
+        .auth-toggle {
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .auth-toggle span {
+            color: var(--cyan);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .success-msg {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-background"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 id="auth-title">Welcome Back</h1>
+                <p id="auth-desc">Login to access your dashboard</p>
+            </div>
+
+            <div id="error-msg" class="error-msg"></div>
+            <div id="success-msg" class="success-msg"></div>
+
+            <form id="auth-form" class="auth-form">
+                <input type="email" id="email" placeholder="Email Address" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" id="submit-btn" class="primary-btn w-full">Login</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="toggle-text">Don't have an account? </span>
+                <span id="toggle-btn">Sign Up</span>
+            </div>
+
+            <a href="index.html"
+                style="display: block; margin-top: 24px; color: var(--text-muted); text-decoration: none; font-size: 14px;">
+                <i data-lucide="arrow-left" style="width: 14px; vertical-align: middle;"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const authDesc = document.getElementById('auth-desc');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const successMsg = document.getElementById('success-msg');
+
+        let isLogin = true;
+
+        toggleBtn.addEventListener('click', () => {
+            isLogin = !isLogin;
+            authTitle.textContent = isLogin ? 'Welcome Back' : 'Create Account';
+            authDesc.textContent = isLogin ? 'Login to access your dashboard' : 'Join our community today';
+            submitBtn.textContent = isLogin ? 'Login' : 'Sign Up';
+            toggleBtn.textContent = isLogin ? 'Sign Up' : 'Login';
+            document.getElementById('toggle-text').textContent = isLogin ? "Don't have an account? " : "Already have an account? ";
+            errorMsg.style.display = 'none';
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            try {
+                if (isLogin) {
+                    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+
+                    if (!user.emailVerified && email !== 'rajsimariaa@gmail.com') {
+                        errorMsg.innerHTML = `Please verify your email before logging in. <br> <span id="resend-email" style="text-decoration:underline; cursor:pointer; font-weight:700;">Resend verification email?</span>`;
+                        errorMsg.style.display = 'block';
+
+                        document.getElementById('resend-email').addEventListener('click', async () => {
+                            await user.sendEmailVerification();
+                            successMsg.textContent = "Verification email resent!";
+                            successMsg.style.display = 'block';
+                            errorMsg.style.display = 'none';
+                        });
+
+                        await firebase.auth().signOut();
+                    } else {
+                        redirectUser(email);
+                    }
+                } else {
+                    const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                    await userCredential.user.sendEmailVerification();
+                    successMsg.textContent = "Verification email sent! Please check your inbox.";
+                    successMsg.style.display = 'block';
+                    await firebase.auth().signOut();
+                    isLogin = true;
+                    authTitle.textContent = 'Welcome Back';
+                    submitBtn.textContent = 'Login';
+                }
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                if (!isLogin && successMsg.style.display === 'block') {
+                    submitBtn.textContent = 'Login';
+                } else {
+                    submitBtn.textContent = isLogin ? 'Login' : 'Sign Up';
+                }
+            }
+        });
+
+        function redirectUser(email) {
+            if (email === 'rajsimariaa@gmail.com') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        // Check if already logged in
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && (user.emailVerified || user.email === 'rajsimariaa@gmail.com')) {
+                redirectUser(user.email);
+            }
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
