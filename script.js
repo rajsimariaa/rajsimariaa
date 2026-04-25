@@ -183,19 +183,19 @@ document.addEventListener('DOMContentLoaded', () => {
             amountInput.value = price;
             amountInput.readOnly = true;
         } else {
-            amountInput.value = '';
+            amountInput.value = '100';
             amountInput.readOnly = false;
         }
 
         // Update QR and Link
-        const finalPrice = price || amountInput.value || '10';
+        const finalPrice = price || amountInput.value || '100';
         const upiData = `upi://pay?pa=rajsimariaa-2@okaxis&pn=Raj%20Simaria&cu=INR&am=${finalPrice}`;
         upiQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiData)}`;
         upiLink.href = upiData;
 
         // If amount changes manually, update QR
         amountInput.addEventListener('input', () => {
-            const newPrice = amountInput.value || '10';
+            const newPrice = amountInput.value || '100';
             const newUpiData = `upi://pay?pa=rajsimariaa-2@okaxis&pn=Raj%20Simaria&cu=INR&am=${newPrice}`;
             upiQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newUpiData)}`;
             upiLink.href = newUpiData;

@@ -93,6 +93,55 @@
             margin-bottom: 24px;
             display: none;
         }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--card-border);
+        }
+
+        .divider span {
+            padding: 0 16px;
+            font-weight: 600;
+        }
+
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-muted);
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 
@@ -113,6 +162,16 @@
                 <input type="password" id="password" placeholder="Password" required>
                 <button type="submit" id="submit-btn" class="primary-btn w-full">Login</button>
             </form>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <button type="button" id="google-btn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                    class="google-icon">
+                Continue with Google
+            </button>
 
             <div class="auth-toggle">
                 <span id="toggle-text">Don't have an account? </span>
@@ -137,6 +196,7 @@
         const toggleBtn = document.getElementById('toggle-btn');
         const errorMsg = document.getElementById('error-msg');
         const successMsg = document.getElementById('success-msg');
+        const googleBtn = document.getElementById('google-btn');
 
         let isLogin = true;
 
@@ -210,6 +270,30 @@
                 window.location.href = 'dashboard.html';
             }
         }
+
+        // Google Sign In
+        googleBtn.addEventListener('click', async () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                errorMsg.style.display = 'none';
+                googleBtn.disabled = true;
+                const originalText = googleBtn.innerHTML;
+                googleBtn.innerHTML = 'Connecting...';
+
+                const result = await firebase.auth().signInWithPopup(provider);
+                const user = result.user;
+                redirectUser(user.email);
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+                googleBtn.disabled = false;
+                googleBtn.innerHTML = `
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon">
+                    Continue with Google
+                `;
+            }
+        });
 
         // Check if already logged in
         firebase.auth().onAuthStateChanged((user) => {

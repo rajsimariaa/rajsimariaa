@@ -766,17 +766,17 @@ section {
 
 /* Payment Modal Simplified */
 .payment-step {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     text-align: left;
 }
 
 .step-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--cyan);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .upi-visual {
@@ -791,8 +791,8 @@ section {
 }
 
 .qr-code {
-    width: 180px;
-    height: 180px;
+    width: 150px;
+    height: 150px;
     border-radius: 12px;
     border: 8px solid white;
 }
@@ -1058,9 +1058,9 @@ footer {
     background: #111;
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 40px;
+    padding: 32px;
     width: 90%;
-    max-width: 450px;
+    max-width: 400px;
     position: relative;
     transform: translateY(20px);
     transition: transform 0.3s ease;
@@ -1087,14 +1087,15 @@ footer {
 }
 
 .modal-title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 800;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .modal-desc {
     color: var(--text-muted);
-    margin-bottom: 32px;
+    font-size: 14px;
+    margin-bottom: 24px;
 }
 
 .payment-form {
@@ -1107,10 +1108,10 @@ footer {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
-    padding: 16px 20px;
+    padding: 14px 18px;
     border-radius: 12px;
     font-family: inherit;
-    font-size: 16px;
+    font-size: 15px;
     transition: border-color 0.3s;
 }
 

@@ -2,9 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Check if user is admin
+    // Helper: Check if user is admin
     function isAdmin() {
       return request.auth != null && request.auth.token.email == 'rajsimariaa@gmail.com';
+    }
+
+    // Helper: Check if user is authenticated and verified
+    function isAuthenticated() {
+      return request.auth != null && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
+    // Users Collection (Profile Data)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin();
     }
 
     // Payments / Orders
@@ -13,21 +24,19 @@ service cloud.firestore {
       allow create: if true;
       
       // Users can read their own payments based on EMAIL
-      // Only allowed if user has verified their email in Auth
       allow read: if isAdmin() || (
-        request.auth != null && 
-        request.auth.token.email_verified == true &&
+        isAuthenticated() && 
         request.auth.token.email == resource.data.email
       );
       
       // Admin can verify (update)
       allow update: if isAdmin();
       
-      // Users can delete their own payments (cancel). Only if verified email matches.
+      // Users can delete their own pending payments
       allow delete: if isAdmin() || (
-        request.auth != null && 
-        request.auth.token.email_verified == true &&
-        request.auth.token.email == resource.data.email
+        isAuthenticated() && 
+        request.auth.token.email == resource.data.email &&
+        resource.data.status == 'pending_verification'
       );
     }
 
