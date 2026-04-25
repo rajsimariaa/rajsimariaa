@@ -5,103 +5,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal | Raj Simaria</title>
-    <!-- Google Fonts: Outfit -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="admin.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#030303',
+                        card: 'rgba(15, 15, 15, 0.6)',
+                        border: 'rgba(255, 255, 255, 0.08)',
+                        cyan: '#22d3ee',
+                        fuchsia: '#c026d3',
+                        emerald: '#34d399',
+                    },
+                    fontFamily: {
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
-<body class="admin-body">
-    <div id="admin-dashboard" class="admin-dashboard" style="display: none;">
-        <div class="admin-sidebar">
-            <div class="admin-logo">
-                <div class="logo-icon">R</div>
-                ADMIN
+<body class="bg-dark text-white font-outfit antialiased min-h-screen">
+    <div id="admin-dashboard" class="flex flex-col lg:flex-row min-h-screen" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-72 lg:h-screen lg:sticky lg:top-0 bg-[#0a0a0a] border-b lg:border-r border-border p-8 flex flex-col gap-12 z-40">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan to-fuchsia rounded-xl flex items-center justify-center text-black font-black text-xl">A</div>
+                <span class="font-black text-2xl tracking-tighter uppercase">Command.</span>
             </div>
-            <nav class="admin-nav">
-                <button class="admin-nav-item active" data-target="payments-view">
-                    <i data-lucide="coffee"></i> Coffee Payments
-                </button>
-                <button class="admin-nav-item" data-target="upload-view">
-                    <i data-lucide="upload-cloud"></i> Upload Work
-                </button>
-                <button class="admin-nav-item" data-target="manage-view">
-                    <i data-lucide="folder"></i> Manage Work
-                </button>
-            </nav>
-            <button id="logout-btn" class="logout-btn"><i data-lucide="log-out"></i> Logout</button>
-        </div>
 
-        <div class="admin-main">
+            <nav class="flex-1 flex flex-col gap-2">
+                <button class="sidebar-item active flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 bg-white/10 text-white shadow-lg w-full text-left" data-target="payments-view">
+                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                    <span class="font-bold">Payments</span>
+                </button>
+                <button class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 w-full text-left" data-target="upload-view">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span class="font-bold">Add Product</span>
+                </button>
+                <button class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 w-full text-left" data-target="manage-view">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                    <span class="font-bold">Catalog</span>
+                </button>
+                <a href="index.html" class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 w-full text-left">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    <span class="font-bold">Public Site</span>
+                </a>
+            </nav>
+
+            <button id="logout-btn" class="flex items-center gap-3 px-6 py-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-all font-bold">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Terminate Session
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-12">
             <!-- Payments View -->
-            <div id="payments-view" class="admin-view active">
-                <h1 class="view-title">Coffee Payments</h1>
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Amount (₹)</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="payments-tbody">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
+            <div id="payments-view" class="admin-view flex flex-col gap-10">
+                <header>
+                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">Revenue <span class="text-cyan">Stream</span></h1>
+                    <p class="text-slate-400 text-lg">Verify incoming payments and manage customer orders.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Total Rev</p>
+                        <h2 id="stat-rev" class="text-3xl font-black text-cyan italic">₹0</h2>
+                    </div>
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Orders</p>
+                        <h2 id="stat-orders" class="text-3xl font-black">0</h2>
+                    </div>
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Pending</p>
+                        <h2 id="stat-admin-pending" class="text-3xl font-black text-amber-500">0</h2>
+                    </div>
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Verified</p>
+                        <h2 id="stat-admin-verified" class="text-3xl font-black text-emerald-500">0</h2>
+                    </div>
+                </div>
+
+                <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border-white/5">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-white/5">
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Timestamp</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Customer Details</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Product</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center text-cyan">Value</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center">Status</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-tbody" class="divide-y divide-white/5 text-sm">
+                                <!-- JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Upload Work View -->
-            <div id="upload-view" class="admin-view" style="display: none;">
-                <h1 class="view-title">Upload New Work</h1>
-                <div class="upload-card">
-                    <form id="upload-form" class="admin-form">
-                        <div class="form-group">
-                            <label>Title of Work</label>
-                            <input type="text" id="work-title" class="payment-input w-full" required>
+            <!-- Upload View -->
+            <div id="upload-view" class="admin-view hidden flex flex-col gap-10">
+                <header>
+                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">Deploy <span class="text-fuchsia">Asset</span></h1>
+                    <p class="text-slate-400 text-lg">Push new digital products to the public store.</p>
+                </header>
+
+                <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-10 max-w-2xl">
+                    <form id="upload-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Asset Name</label>
+                                <input type="text" id="work-title" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600" placeholder="e.g. Neo UI Kit" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Price (INR)</label>
+                                <input type="number" id="work-price" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600" placeholder="0" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea id="work-desc" class="payment-input w-full" rows="4" required></textarea>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Context / Description</label>
+                            <textarea id="work-desc" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600 h-32 resize-none" placeholder="Explain the value..." required></textarea>
                         </div>
-                        <div class="form-group">
-                            <label>Price (₹)</label>
-                            <input type="number" id="work-price" class="payment-input w-full" required>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Delivery Endpoint (URL)</label>
+                            <input type="url" id="work-file-url" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600 font-mono text-sm" placeholder="https://drive.google.com/..." required>
                         </div>
-                        <div class="form-group">
-                            <label>File Download Link (Google Drive, Dropbox, etc.)</label>
-                            <input type="url" id="work-file-url" class="payment-input w-full" placeholder="https://..."
-                                required>
+                        
+                        <div class="pt-4 flex items-center justify-between">
+                            <button type="submit" class="bg-white text-black px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform flex items-center gap-3">
+                                <i data-lucide="rocket" class="w-5 h-5"></i>
+                                Push to Store
+                            </button>
+                            <p id="upload-status" class="text-sm font-bold"></p>
                         </div>
-                        <button type="submit" id="upload-btn" class="primary-btn">Add Work</button>
-                        <p id="upload-status"></p>
                     </form>
                 </div>
             </div>
 
-            <!-- Manage Work View -->
-            <div id="manage-view" class="admin-view" style="display: none;">
-                <h1 class="view-title">Manage Uploaded Work</h1>
-                <div class="works-grid" id="works-grid">
-                    <!-- Populated by JS -->
+            <!-- Manage View -->
+            <div id="manage-view" class="admin-view hidden flex flex-col gap-10">
+                <header>
+                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">Live <span class="text-emerald">Catalog</span></h1>
+                    <p class="text-slate-400 text-lg">Inventory management and active product listings.</p>
+                </header>
+
+                <div id="works-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- JS Injection -->
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-
     <script src="firebase-config.js"></script>
     <script src="admin.js"></script>
 </body>

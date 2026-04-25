@@ -5,7 +5,14 @@
     padding: 0;
     font-family: 'Outfit', sans-serif;
     display: flex;
+    flex-direction: row;
     min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .admin-body {
+        flex-direction: column;
+    }
 }
 
 /* Login Screen */
@@ -66,6 +73,15 @@
     flex-direction: column;
 }
 
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--card-border);
+        padding: 16px;
+    }
+}
+
 .admin-logo {
     display: flex;
     align-items: center;
@@ -75,11 +91,30 @@
     margin-bottom: 48px;
 }
 
+@media (max-width: 768px) {
+    .admin-logo {
+        margin-bottom: 24px;
+    }
+}
+
 .admin-nav {
     display: flex;
     flex-direction: column;
     gap: 8px;
     flex: 1;
+}
+
+@media (max-width: 768px) {
+    .admin-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+
+    .admin-nav-item {
+        white-space: nowrap;
+    }
 }
 
 .admin-nav-item {
@@ -133,6 +168,12 @@
     overflow-y: auto;
 }
 
+@media (max-width: 768px) {
+    .admin-main {
+        padding: 24px 16px;
+    }
+}
+
 .view-title {
     font-size: 32px;
     font-weight: 800;
@@ -146,12 +187,13 @@
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 16px;
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .admin-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px;
 }
 
 .admin-table th,

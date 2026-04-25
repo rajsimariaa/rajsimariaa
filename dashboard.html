@@ -5,84 +5,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard | Raj Simaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="admin.css">
-    <style>
-        .product-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--emerald);
-            color: black;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            transition: transform 0.2s;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#030303',
+                        card: 'rgba(15, 15, 15, 0.6)',
+                        border: 'rgba(255, 255, 255, 0.08)',
+                        cyan: '#22d3ee',
+                        fuchsia: '#c026d3',
+                        emerald: '#34d399',
+                    },
+                    fontFamily: {
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
         }
-
-        .product-link:hover {
-            transform: scale(1.05);
-        }
-
-        .cancel-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-        }
-    </style>
+    </script>
 </head>
 
-<body class="admin-body">
-    <div id="dashboard-loader" class="login-screen">
-        <div class="loading-text"><i data-lucide="loader" class="spin"></i> Loading...</div>
+<body class="bg-dark text-white font-outfit antialiased min-h-screen">
+    <!-- Loader -->
+    <div id="dashboard-loader" class="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <i data-lucide="loader" class="w-12 h-12 text-cyan animate-spin"></i>
+            <p class="text-slate-400 font-medium tracking-widest uppercase text-sm">Initializing Dashboard</p>
+        </div>
     </div>
 
-    <div id="user-dashboard" class="admin-dashboard" style="display: none;">
-        <div class="admin-sidebar">
-            <div class="admin-logo">
-                <div class="logo-icon">U</div>
-                DASHBOARD
+    <div id="user-dashboard" class="flex flex-col lg:flex-row min-h-screen opacity-0 transition-opacity duration-500" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-72 lg:h-screen lg:sticky lg:top-0 bg-[#0a0a0a] border-b lg:border-r border-border p-8 flex flex-col gap-12 z-40">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan to-fuchsia rounded-xl flex items-center justify-center text-black font-black text-xl">U</div>
+                <span class="font-black text-2xl tracking-tighter">PORTAL.</span>
             </div>
-            <nav class="admin-nav">
-                <button class="admin-nav-item active" data-target="orders-view">
-                    <i data-lucide="shopping-bag"></i> My Orders
-                </button>
-            </nav>
-            <button id="logout-btn" class="logout-btn"><i data-lucide="log-out"></i> Logout</button>
-        </div>
 
-        <div class="admin-main">
-            <div id="orders-view" class="admin-view active">
-                <h1 class="view-title">My Orders</h1>
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Product</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Download / Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-tbody">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
+            <nav class="flex-1 flex flex-col gap-2">
+                <button class="sidebar-item active flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 bg-white/10 text-white shadow-lg" data-target="orders-view">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                    <span class="font-bold">My Digital Assets</span>
+                </button>
+                <a href="index.html" class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    <span class="font-bold">Go to Home</span>
+                </a>
+            </nav>
+
+            <button id="logout-btn" class="flex items-center gap-3 px-6 py-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-all font-bold">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Logout
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-12">
+            <div id="orders-view" class="max-w-6xl mx-auto flex flex-col gap-10">
+                <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">My <span class="text-cyan">Purchases</span></h1>
+                        <p class="text-slate-400 text-lg">Manage and download your premium digital assets.</p>
+                    </div>
+                    <div id="user-welcome" class="hidden md:flex items-center gap-4 p-4 bg-card border border-border backdrop-blur-xl rounded-2xl shadow-2xl">
+                        <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                            <i data-lucide="user" class="text-cyan"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Active User</p>
+                            <p id="user-email-display" class="font-bold text-sm">...</p>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8 flex flex-col gap-2">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest">Total Assets</p>
+                        <h2 id="stat-total" class="text-4xl font-black">0</h2>
+                    </div>
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8 flex flex-col gap-2">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest">Pending</p>
+                        <h2 id="stat-pending" class="text-4xl font-black text-amber-500">0</h2>
+                    </div>
+                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8 flex flex-col gap-2 border-emerald/20">
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest">Verified</p>
+                        <h2 id="stat-verified" class="text-4xl font-black text-emerald-500">0</h2>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border-white/5">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-white/5">
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Date</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Asset Title</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center">Price</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center">Status</th>
+                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-tbody" class="divide-y divide-white/5">
+                                <!-- JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>

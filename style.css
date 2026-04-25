@@ -172,11 +172,16 @@ body {
     justify-content: center;
     padding: 40px;
     transform: translateY(-100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+    overflow: hidden;
 }
 
 .mobile-menu.active {
     transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .close-menu-btn {
@@ -1019,7 +1024,7 @@ footer {
     align-items: center;
     gap: 10px;
     box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
-    z-index: 90;
+    z-index: 80;
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
@@ -1061,10 +1066,19 @@ footer {
     padding: 32px;
     width: 90%;
     max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
     transform: translateY(20px);
     transition: transform 0.3s ease;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 24px 16px;
+        border-radius: 20px;
+    }
 }
 
 .modal-overlay.active .modal-content {
