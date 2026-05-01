@@ -10,25 +10,45 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#030303',
+                        card: 'rgba(15, 15, 15, 0.6)',
+                        border: 'rgba(255, 255, 255, 0.08)',
+                        cyan: '#22d3ee',
+                        fuchsia: '#c026d3',
+                        emerald: '#34d399',
+                    },
+                    fontFamily: {
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="bg-dark text-white font-outfit antialiased min-h-screen">
     <div class="grid-background"></div>
 
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#" class="logo">
-                <div class="logo-icon">R</div>
-                RAJ.
+                <span class="text-cyan font-black tracking-tighter">>_</span>
+                RAJ<span class="text-cyan">.</span>
             </a>
             <div class="nav-links">
                 <a href="#expertise">Expertise</a>
                 <a href="#work">Work</a>
                 <a href="#shop">Shop</a>
                 <a href="#contact">Contact</a>
-                <a href="login.html" class="admin-nav-link"><i data-lucide="user" style="width:14px;"></i> Portal</a>
+                <a href="login.html" class="admin-nav-link">Portal</a>
             </div>
             <a href="#contact" class="cta-button">Hire Me <i data-lucide="arrow-right"></i></a>
             <button class="mobile-menu-btn" id="menu-btn">
@@ -151,6 +171,19 @@
                         <span class="role-badge badge-emerald">Solo Developer</span>
                         <h3 class="project-title hover-emerald">Shreeji Ear Care <i data-lucide="arrow-up-right"></i></h3>
                         <p class="project-desc">A multilingual website for an ear piercing, ear lobe repair &amp; wax powder brand, built with HTML, CSS &amp; JS. Features a language switcher supporting Hindi, English, and Gujarati to connect with every customer.</p>
+                    </div>
+                </a>
+
+                <!-- Project 4 -->
+                <a href="https://sonic-stream-lac.vercel.app" target="_blank" class="project-card reverse reveal">
+                    <div class="project-image-wrapper">
+                        <div class="project-overlay overlay-cyan"></div>
+                        <h3 class="project-image-title">Sonic<br>Stream</h3>
+                    </div>
+                    <div class="project-info">
+                        <span class="role-badge badge-cyan">Full Stack</span>
+                        <h3 class="project-title hover-cyan">Sonic Stream <i data-lucide="arrow-up-right"></i></h3>
+                        <p class="project-desc">A premium MP3 streaming platform with a sleek interface, real-time playback synchronization, and a high-performance audio engine. Experience music like never before.</p>
                     </div>
                 </a>
             </div>

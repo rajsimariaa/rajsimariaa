@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (adminNavLink) {
                 adminNavLink.href = targetPage;
-                adminNavLink.innerHTML = `<i data-lucide="${isUserAdmin ? 'lock' : 'user'}"></i>${label}`;
+                adminNavLink.innerHTML = label;
             }
             if (mobileAdminLink) {
                 mobileAdminLink.href = targetPage;
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (adminNavLink) {
                 adminNavLink.href = 'login.html';
-                adminNavLink.innerHTML = `<i data-lucide="user"></i> Portal`;
+                adminNavLink.innerHTML = `Portal`;
             }
             if (mobileAdminLink) {
                 mobileAdminLink.href = 'login.html';
@@ -108,17 +108,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             docs.forEach(data => {
                 const workItem = document.createElement('div');
-                workItem.className = 'work-item reveal';
+                workItem.className = 'bg-card border border-border backdrop-blur-xl rounded-[2rem] p-8 flex flex-col gap-6 transition-all duration-300 hover:scale-[1.02] hover:border-cyan/50 reveal';
                 workItem.innerHTML = `
-                    <h3>${data.title}</h3>
-                    <p>${data.description}</p>
-                    <div class="work-price">₹${data.price}</div>
-                    <button class="primary-btn w-full buy-btn" 
-                        data-id="${data.id}" 
-                        data-title="${data.title}" 
-                        data-price="${data.price}">
-                        Buy Now
-                    </button>
+                    <div>
+                        <h3 class="text-2xl font-black mb-2">${data.title}</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed line-clamp-3">${data.description}</p>
+                    </div>
+                    <div class="mt-auto flex items-center justify-between gap-4">
+                        <div class="text-2xl font-black text-white">₹${data.price}</div>
+                        <button class="bg-white text-black px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-cyan transition-colors buy-btn whitespace-nowrap" 
+                            data-id="${data.id}" 
+                            data-title="${data.title}" 
+                            data-price="${data.price}">
+                            Buy Now
+                        </button>
+                    </div>
                 `;
                 publicWorksGrid.appendChild(workItem);
             });
