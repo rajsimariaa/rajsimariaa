@@ -4,23 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard | Raj Simaria</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dashboard | Raj Simaria</title>
+    <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         dark: '#030303',
+                        sidebar: '#0a0a0a',
                         card: 'rgba(15, 15, 15, 0.6)',
                         border: 'rgba(255, 255, 255, 0.08)',
-                        cyan: '#22d3ee',
-                        fuchsia: '#c026d3',
-                        emerald: '#34d399',
+                        cyan: {
+                            DEFAULT: '#22d3ee',
+                            light: '#67e8f9',
+                        },
+                        emerald: {
+                            DEFAULT: '#34d399',
+                            light: '#6ee7b7',
+                        },
                     },
                     fontFamily: {
                         outfit: ['Outfit', 'sans-serif'],
@@ -29,92 +36,138 @@
             }
         }
     </script>
+    <style>
+        .glass {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 2rem;
+            border-radius: 1.5rem;
+            transition: all 0.3s;
+            font-weight: 700;
+            color: #94a3b8;
+            text-decoration: none;
+        }
+        .sidebar-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body class="bg-dark text-white font-outfit antialiased min-h-screen">
+<body class="bg-dark text-white font-outfit antialiased min-h-screen selection:bg-cyan selection:text-black">
     <!-- Loader -->
-    <div id="dashboard-loader" class="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
-        <div class="flex flex-col items-center gap-4">
-            <i data-lucide="loader" class="w-12 h-12 text-cyan animate-spin"></i>
-            <p class="text-slate-400 font-medium tracking-widest uppercase text-sm">Initializing Dashboard</p>
+    <div id="dashboard-loader" class="fixed inset-0 z-[500] bg-dark flex flex-col items-center justify-center transition-all duration-700">
+        <div class="relative w-24 h-24 mb-8">
+            <div class="absolute inset-0 border-4 border-white/5 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-cyan rounded-full border-t-transparent animate-spin"></div>
+            <div class="absolute inset-4 bg-white/5 rounded-full flex items-center justify-center">
+                <span class="text-cyan font-black tracking-tighter text-lg">>_</span>
+            </div>
         </div>
+        <p class="text-xs font-black uppercase tracking-[0.5em] text-slate-500 animate-pulse">Initializing Portal</p>
     </div>
 
-    <div id="user-dashboard" class="flex flex-col lg:flex-row min-h-screen opacity-0 transition-opacity duration-500" style="display: none;">
+    <div id="user-dashboard" class="flex flex-col lg:flex-row min-h-screen opacity-0 transition-opacity duration-1000" style="display: none;">
         <!-- Sidebar -->
-        <aside class="w-full lg:w-72 lg:h-screen lg:sticky lg:top-0 bg-[#0a0a0a] border-b lg:border-r border-border p-8 flex flex-col gap-12 z-40">
-            <div class="flex items-center gap-2">
-                <span class="text-cyan font-black text-2xl tracking-tighter">>_</span>
-                <span class="font-black text-2xl tracking-tighter">RAJ<span class="text-cyan">.</span></span>
+        <aside class="w-full lg:w-80 lg:h-screen lg:sticky lg:top-0 bg-sidebar border-b lg:border-r border-white/5 p-8 flex flex-col gap-12 z-40">
+            <div class="flex items-center gap-3">
+                <span class="text-cyan font-black text-3xl tracking-tighter">>_</span>
+                <span class="font-black text-3xl tracking-tighter">RAJ<span class="text-cyan">.</span></span>
             </div>
 
-            <nav class="flex-1 flex flex-col gap-2">
-                <button class="sidebar-item active flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 bg-white/10 text-white shadow-lg" data-target="orders-view">
+            <nav class="flex-1 flex flex-col gap-3">
+                <button class="sidebar-link active" data-target="orders-view">
                     <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                    <span class="font-bold">My Digital Assets</span>
+                    <span>My Digital Assets</span>
                 </button>
-                <a href="index.html" class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5">
+                <a href="index.html" class="sidebar-link no-underline">
                     <i data-lucide="home" class="w-5 h-5"></i>
-                    <span class="font-bold">Go to Home</span>
+                    <span>Return to Site</span>
                 </a>
             </nav>
 
-            <button id="logout-btn" class="flex items-center gap-3 px-6 py-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-all font-bold">
+            <button id="logout-btn" class="flex items-center gap-4 px-8 py-5 rounded-[1.5rem] text-red-500 hover:bg-red-500/10 transition-all font-black text-sm uppercase tracking-widest">
                 <i data-lucide="log-out" class="w-5 h-5"></i>
-                Logout
+                Terminate Session
             </button>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6 lg:p-12">
-            <div id="orders-view" class="max-w-6xl mx-auto flex flex-col gap-10">
-                <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <main class="flex-1 p-6 lg:p-16 relative overflow-hidden">
+            <!-- Background Glows -->
+            <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-cyan/5 blur-[120px] rounded-full pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-fuchsia/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+            <div id="orders-view" class="max-w-6xl mx-auto flex flex-col gap-12 relative z-10">
+                <header class="flex flex-col md:flex-row md:items-end justify-between gap-8">
                     <div>
-                        <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">My <span class="text-cyan">Purchases</span></h1>
-                        <p class="text-slate-400 text-lg">Manage and download your premium digital assets.</p>
+                        <h1 class="text-5xl lg:text-7xl font-black tracking-tighter mb-4">My <span class="text-cyan">Assets</span></h1>
+                        <p class="text-xl text-slate-400 font-medium">Manage and access your premium digital acquisitions.</p>
                     </div>
-                    <div id="user-welcome" class="hidden md:flex items-center gap-4 p-4 bg-card border border-border backdrop-blur-xl rounded-2xl shadow-2xl">
-                        <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                            <i data-lucide="user" class="text-cyan"></i>
+                    <div id="user-welcome" class="hidden md:flex items-center gap-5 p-5 glass rounded-[2rem] shadow-2xl">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center border border-cyan/20">
+                            <i data-lucide="user" class="w-6 h-6 text-cyan"></i>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Active User</p>
-                            <p id="user-email-display" class="font-bold text-sm">...</p>
+                            <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Authenticated As</p>
+                            <p id="user-email-display" class="font-black text-sm text-white">...</p>
                         </div>
                     </div>
                 </header>
 
                 <!-- Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8 flex flex-col gap-2">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest">Total Assets</p>
-                        <h2 id="stat-total" class="text-4xl font-black">0</h2>
+                    <div class="glass rounded-[2.5rem] p-10 flex flex-col gap-2 group hover:border-cyan/30 transition-all">
+                        <p class="text-slate-500 font-black text-[10px] uppercase tracking-[0.2em]">Inventory Size</p>
+                        <h2 id="stat-total" class="text-5xl font-black group-hover:text-cyan transition-colors">0</h2>
                     </div>
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8 flex flex-col gap-2">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest">Pending</p>
-                        <h2 id="stat-pending" class="text-4xl font-black text-amber-500">0</h2>
+                    <div class="glass rounded-[2.5rem] p-10 flex flex-col gap-2 group hover:border-amber-500/30 transition-all">
+                        <p class="text-slate-500 font-black text-[10px] uppercase tracking-[0.2em]">In Verification</p>
+                        <h2 id="stat-pending" class="text-5xl font-black text-amber-500 group-hover:scale-105 transition-transform origin-left">0</h2>
                     </div>
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8 flex flex-col gap-2 border-emerald/20">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest">Verified</p>
-                        <h2 id="stat-verified" class="text-4xl font-black text-emerald-500">0</h2>
+                    <div class="glass rounded-[2.5rem] p-10 flex flex-col gap-2 group hover:border-emerald/30 transition-all">
+                        <p class="text-slate-500 font-black text-[10px] uppercase tracking-[0.2em]">Deployed Assets</p>
+                        <h2 id="stat-verified" class="text-5xl font-black text-emerald group-hover:scale-105 transition-transform origin-left">0</h2>
                     </div>
                 </div>
 
                 <!-- Table Section -->
-                <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border-white/5">
+                <div class="glass rounded-[3rem] shadow-2xl overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-white/5">
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Date</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Asset Title</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center">Price</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center">Status</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-right">Action</th>
+                                <tr class="bg-white/[0.02]">
+                                    <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Acquisition Date</th>
+                                    <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Asset Identity</th>
+                                    <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-center">Value</th>
+                                    <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-center">Security Status</th>
+                                    <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-right">Access</th>
                                 </tr>
                             </thead>
-                            <tbody id="orders-tbody" class="divide-y divide-white/5">
+                            <tbody id="orders-tbody" class="divide-y divide-white/5 font-medium">
                                 <!-- JS Injection -->
+                                <tr>
+                                    <td colspan="5" class="px-10 py-20 text-center text-slate-600">
+                                        <div class="flex flex-col items-center gap-4">
+                                            <i data-lucide="database" class="w-12 h-12 animate-bounce"></i>
+                                            <p class="text-sm font-black uppercase tracking-widest">Awaiting Data Stream...</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -123,6 +176,7 @@
         </main>
     </div>
 
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>

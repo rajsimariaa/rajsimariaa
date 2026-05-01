@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Raj Simaria</title>
+    <title>Portal | Raj Simaria</title>
+    <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -17,9 +19,14 @@
                         dark: '#030303',
                         card: 'rgba(15, 15, 15, 0.6)',
                         border: 'rgba(255, 255, 255, 0.08)',
-                        cyan: '#22d3ee',
-                        fuchsia: '#c026d3',
-                        emerald: '#34d399',
+                        cyan: {
+                            DEFAULT: '#22d3ee',
+                            light: '#67e8f9',
+                        },
+                        fuchsia: {
+                            DEFAULT: '#c026d3',
+                            light: '#e879f9',
+                        },
                     },
                     fontFamily: {
                         outfit: ['Outfit', 'sans-serif'],
@@ -28,207 +35,96 @@
             }
         }
     </script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="style.css">
     <style>
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
         }
-
-        .auth-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 32px;
-            padding: 48px;
-            width: 100%;
-            max-width: 450px;
-            backdrop-filter: blur(16px);
-            text-align: center;
-        }
-
-        .auth-header h1 {
-            font-size: 32px;
-            font-weight: 900;
-            margin-bottom: 8px;
-        }
-
-        .auth-header p {
-            color: var(--text-muted);
-            margin-bottom: 32px;
-        }
-
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .auth-form input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            padding: 16px 20px;
-            border-radius: 12px;
-            color: white;
-            font-family: inherit;
-            font-size: 16px;
-        }
-
-        .auth-form input:focus {
-            outline: none;
-            border-color: var(--cyan);
-        }
-
-        .auth-toggle {
-            margin-top: 24px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .auth-toggle span {
-            color: var(--cyan);
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        .error-msg {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 24px;
-            display: none;
-        }
-
-        .success-msg {
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 24px;
-            display: none;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--card-border);
-        }
-
-        .divider span {
-            padding: 0 16px;
-            font-weight: 600;
-        }
-
-        .google-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-            width: 100%;
-        }
-
-        .google-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--text-muted);
-        }
-
-        .google-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        @media (max-width: 480px) {
-            .auth-card {
-                padding: 32px 20px;
-                border-radius: 24px;
-            }
-
-            .auth-header h1 {
-                font-size: 28px;
-            }
+        .glass {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
     </style>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body class="bg-dark text-white font-outfit antialiased min-h-screen">
-    <div class="grid-background"></div>
-    
-    <div class="min-h-screen flex items-center justify-center p-6">
-        <div class="bg-card border border-border backdrop-blur-xl rounded-[2.5rem] p-10 md:p-14 w-full max-w-[480px] text-center shadow-2xl animate-in fade-in zoom-in duration-500">
-            <div class="mb-10">
-                <div class="text-4xl font-black tracking-tighter mb-6">
-                    <span class="text-cyan">>_</span>
-                    <span>RAJ<span class="text-cyan">.</span></span>
-                </div>
-                <h1 id="auth-title" class="text-4xl font-black tracking-tight mb-3">Welcome Back</h1>
-                <p id="auth-desc" class="text-slate-400 font-medium">Login to access your dashboard</p>
-            </div>
+<body class="bg-dark text-white font-outfit antialiased min-h-screen flex items-center justify-center p-6 overflow-hidden">
+    <!-- Background -->
+    <div class="fixed inset-0 z-[-1] grid-bg"></div>
+    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-cyan/5 via-transparent to-fuchsia/5 pointer-events-none"></div>
 
-            <div id="error-msg" class="hidden text-red-500 bg-red-500/10 p-4 rounded-xl text-sm font-bold mb-6 border border-red-500/20"></div>
-            <div id="success-msg" class="hidden text-emerald-500 bg-emerald-500/10 p-4 rounded-xl text-sm font-bold mb-6 border border-emerald-500/20"></div>
-
-            <form id="auth-form" class="flex flex-col gap-4">
-                <div class="space-y-4">
-                    <input type="email" id="email" placeholder="Email Address" required
-                        class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-all text-white placeholder-slate-600 font-medium">
-                    <input type="password" id="password" placeholder="Password" required
-                        class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-all text-white placeholder-slate-600 font-medium">
+    <div class="w-full max-w-[480px] animate-in fade-in zoom-in duration-700">
+        <div class="glass rounded-[3rem] p-10 md:p-14 relative shadow-2xl overflow-hidden group">
+            <!-- Glow Effect -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan/10 blur-[80px] rounded-full group-hover:bg-cyan/20 transition-all duration-700"></div>
+            
+            <div class="relative z-10">
+                <div class="mb-12 text-center">
+                    <a href="index.html" class="inline-flex items-center gap-2 text-3xl font-black tracking-tighter mb-8 no-underline text-white group/logo">
+                        <span class="text-cyan group-hover/logo:text-fuchsia transition-colors duration-500">>_</span>
+                        RAJ<span class="text-cyan">.</span>
+                    </a>
+                    <h1 id="auth-title" class="text-4xl font-black tracking-tight mb-3">Welcome Back</h1>
+                    <p id="auth-desc" class="text-slate-400 font-medium">Identify yourself to access the portal</p>
                 </div>
-                <button type="submit" id="submit-btn" 
-                    class="bg-white text-black px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg mt-2">
-                    Login
+
+                <div id="error-msg" class="hidden text-red-400 bg-red-400/10 p-4 rounded-2xl text-xs font-bold mb-8 border border-red-400/20 text-center"></div>
+                <div id="success-msg" class="hidden text-emerald-400 bg-emerald-400/10 p-4 rounded-2xl text-xs font-bold mb-8 border border-emerald-400/20 text-center"></div>
+
+                <form id="auth-form" class="flex flex-col gap-5">
+                    <div class="space-y-4">
+                        <div class="relative group/input">
+                            <i data-lucide="mail" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within/input:text-cyan transition-colors"></i>
+                            <input type="email" id="email" placeholder="Email Address" required
+                                class="bg-white/[0.03] border border-white/10 rounded-2xl pl-14 pr-6 py-5 w-full focus:outline-none focus:border-cyan transition-all text-white placeholder-slate-600 font-medium">
+                        </div>
+                        <div class="relative group/input">
+                            <i data-lucide="lock" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within/input:text-cyan transition-colors"></i>
+                            <input type="password" id="password" placeholder="Password" required
+                                class="bg-white/[0.03] border border-white/10 rounded-2xl pl-14 pr-6 py-5 w-full focus:outline-none focus:border-cyan transition-all text-white placeholder-slate-600 font-medium">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submit-btn" 
+                        class="bg-white text-black py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl mt-4">
+                        Login
+                    </button>
+                </form>
+
+                <div class="flex items-center gap-6 my-10">
+                    <div class="h-px flex-1 bg-white/5"></div>
+                    <span class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600">OR</span>
+                    <div class="h-px flex-1 bg-white/5"></div>
+                </div>
+
+                <button type="button" id="google-btn" 
+                    class="flex items-center justify-center gap-4 bg-white/[0.03] border border-white/10 text-white py-5 rounded-2xl font-bold text-sm hover:bg-white/[0.08] transition-all w-full group/google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5 group-hover/google:scale-110 transition-transform">
+                    Continue with Google
                 </button>
-            </form>
 
-            <div class="flex items-center gap-4 my-8 text-slate-600">
-                <div class="h-px flex-1 bg-white/5"></div>
-                <span class="text-[10px] font-black uppercase tracking-[0.3em]">OR</span>
-                <div class="h-px flex-1 bg-white/5"></div>
+                <div class="mt-12 text-center text-sm font-medium">
+                    <span id="toggle-text" class="text-slate-500">New to the elite? </span>
+                    <span id="toggle-btn" class="text-cyan font-black cursor-pointer hover:text-cyan-light transition-colors">Sign Up</span>
+                </div>
+
+                <div class="mt-10 pt-10 border-t border-white/5 text-center">
+                    <a href="index.html" class="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-[0.2em] no-underline">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Return to Main Site
+                    </a>
+                </div>
             </div>
-
-            <button type="button" id="google-btn" 
-                class="flex items-center justify-center gap-3 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all w-full">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
-                Continue with Google
-            </button>
-
-            <div class="mt-8 text-sm font-medium">
-                <span id="toggle-text" class="text-slate-500">Don't have an account? </span>
-                <span id="toggle-btn" class="text-cyan font-bold cursor-pointer hover:underline">Sign Up</span>
-            </div>
-
-            <a href="index.html" class="inline-flex items-center gap-2 mt-8 text-slate-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
-            </a>
         </div>
     </div>
 
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
@@ -247,10 +143,10 @@
         toggleBtn.addEventListener('click', () => {
             isLogin = !isLogin;
             authTitle.textContent = isLogin ? 'Welcome Back' : 'Create Account';
-            authDesc.textContent = isLogin ? 'Login to access your dashboard' : 'Join our community today';
+            authDesc.textContent = isLogin ? 'Identify yourself to access the portal' : 'Join the elite inner circle';
             submitBtn.textContent = isLogin ? 'Login' : 'Sign Up';
             toggleBtn.textContent = isLogin ? 'Sign Up' : 'Login';
-            document.getElementById('toggle-text').textContent = isLogin ? "Don't have an account? " : "Already have an account? ";
+            document.getElementById('toggle-text').textContent = isLogin ? "New to the elite? " : "Already initiated? ";
             errorMsg.classList.add('hidden');
         });
 
@@ -270,12 +166,12 @@
                     const user = userCredential.user;
 
                     if (!user.emailVerified && email !== 'rajsimariaa@gmail.com') {
-                        errorMsg.innerHTML = `Please verify your email before logging in. <br> <span id="resend-email" style="text-decoration:underline; cursor:pointer; font-weight:700;">Resend verification email?</span>`;
+                        errorMsg.innerHTML = `Verification required. <br> <span id="resend-email" class="underline cursor-pointer font-black mt-2 inline-block">Resend email?</span>`;
                         errorMsg.classList.remove('hidden');
 
                         document.getElementById('resend-email').addEventListener('click', async () => {
                             await user.sendEmailVerification();
-                            successMsg.textContent = "Verification email sent!";
+                            successMsg.textContent = "Email sent! Check your inbox.";
                             successMsg.classList.remove('hidden');
                             errorMsg.classList.add('hidden');
                         });
@@ -287,7 +183,7 @@
                 } else {
                     const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
                     await userCredential.user.sendEmailVerification();
-                    successMsg.textContent = "Verification email sent! Please check your inbox.";
+                    successMsg.textContent = "Initiation email sent! Please verify.";
                     successMsg.classList.remove('hidden');
                     await firebase.auth().signOut();
                     isLogin = true;
@@ -299,11 +195,7 @@
                 errorMsg.classList.remove('hidden');
             } finally {
                 submitBtn.disabled = false;
-                if (!isLogin && !successMsg.classList.contains('hidden')) {
-                    submitBtn.textContent = 'Login';
-                } else {
-                    submitBtn.textContent = isLogin ? 'Login' : 'Sign Up';
-                }
+                submitBtn.textContent = isLogin ? 'Login' : 'Sign Up';
             }
         });
 
@@ -315,32 +207,28 @@
             }
         }
 
-        // Google Sign In
         googleBtn.addEventListener('click', async () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
                 errorMsg.classList.add('hidden');
                 googleBtn.disabled = true;
-                const originalText = googleBtn.innerHTML;
+                const originalContent = googleBtn.innerHTML;
                 googleBtn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> Connecting...';
                 lucide.createIcons();
 
                 const result = await firebase.auth().signInWithPopup(provider);
-                const user = result.user;
-                redirectUser(user.email);
+                redirectUser(result.user.email);
             } catch (error) {
-                console.error("Google Auth Error:", error);
                 errorMsg.textContent = error.message;
                 errorMsg.classList.remove('hidden');
                 googleBtn.disabled = false;
                 googleBtn.innerHTML = `
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
                     Continue with Google
                 `;
             }
         });
 
-        // Check if already logged in
         firebase.auth().onAuthStateChanged((user) => {
             if (user && (user.emailVerified || user.email === 'rajsimariaa@gmail.com')) {
                 redirectUser(user.email);
