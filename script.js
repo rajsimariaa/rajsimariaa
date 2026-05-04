@@ -80,6 +80,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileAdminLink.textContent = 'Portal Login';
             }
         }
+        
+        // Handle pending purchase if it exists
+        if (user) {
+            const pendingPurchase = localStorage.getItem('pendingPurchase');
+            if (pendingPurchase) {
+                try {
+                    const data = JSON.parse(pendingPurchase);
+                    localStorage.removeItem('pendingPurchase');
+                    // Small delay to ensure everything is loaded
+                    setTimeout(() => {
+                        openPaymentModal(data.title, data.price, data.id);
+                    }, 500);
+                } catch (e) {
+                    console.error("Failed to parse pending purchase", e);
+                }
+            }
+        }
+
         lucide.createIcons();
     });
 
@@ -112,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 workItem.innerHTML = `
                     <div>
                         <h3 class="text-2xl font-black mb-2">${data.title}</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed line-clamp-3">${data.description}</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">${data.description}</p>
                     </div>
                     <div class="mt-auto flex items-center justify-between gap-4">
                         <div class="text-2xl font-black text-white">₹${data.price}</div>
@@ -135,6 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const id = e.currentTarget.getAttribute('data-id');
                     const title = e.currentTarget.getAttribute('data-title');
                     const price = e.currentTarget.getAttribute('data-price');
+                    
+                    const user = firebase.auth().currentUser;
+                    if (!user) {
+                        localStorage.setItem('pendingPurchase', JSON.stringify({ id, title, price }));
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
                     openPaymentModal(title, price, id);
                 });
             });
@@ -218,6 +244,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (coffeeBtn && paymentModal) {
         coffeeBtn.addEventListener('click', () => {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                localStorage.setItem('pendingPurchase', JSON.stringify({ title: "a coffee", price: "", id: null }));
+                window.location.href = 'login.html';
+                return;
+            }
             openPaymentModal();
         });
 

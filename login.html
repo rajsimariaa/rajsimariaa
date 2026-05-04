@@ -203,7 +203,11 @@
             if (email === 'rajsimariaa@gmail.com') {
                 window.location.href = 'admin.html';
             } else {
-                window.location.href = 'dashboard.html';
+                if (localStorage.getItem('pendingPurchase')) {
+                    window.location.href = 'index.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
             }
         }
 
