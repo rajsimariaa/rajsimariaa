@@ -1,119 +1,162 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. 3D Dot Sphere Canvas
-    const canvas = document.getElementById('hero-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
+    // Global rotation angles (shared between canvas and scroll engine)
+    let angleX = 0;
+    let angleY = 0;
+
+    // 1. Spacetime Gravity Grid (The Ultimate Coding Skill Showcase)
+    const gravityCanvas = document.getElementById('gravity-canvas');
+    if (gravityCanvas) {
+        const ctx = gravityCanvas.getContext('2d');
+        let width, height;
+        const spacing = 40; // Distance between grid points
+        let cols, rows;
         let points = [];
-        const numPoints = 1500;
-        let radius = 250;
-        let angleX = 0;
-        let angleY = 0;
+        let mouse = { x: -1000, y: -1000 };
 
-        function initPoints() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Make the sphere radius 45% of the smallest screen dimension so it fills the screen nicely
-            radius = Math.min(canvas.width, canvas.height) * 0.45;
-            if (radius < 300) radius = 300; // Minimum size for mobile
+        class GridPoint {
+            constructor(x, y) {
+                this.ox = x; // original X
+                this.oy = y; // original Y
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+            }
 
-            points = [];
-            for (let i = 0; i < numPoints; i++) {
-                const theta = Math.random() * 2 * Math.PI;
-                const phi = Math.acos(2 * Math.random() - 1);
-                points.push({
-                    x: radius * Math.sin(phi) * Math.cos(theta),
-                    y: radius * Math.sin(phi) * Math.sin(theta),
-                    z: radius * Math.cos(phi)
-                });
+            update() {
+                // Calculate distance from mouse
+                const dx = mouse.x - this.ox;
+                const dy = mouse.y - this.oy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Gravity Well Physics
+                const maxDist = 350;
+                let forceX = 0;
+                let forceY = 0;
+
+                if (distance < maxDist) {
+                    const force = Math.pow((maxDist - distance) / maxDist, 2);
+                    // Warp towards mouse (Gravity well effect)
+                    forceX = (dx / distance) * force * 30;
+                    forceY = (dy / distance) * force * 30;
+                }
+
+                // Target position is original + warp force
+                const targetX = this.ox + forceX;
+                const targetY = this.oy + forceY;
+
+                // Spring physics to snap to target smoothly
+                this.vx += (targetX - this.x) * 0.1;
+                this.vy += (targetY - this.y) * 0.1;
+
+                // Friction
+                this.vx *= 0.8;
+                this.vy *= 0.8;
+
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                // Size changes based on how much it is warped
+                const warpDist = Math.sqrt(Math.pow(this.x - this.ox, 2) + Math.pow(this.y - this.oy, 2));
+                const size = Math.min(Math.max(1, warpDist * 0.15), 3);
+                
+                // Color gets brighter/bluer near the gravity well
+                const r = Math.floor(99 - Math.min(99, warpDist * 2));
+                const g = Math.floor(102 + Math.min(100, warpDist * 3));
+                const b = Math.floor(241 + Math.min(14, warpDist * 0.5));
+                
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.2 + (warpDist * 0.02)})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
 
-        function project(x, y, z) {
-            // Adjust perspective based on the new massive radius
-            const camZ = radius * 2.5; 
-            const perspective = camZ / (camZ + z);
-            return {
-                x: x * perspective + canvas.width / 2,
-                y: y * perspective + canvas.height / 2,
-                scale: perspective
-            };
-        }
+        function initGrid() {
+            width = gravityCanvas.width = window.innerWidth;
+            height = gravityCanvas.height = window.innerHeight;
+            cols = Math.floor(width / spacing) + 2;
+            rows = Math.floor(height / spacing) + 2;
+            points = [];
 
-        function rotate(p, ax, ay) {
-            let y1 = p.y * Math.cos(ax) - p.z * Math.sin(ax);
-            let z1 = p.y * Math.sin(ax) + p.z * Math.cos(ax);
-            let x2 = p.x * Math.cos(ay) + z1 * Math.sin(ay);
-            let z2 = -p.x * Math.sin(ay) + z1 * Math.cos(ay);
-            return { x: x2, y: y1, z: z2 };
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            angleX += 0.001;
-            angleY += 0.0015;
-
-            // Sort points by Z index for proper 3D rendering (back to front)
-            const rotatedPoints = points.map(p => {
-                const r = rotate(p, angleX, angleY);
-                return { original: p, rotated: r };
-            }).sort((a, b) => b.rotated.z - a.rotated.z);
-
-            rotatedPoints.forEach(p => {
-                const projected = project(p.rotated.x, p.rotated.y, p.rotated.z);
-                
-                // Calculate depth alpha and size
-                // Map z from [-radius, radius] to [0, 1]
-                const depth = (p.rotated.z + radius) / (2 * radius);
-                const alpha = Math.max(0.1, depth * 0.8);
-                
-                // Color variation based on depth (from indigo to cyan)
-                const rColor = Math.floor(99 + (1 - depth) * 50);
-                const gColor = Math.floor(102 + depth * 100);
-                const bColor = 241;
-
-                ctx.fillStyle = `rgba(${rColor}, ${gColor}, ${bColor}, ${alpha})`;
-                
-                // Add glow to points in the front
-                if (depth > 0.7) {
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = `rgba(${rColor}, ${gColor}, ${bColor}, ${alpha})`;
-                } else {
-                    ctx.shadowBlur = 0;
+            for (let i = 0; i < cols; i++) {
+                points[i] = [];
+                for (let j = 0; j < rows; j++) {
+                    points[i][j] = new GridPoint(i * spacing, j * spacing);
                 }
-
-                ctx.beginPath();
-                // Base size + depth scale
-                const particleSize = Math.max(0.5, projected.scale * 2.5);
-                ctx.arc(projected.x, projected.y, particleSize, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            requestAnimationFrame(draw);
+            }
         }
 
-        let mouseX = 0;
-        let mouseY = 0;
-        let targetAngleX = 0;
-        let targetAngleY = 0;
+        function animateGrid() {
+            ctx.clearRect(0, 0, width, height);
 
-        const handleInteraction = (clientX, clientY) => {
-            mouseX = (clientX - canvas.width / 2) / canvas.width;
-            mouseY = (clientY - canvas.height / 2) / canvas.height;
-            // Interaction drives the rotation slightly
-            angleY += mouseX * 0.02;
-            angleX -= mouseY * 0.02;
+            // Update and draw points
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    points[i][j].update();
+                }
+            }
+            
+            // Draw connecting lines (The Spacetime Mesh)
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < cols - 1; i++) {
+                for (let j = 0; j < rows - 1; j++) {
+                    const p = points[i][j];
+                    const right = points[i + 1][j];
+                    const bottom = points[i][j + 1];
+
+                    // Only draw lines if they are somewhat near the mouse to create a glowing web
+                    const distToMouse = Math.sqrt(Math.pow(p.x - mouse.x, 2) + Math.pow(p.y - mouse.y, 2));
+                    if (distToMouse < 400) {
+                        const alpha = Math.max(0, 1 - (distToMouse / 400));
+                        ctx.strokeStyle = `rgba(99, 102, 241, ${alpha * 0.3})`;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(right.x, right.y);
+                        ctx.lineTo(bottom.x, bottom.y);
+                        ctx.stroke();
+                    }
+                    
+                    p.draw();
+                }
+            }
+
+            requestAnimationFrame(animateGrid);
+        }
+
+        const updateMousePosition = (x, y) => {
+            mouse.x = x;
+            mouse.y = y;
         };
 
-        window.addEventListener('mousemove', (e) => handleInteraction(e.clientX, e.clientY));
-        
-        window.addEventListener('touchmove', (e) => {
+        window.addEventListener('mousemove', (e) => {
+            updateMousePosition(e.clientX, e.clientY);
+        });
+
+        // Touch support for mobile devices
+        window.addEventListener('touchstart', (e) => {
             if (e.touches.length > 0) {
-                handleInteraction(e.touches[0].clientX, e.touches[0].clientY);
+                updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
             }
         }, { passive: true });
 
-        initPoints();
-        draw();
-        window.addEventListener('resize', initPoints);
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            // Move gravity well off-screen when finger is lifted so grid snaps back
+            updateMousePosition(-1000, -1000);
+        });
+
+        initGrid();
+        animateGrid();
+        window.addEventListener('resize', initGrid);
     }
 
     // Custom Fluid Cursor
@@ -158,6 +201,157 @@ document.addEventListener('DOMContentLoaded', () => {
         bindHoverEffects();
         // Expose to global so we can re-bind on dynamic load
         window.bindCursorEffects = bindHoverEffects;
+    }
+
+    // Scroll Progress & Cinematic Parallax Engine
+    const progressBar = document.getElementById('scroll-progress');
+    const auraContainer = document.querySelector('.aura-container');
+    const heroContent = document.getElementById('hero-content');
+    const heroSection = document.getElementById('hero');
+    let lastScroll = 0;
+
+    function cinematicScroll() {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrollDelta = winScroll - lastScroll;
+        lastScroll = winScroll;
+
+        // 1. Progress Bar
+        if (progressBar) {
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + "%";
+        }
+
+        // 2. Aura parallax
+        if (auraContainer) {
+            auraContainer.style.setProperty('--py', `${winScroll * -0.3}px`);
+        }
+
+        // 3. Hero cinematic dissolve: translate, scale, blur, opacity
+        if (heroContent && heroSection) {
+            const heroH = heroSection.offsetHeight;
+            const progress = Math.min(winScroll / heroH, 1); // 0 at top, 1 at end of hero
+            heroContent.style.transform = `translateY(${progress * 200}px) scale(${1 - progress * 0.15})`;
+            heroContent.style.opacity = Math.max(0, 1 - progress * 2);
+            heroContent.style.filter = `blur(${progress * 8}px)`;
+        }
+
+        // 4. Globe scroll spin
+        angleY += scrollDelta * 0.003;
+        angleX -= scrollDelta * 0.001;
+
+        // 5. Nav auto-hide on scroll direction
+        const nav = document.querySelector('.floating-nav');
+        if (nav) {
+            if (winScroll > 100) {
+                nav.classList.add('nav-solid');
+                if (scrollDelta > 3) {
+                    nav.classList.add('nav-hidden');
+                } else if (scrollDelta < -3) {
+                    nav.classList.remove('nav-hidden');
+                }
+            } else {
+                nav.classList.remove('nav-solid', 'nav-hidden');
+            }
+        }
+
+        // Note: Global scroll logic kept clean for standard smooth vertical scroll
+    }
+
+    window.addEventListener('scroll', () => {
+        requestAnimationFrame(cinematicScroll);
+    }, { passive: true });
+
+
+
+    // Ambient Floating Particles
+    const ambientCanvas = document.getElementById('ambient-particles');
+    if (ambientCanvas) {
+        const actx = ambientCanvas.getContext('2d');
+        let particles = [];
+        const PARTICLE_COUNT = 60;
+
+        function initAmbient() {
+            ambientCanvas.width = window.innerWidth;
+            ambientCanvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * ambientCanvas.width,
+                    y: Math.random() * ambientCanvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    speedX: (Math.random() - 0.5) * 0.3,
+                    speedY: (Math.random() - 0.5) * 0.2 - 0.1,
+                    opacity: Math.random() * 0.5 + 0.1,
+                    pulse: Math.random() * Math.PI * 2,
+                });
+            }
+        }
+
+        function drawAmbient() {
+            actx.clearRect(0, 0, ambientCanvas.width, ambientCanvas.height);
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.pulse += 0.01;
+
+                // Wrap around
+                if (p.x < 0) p.x = ambientCanvas.width;
+                if (p.x > ambientCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = ambientCanvas.height;
+                if (p.y > ambientCanvas.height) p.y = 0;
+
+                const alpha = p.opacity * (0.5 + Math.sin(p.pulse) * 0.5);
+                actx.beginPath();
+                actx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                actx.fillStyle = `rgba(99, 102, 241, ${alpha})`;
+                actx.fill();
+            });
+
+            // Draw connections between close particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        actx.beginPath();
+                        actx.moveTo(particles[i].x, particles[i].y);
+                        actx.lineTo(particles[j].x, particles[j].y);
+                        actx.strokeStyle = `rgba(99, 102, 241, ${0.08 * (1 - dist / 120)})`;
+                        actx.lineWidth = 0.5;
+                        actx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(drawAmbient);
+        }
+
+        initAmbient();
+        drawAmbient();
+        window.addEventListener('resize', initAmbient);
+    }
+
+    // Magnetic Button Effect
+    document.querySelectorAll('.magnetic-btn').forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translate(0, 0)';
+        });
+    });
+
+    // Footer Observer
+    const footer = document.querySelector('footer');
+    if (footer) {
+        const footerObs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+        }, { threshold: 0.1 });
+        footerObs.observe(footer);
     }
 
     // Scramble Text Hacker Effect
@@ -220,31 +414,43 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.scramble-text').forEach(el => {
         const fx = new TextScramble(el);
         scramblers.push({ el, fx, originalText: el.innerText });
-        el.innerHTML = '&nbsp;'; // Reserve space to avoid layout shift
+        el.innerHTML = '&nbsp;';
     });
 
-    // 2. Reveal Observer
-    const revealObserver = new IntersectionObserver((entries) => {
+    // Cinematic Scroll Observer (replaces old .reveal observer)
+    const scrollObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('active');
+                const el = entry.target;
+                const delay = parseInt(el.dataset.scrollDelay || '0');
                 
-                // Trigger scramble if the target or its children have it
-                const triggerScramble = (el) => {
-                    const scrambler = scramblers.find(s => s.el === el);
-                    if (scrambler && !scrambler.done) {
-                        scrambler.fx.setText(scrambler.originalText);
-                        scrambler.done = true;
+                setTimeout(() => {
+                    el.classList.add('in-view');
+                    
+                    // Also trigger legacy .reveal.active
+                    if (el.classList.contains('reveal')) {
+                        el.classList.add('active');
                     }
-                };
-
-                if (entry.target.classList.contains('scramble-text')) triggerScramble(entry.target);
-                entry.target.querySelectorAll('.scramble-text').forEach(child => triggerScramble(child));
+                    
+                    // Trigger scramble text
+                    const triggerScramble = (target) => {
+                        const scrambler = scramblers.find(s => s.el === target);
+                        if (scrambler && !scrambler.done) {
+                            scrambler.fx.setText(scrambler.originalText);
+                            scrambler.done = true;
+                        }
+                    };
+                    if (el.classList.contains('scramble-text')) triggerScramble(el);
+                    el.querySelectorAll('.scramble-text').forEach(child => triggerScramble(child));
+                }, delay);
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.05, rootMargin: '0px 0px 50px 0px' });
 
-    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    // Observe all scroll-animated elements
+    document.querySelectorAll('[data-scroll], [data-scroll-stagger], .scroll-line, .reveal').forEach(el => {
+        scrollObserver.observe(el);
+    });
 
     // 3D Tilt Engine
     function bind3DTilt() {
@@ -274,7 +480,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rotateX = ((y - centerY) / centerY) * -12; 
                 const rotateY = ((x - centerX) / centerX) * 12;
                 
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                card.style.setProperty('--rx', `${rotateX}deg`);
+                card.style.setProperty('--ry', `${rotateY}deg`);
+                card.style.setProperty('--s', `1.02`);
                 
                 // Dynamic glare
                 const glareX = (x / rect.width) * 100;
@@ -283,8 +491,10 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const resetTilt = () => {
-                card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-                card.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.5s';
+                card.style.setProperty('--rx', `0deg`);
+                card.style.setProperty('--ry', `0deg`);
+                card.style.setProperty('--s', `1`);
+                card.style.transition = 'background 0.5s';
                 card.style.background = `rgba(255, 255, 255, 0.03)`;
             };
 
