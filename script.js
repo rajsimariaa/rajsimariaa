@@ -116,11 +116,130 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', initPoints);
     }
 
+    // Custom Fluid Cursor
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorOutline = document.getElementById('cursor-outline');
+    let cursorX = window.innerWidth / 2;
+    let cursorY = window.innerHeight / 2;
+    let outlineX = cursorX;
+    let outlineY = cursorY;
+
+    if (cursorDot && cursorOutline) {
+        window.addEventListener('mousemove', (e) => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+            cursorDot.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+        });
+
+        function animateCursor() {
+            outlineX += (cursorX - outlineX) * 0.15;
+            outlineY += (cursorY - outlineY) * 0.15;
+            cursorOutline.style.transform = `translate(${outlineX}px, ${outlineY}px) translate(-50%, -50%)`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        const bindHoverEffects = () => {
+            document.querySelectorAll('a, button, .glass-card, .scramble-text').forEach(el => {
+                if (el.dataset.cursorBound) return;
+                el.dataset.cursorBound = 'true';
+                el.addEventListener('mouseenter', () => {
+                    cursorOutline.style.width = '60px';
+                    cursorOutline.style.height = '60px';
+                    cursorOutline.style.background = 'rgba(99, 102, 241, 0.1)';
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursorOutline.style.width = '40px';
+                    cursorOutline.style.height = '40px';
+                    cursorOutline.style.background = 'transparent';
+                });
+            });
+        };
+        bindHoverEffects();
+        // Expose to global so we can re-bind on dynamic load
+        window.bindCursorEffects = bindHoverEffects;
+    }
+
+    // Scramble Text Hacker Effect
+    class TextScramble {
+        constructor(el) {
+            this.el = el;
+            this.chars = '!<>-_\\\\/[]{}—=+*^?#________';
+            this.update = this.update.bind(this);
+            this.originalText = el.innerText;
+        }
+        setText(newText) {
+            const oldText = this.el.innerText;
+            const length = Math.max(oldText.length, newText.length);
+            const promise = new Promise((resolve) => this.resolve = resolve);
+            this.queue = [];
+            for (let i = 0; i < length; i++) {
+                const from = oldText[i] || '';
+                const to = newText[i] || '';
+                const start = Math.floor(Math.random() * 40);
+                const end = start + Math.floor(Math.random() * 40);
+                this.queue.push({ from, to, start, end });
+            }
+            cancelAnimationFrame(this.frameRequest);
+            this.frame = 0;
+            this.update();
+            return promise;
+        }
+        update() {
+            let output = '';
+            let complete = 0;
+            for (let i = 0, n = this.queue.length; i < n; i++) {
+                let { from, to, start, end, char } = this.queue[i];
+                if (this.frame >= end) {
+                    complete++;
+                    output += to;
+                } else if (this.frame >= start) {
+                    if (!char || Math.random() < 0.28) {
+                        char = this.randomChar();
+                        this.queue[i].char = char;
+                    }
+                    output += `<span class="text-indigo-400 font-mono opacity-80">${char}</span>`;
+                } else {
+                    output += from;
+                }
+            }
+            this.el.innerHTML = output;
+            if (complete === this.queue.length) {
+                this.resolve();
+            } else {
+                this.frameRequest = requestAnimationFrame(this.update);
+                this.frame++;
+            }
+        }
+        randomChar() {
+            return this.chars[Math.floor(Math.random() * this.chars.length)];
+        }
+    }
+
+    const scramblers = [];
+    document.querySelectorAll('.scramble-text').forEach(el => {
+        const fx = new TextScramble(el);
+        scramblers.push({ el, fx, originalText: el.innerText });
+        el.innerHTML = '&nbsp;'; // Reserve space to avoid layout shift
+    });
+
     // 2. Reveal Observer
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('active');
+                
+                // Trigger scramble if the target or its children have it
+                const triggerScramble = (el) => {
+                    const scrambler = scramblers.find(s => s.el === el);
+                    if (scrambler && !scrambler.done) {
+                        scrambler.fx.setText(scrambler.originalText);
+                        scrambler.done = true;
+                    }
+                };
+
+                if (entry.target.classList.contains('scramble-text')) triggerScramble(entry.target);
+                entry.target.querySelectorAll('.scramble-text').forEach(child => triggerScramble(child));
             }
         });
     }, { threshold: 0.1 });

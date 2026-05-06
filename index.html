@@ -152,6 +152,36 @@
             will-change: transform;
         }
 
+        /* Custom Cursor */
+        @media (pointer: fine) {
+            body, a, button, input, .glass-card {
+                cursor: none !important;
+            }
+        }
+        
+        .cursor-dot, .cursor-outline {
+            position: fixed;
+            top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .cursor-dot {
+            width: 8px; height: 8px;
+            background: #6366f1;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #6366f1, 0 0 20px #6366f1;
+        }
+        
+        .cursor-outline {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            border-radius: 50%;
+            transition: width 0.2s, height 0.2s, background 0.2s, border-color 0.2s;
+            z-index: 9998;
+        }
+
         /* Button Glow */
         .glow-button {
             position: relative;
@@ -200,6 +230,10 @@
 </head>
 
 <body>
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden md:block" id="cursor-dot"></div>
+    <div class="cursor-outline hidden md:block" id="cursor-outline"></div>
+
     <!-- Background Aura -->
     <div class="aura-container">
         <div class="aura-blob blob-1"></div>
@@ -245,12 +279,12 @@
             <div class="max-w-7xl mx-auto w-full relative z-10 text-center">
                 <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-card mb-8 reveal">
                     <span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400">Visionary Developer</span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400 scramble-text">Visionary Developer</span>
                 </div>
                 
                 <h1 class="hero-title text-[clamp(3rem,12vw,9rem)] mb-8 reveal" style="transition-delay: 200ms;">
-                    CRAFTING <br>
-                    <span class="gradient-text">DIMENSIONS</span>
+                    <span class="scramble-text">CRAFTING</span> <br>
+                    <span class="gradient-text scramble-text">DIMENSIONS</span>
                 </h1>
                 
                 <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto font-medium mb-12 reveal" style="transition-delay: 400ms;">
@@ -271,7 +305,7 @@
         <!-- Expertise Section -->
         <section id="expertise" class="max-w-7xl mx-auto px-6 py-40 relative z-10">
             <div class="text-center mb-32 reveal">
-                <h2 class="text-5xl md:text-7xl font-display font-bold mb-6">Expertise<span class="text-indigo-500">.</span></h2>
+                <h2 class="text-5xl md:text-7xl font-display font-bold mb-6 scramble-text">Expertise<span class="text-indigo-500">.</span></h2>
                 <p class="text-slate-500 max-w-xl mx-auto font-medium">Solving complex problems with elegant code and futuristic design systems.</p>
             </div>
 
@@ -283,8 +317,8 @@
                     <h3 class="text-3xl font-display font-bold mb-6">Interface Architecture</h3>
                     <p class="text-slate-400 leading-relaxed font-medium">Bespoke UI/UX designed with a focus on hierarchy, typography, and fluid interactions.</p>
                     <div class="mt-10 flex gap-3 flex-wrap">
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase">GSAP</span>
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase">Figma</span>
+                        <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase">Tailwind CSS</span>
+                        <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase">JavaScript</span>
                     </div>
                 </div>
 
@@ -316,12 +350,9 @@
 
         <!-- Work Section -->
         <section id="work" class="max-w-7xl mx-auto px-6 py-40">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-24 reveal">
-                <div>
-                    <h2 class="text-5xl md:text-7xl font-display font-bold mb-6">Archive<span class="text-slate-500">.</span></h2>
-                    <p class="text-slate-500 max-w-sm font-medium">A selection of my recent high-end digital deployments.</p>
-                </div>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-700 hidden md:block">2023-2024 Collection</span>
+            <div class="text-center mb-32 reveal">
+                <h2 class="text-5xl md:text-7xl font-display font-bold mb-6 scramble-text">Archive<span class="text-slate-500">.</span></h2>
+                <p class="text-slate-500 max-w-xl mx-auto font-medium">A selection of my recent high-end digital deployments.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -356,7 +387,7 @@
         <!-- Shop Section -->
         <section id="shop" class="max-w-7xl mx-auto px-6 py-40">
             <div class="text-center mb-32 reveal">
-                <h2 class="text-5xl md:text-7xl font-display font-bold mb-6">Artifacts<span class="text-pink-500">.</span></h2>
+                <h2 class="text-5xl md:text-7xl font-display font-bold mb-6 scramble-text">Artifacts<span class="text-pink-500">.</span></h2>
                 <p class="text-slate-500 max-w-xl mx-auto font-medium">Premium resources for elite developers and designers.</p>
             </div>
 
@@ -369,7 +400,7 @@
         <section id="contact" class="max-w-7xl mx-auto px-6 py-40">
             <div class="glass-card p-12 md:p-32 text-center reveal relative overflow-hidden">
                 <div class="absolute -top-20 -right-20 w-64 h-64 bg-brand-primary/10 blur-3xl rounded-full"></div>
-                <h2 class="text-5xl md:text-8xl font-display font-bold mb-12 relative z-10">Start a <span class="gradient-text">Project.</span></h2>
+                <h2 class="text-5xl md:text-8xl font-display font-bold mb-12 relative z-10"><span class="scramble-text">Start a</span> <span class="gradient-text scramble-text">Project.</span></h2>
                 
                 <div class="flex flex-col sm:flex-row justify-center gap-8 mb-20 relative z-10">
                     <a href="mailto:rajsimariaa@gmail.com" class="glow-button px-12 py-6 rounded-2xl font-bold text-sm uppercase tracking-widest no-underline">
