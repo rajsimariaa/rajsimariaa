@@ -409,6 +409,35 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Robotic Welcome Voice ---
+    function speakVibeInit() {
+        if (window.speechSynthesis.speaking) return;
+        window.speechSynthesis.cancel(); // Clear queue
+        const msg = new SpeechSynthesisUtterance("WELCOME. INITIALIZING VIBE PROTOCOL.");
+        msg.pitch = 0.1;
+        msg.rate = 0.85;
+        msg.volume = 1;
+
+        let voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                voices = window.speechSynthesis.getVoices();
+                msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
+                window.speechSynthesis.speak(msg);
+            };
+        } else {
+            msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
+            window.speechSynthesis.speak(msg);
+        }
+    }
+
+    // Trigger on load and first interaction
+    window.addEventListener('load', () => {
+        setTimeout(speakVibeInit, 1000);
+    });
+    document.addEventListener('click', speakVibeInit, { once: true });
+    document.addEventListener('keydown', speakVibeInit, { once: true });
+
     // Final Engine Refresh
     ScrollTrigger.refresh();
     vibeLog('VIBE_PROTOCOL: FULLY_SYNCED');

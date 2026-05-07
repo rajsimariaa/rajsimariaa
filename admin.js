@@ -13,6 +13,38 @@ function checkAccess() {
     }
 }
 
+// Robotic Welcome Voice
+function speakWelcome() {
+    if (window.speechSynthesis.speaking) return;
+    const msg = new SpeechSynthesisUtterance("WELCOME MASTER. PLEASE ENTER THE ACCESS CODE TO ENTER THE VAULT.");
+    msg.pitch = 0.1; 
+    msg.rate = 0.85;
+    msg.volume = 1;
+    
+    let voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) {
+        // Wait for voices to load if not ready
+        window.speechSynthesis.onvoiceschanged = () => {
+            voices = window.speechSynthesis.getVoices();
+            msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
+            window.speechSynthesis.speak(msg);
+        };
+    } else {
+        msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
+        window.speechSynthesis.speak(msg);
+    }
+}
+
+// Trigger voice on load and first interaction
+window.addEventListener('load', () => {
+    // Small delay to ensure voices are loaded
+    setTimeout(speakWelcome, 500);
+});
+
+overlay.addEventListener('click', speakWelcome, { once: true });
+document.addEventListener('keydown', speakWelcome, { once: true });
+
+
 // Support Enter key for login
 document.getElementById('admin-pass').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') checkAccess();
@@ -113,3 +145,26 @@ function logout() {
     sessionStorage.removeItem('vibe_unlocked');
     window.location.reload();
 }
+
+// --- Mobile Menu Toggle ---
+const adminMenuToggle = document.getElementById('admin-menu-toggle');
+const adminMobileMenu = document.getElementById('admin-mobile-menu');
+let isMenuOpen = false;
+
+function toggleMobileMenu() {
+    isMenuOpen = !isMenuOpen;
+    if (isMenuOpen) {
+        adminMobileMenu.classList.remove('translate-x-full', 'opacity-0', 'pointer-events-none');
+        adminMenuToggle.children[0].classList.add('rotate-45', 'translate-y-2');
+        adminMenuToggle.children[1].classList.add('-rotate-45', '-translate-y-0', 'w-8');
+    } else {
+        adminMobileMenu.classList.add('translate-x-full', 'opacity-0', 'pointer-events-none');
+        adminMenuToggle.children[0].classList.remove('rotate-45', 'translate-y-2');
+        adminMenuToggle.children[1].classList.remove('-rotate-45', '-translate-y-0', 'w-8');
+    }
+}
+
+if (adminMenuToggle) {
+    adminMenuToggle.addEventListener('click', toggleMobileMenu);
+}
+
