@@ -1,178 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal | Raj Simaria</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Vibe Vault | Admin Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        dark: '#030303',
-                        card: 'rgba(15, 15, 15, 0.6)',
-                        border: 'rgba(255, 255, 255, 0.08)',
-                        cyan: '#22d3ee',
-                        fuchsia: '#c026d3',
-                        emerald: '#34d399',
-                    },
-                    fontFamily: {
-                        outfit: ['Outfit', 'sans-serif'],
-                    }
+                    colors: { primary: '#00f2ff', secondary: '#7000ff', dark: '#050505' },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
                 }
             }
         }
     </script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+    </style>
 </head>
-
-<body class="bg-dark text-white font-outfit antialiased min-h-screen">
-    <div id="admin-dashboard" class="flex flex-col lg:flex-row min-h-screen" style="display: none;">
-        <!-- Sidebar -->
-        <aside class="w-full lg:w-72 lg:h-screen lg:sticky lg:top-0 bg-[#0a0a0a] border-b lg:border-r border-border p-8 flex flex-col gap-12 z-40">
-            <div class="flex items-center gap-2">
-                <span class="text-cyan font-black text-2xl tracking-tighter">>_</span>
-                <span class="font-black text-2xl tracking-tighter">RAJ<span class="text-cyan">.</span></span>
-            </div>
-
-            <nav class="flex-1 flex flex-col gap-2">
-                <button class="sidebar-item active flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 bg-white/10 text-white shadow-lg w-full text-left" data-target="payments-view">
-                    <i data-lucide="credit-card" class="w-5 h-5"></i>
-                    <span class="font-bold">Payments</span>
-                </button>
-                <button class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 w-full text-left" data-target="upload-view">
-                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                    <span class="font-bold">Add Product</span>
-                </button>
-                <button class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 w-full text-left" data-target="manage-view">
-                    <i data-lucide="layers" class="w-5 h-5"></i>
-                    <span class="font-bold">Catalog</span>
-                </button>
-                <a href="index.html" class="sidebar-item flex items-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 w-full text-left">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                    <span class="font-bold">Public Site</span>
-                </a>
-            </nav>
-
-            <button id="logout-btn" class="flex items-center gap-3 px-6 py-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-all font-bold">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-                Terminate Session
-            </button>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-6 lg:p-12">
-            <!-- Payments View -->
-            <div id="payments-view" class="admin-view flex flex-col gap-10">
-                <header>
-                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">Revenue <span class="text-cyan">Stream</span></h1>
-                    <p class="text-slate-400 text-lg">Verify incoming payments and manage customer orders.</p>
-                </header>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Total Rev</p>
-                        <h2 id="stat-rev" class="text-3xl font-black text-cyan italic">₹0</h2>
-                    </div>
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Orders</p>
-                        <h2 id="stat-orders" class="text-3xl font-black">0</h2>
-                    </div>
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Pending</p>
-                        <h2 id="stat-admin-pending" class="text-3xl font-black text-amber-500">0</h2>
-                    </div>
-                    <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-8">
-                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Verified</p>
-                        <h2 id="stat-admin-verified" class="text-3xl font-black text-emerald-500">0</h2>
-                    </div>
-                </div>
-
-                <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border-white/5">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-white/5">
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Timestamp</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Customer Details</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Product</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center text-cyan">Value</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-center">Status</th>
-                                    <th class="px-8 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="payments-tbody" class="divide-y divide-white/5 text-sm">
-                                <!-- JS Injection -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upload View -->
-            <div id="upload-view" class="admin-view hidden flex flex-col gap-10">
-                <header>
-                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">Deploy <span class="text-fuchsia">Asset</span></h1>
-                    <p class="text-slate-400 text-lg">Push new digital products to the public store.</p>
-                </header>
-
-                <div class="bg-card border border-border backdrop-blur-xl rounded-[2rem] shadow-2xl p-10 max-w-2xl">
-                    <form id="upload-form" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Asset Name</label>
-                                <input type="text" id="work-title" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600" placeholder="e.g. Neo UI Kit" required>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Price (INR)</label>
-                                <input type="number" id="work-price" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600" placeholder="0" required>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Context / Description</label>
-                            <textarea id="work-desc" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600 h-32 resize-none" placeholder="Explain the value..." required></textarea>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Delivery Endpoint (URL)</label>
-                            <input type="url" id="work-file-url" class="bg-white/5 border border-white/10 rounded-xl px-5 py-4 w-full focus:outline-none focus:border-cyan transition-colors text-white placeholder-slate-600 font-mono text-sm" placeholder="https://drive.google.com/..." required>
-                        </div>
-                        
-                        <div class="pt-4 flex items-center justify-between">
-                            <button type="submit" class="bg-white text-black px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform flex items-center gap-3">
-                                <i data-lucide="rocket" class="w-5 h-5"></i>
-                                Push to Store
-                            </button>
-                            <p id="upload-status" class="text-sm font-bold"></p>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Manage View -->
-            <div id="manage-view" class="admin-view hidden flex flex-col gap-10">
-                <header>
-                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-2">Live <span class="text-emerald">Catalog</span></h1>
-                    <p class="text-slate-400 text-lg">Inventory management and active product listings.</p>
-                </header>
-
-                <div id="works-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <!-- JS Injection -->
-                </div>
-            </div>
-        </main>
+<body class="bg-dark text-white font-sans min-h-screen overflow-x-hidden">
+    
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="fixed inset-0 z-[100] bg-dark flex items-center justify-center p-6">
+        <div class="max-w-md w-full glass p-10 rounded-[40px] text-center">
+            <div class="text-primary font-mono mb-4 tracking-widest uppercase text-xs">// AUTH_REQUIRED</div>
+            <h1 class="text-4xl font-black mb-8 tracking-tighter">VIBE CHECK<span class="text-primary">.</span></h1>
+            <input type="password" id="admin-pass" placeholder="Enter Access Code" class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl outline-none focus:border-primary transition-all text-center mb-6">
+            <button onclick="checkAccess()" class="w-full py-4 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-105 transition-transform">Verify Identity</button>
+            <p class="mt-6 text-white/20 text-[10px] uppercase tracking-widest">Hint: The code is "BayMax"</p>
+        </div>
     </div>
 
-    <!-- Firebase Compat SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <!-- Dashboard Header -->
+    <nav class="p-8 md:p-12 flex justify-between items-center border-b border-white/5 glass sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="text-2xl font-black tracking-tighter">VIBE <span class="text-primary">VAULT.</span></div>
+            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-mono rounded-full uppercase">Admin v1.0</span>
+        </div>
+        <div class="flex gap-6">
+            <button onclick="clearVault()" class="text-red-400/50 hover:text-red-400 text-[10px] font-bold uppercase tracking-widest transition-colors">Clear Vault</button>
+            <button onclick="window.location.href='index.html'" class="text-white/40 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">View Site</button>
+            <button onclick="logout()" class="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-primary text-[10px] font-bold uppercase tracking-widest transition-all">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-8 md:p-12">
+        <div class="mb-12">
+            <h2 class="text-5xl font-black tracking-tighter mb-2">INCOMING ENQUIRIES</h2>
+            <p class="text-white/40 font-mono text-sm tracking-widest" id="stats-line">// 0 TRANSMISSIONS CAPTURED</p>
+        </div>
+
+        <div id="enquiry-list" class="grid grid-cols-1 gap-6">
+            <!-- Cards will be injected here -->
+            <div class="text-center py-40 opacity-20" id="empty-state">
+                <div class="text-8xl mb-4 font-black">EMPTY</div>
+                <p class="font-mono tracking-widest uppercase">Waiting for the first vibe...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDK (v8 Compatibility) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="firebase-config.js"></script>
+
     <script src="admin.js"></script>
 </body>
-
 </html>

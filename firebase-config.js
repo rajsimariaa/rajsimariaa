@@ -1,13 +1,5 @@
-// ---------------------------------------------------------
-// PLACEHOLDER CONFIGURATION
-// ---------------------------------------------------------
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project or select an existing one
-// 3. Go to Project Settings -> General -> Your apps
-// 4. Click the Web icon (</>) to register a new web app
-// 5. Copy the configuration object and replace the below:
-// ---------------------------------------------------------
-
+// Firebase Configuration Placeholder
+// Replace these values with your actual Firebase project config
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
     apiKey: "AIzaSyBHTcld1VLz9wUHDeobnwaWZDhTL3qUiH4",
@@ -19,9 +11,10 @@ const firebaseConfig = {
     measurementId: "G-NNYREK7RR2"
 };
 
-// Initialize Firebase App
-firebase.initializeApp(firebaseConfig);
-
-// Initialize Services
-const db = firebase.firestore();
-const auth = firebase.auth();
+// Initialize Firebase
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.firestore();
+} else {
+    console.warn("Firebase SDK not detected. Please add Firebase script tags.");
+}
