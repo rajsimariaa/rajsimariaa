@@ -472,29 +472,44 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Robotic Welcome Voice ---
+    let vibeSpoken = false;
+
     function speakVibeInit() {
+        if (vibeSpoken) return;
+
         if (window.speechSynthesis.speaking) return;
         window.speechSynthesis.cancel(); // Clear queue
+
         const msg = new SpeechSynthesisUtterance("WELCOME. INITIALIZING VIBE PROTOCOL.");
         msg.pitch = 0.1;
         msg.rate = 0.85;
         msg.volume = 1;
 
-        let voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                voices = window.speechSynthesis.getVoices();
-                msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
-                window.speechSynthesis.speak(msg);
-            };
-        } else {
+        const startSpeaking = () => {
+            if (vibeSpoken) return;
+            vibeSpoken = true;
+
+            let voices = window.speechSynthesis.getVoices();
             msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
             window.speechSynthesis.speak(msg);
+
+            // Clean up listeners
+            document.removeEventListener('click', speakVibeInit);
+            document.removeEventListener('keydown', speakVibeInit);
+        };
+
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.onvoiceschanged = null;
+                startSpeaking();
+            };
+        } else {
+            startSpeaking();
         }
     }
 
-    document.addEventListener('click', speakVibeInit, { once: true });
-    document.addEventListener('keydown', speakVibeInit, { once: true });
+    document.addEventListener('click', speakVibeInit);
+    document.addEventListener('keydown', speakVibeInit);
 
     // Final Engine Refresh
     ScrollTrigger.refresh();

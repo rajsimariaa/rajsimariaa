@@ -14,24 +14,39 @@ function checkAccess() {
 }
 
 // Robotic Welcome Voice
+let welcomeSpoken = false;
+
 function speakWelcome() {
+    if (welcomeSpoken) return;
+    
+    // Only proceed if not already speaking to avoid overlap
     if (window.speechSynthesis.speaking) return;
+
     const msg = new SpeechSynthesisUtterance("WELCOME MASTER. PLEASE ENTER THE ACCESS CODE TO ENTER THE VAULT.");
     msg.pitch = 0.1; 
     msg.rate = 0.85;
     msg.volume = 1;
     
-    let voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) {
-        // Wait for voices to load if not ready
-        window.speechSynthesis.onvoiceschanged = () => {
-            voices = window.speechSynthesis.getVoices();
-            msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
-            window.speechSynthesis.speak(msg);
-        };
-    } else {
+    const startSpeaking = () => {
+        if (welcomeSpoken) return;
+        welcomeSpoken = true;
+        
+        let voices = window.speechSynthesis.getVoices();
         msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
         window.speechSynthesis.speak(msg);
+        
+        // Remove listeners once we've successfully initiated speech
+        overlay.removeEventListener('click', speakWelcome);
+        document.removeEventListener('keydown', speakWelcome);
+    };
+
+    if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.onvoiceschanged = null; // Prevent repeat triggers
+            startSpeaking();
+        };
+    } else {
+        startSpeaking();
     }
 }
 
@@ -41,8 +56,8 @@ window.addEventListener('load', () => {
     setTimeout(speakWelcome, 500);
 });
 
-overlay.addEventListener('click', speakWelcome, { once: true });
-document.addEventListener('keydown', speakWelcome, { once: true });
+overlay.addEventListener('click', speakWelcome);
+document.addEventListener('keydown', speakWelcome);
 
 
 // Support Enter key for login
