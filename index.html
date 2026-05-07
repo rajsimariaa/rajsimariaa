@@ -50,6 +50,33 @@
     <!-- 3D Background Canvas -->
     <canvas id="vibe-canvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-40"></canvas>
 
+    <!-- Cinematic Preloader -->
+    <div id="vibe-splash" class="fixed inset-0 z-[9999] bg-dark flex flex-col items-center justify-center text-center p-6 transition-all duration-1000">
+        <!-- Initial Interaction Trigger (Required for Audio) -->
+        <div id="boot-trigger" class="flex flex-col items-center cursor-pointer group">
+            <div class="relative mb-8">
+                <div class="w-20 h-20 border-2 border-primary/20 rounded-full animate-ping absolute inset-0"></div>
+                <div class="w-20 h-20 border border-primary/50 flex items-center justify-center rounded-full text-primary font-black text-xl group-hover:scale-110 transition-transform">
+                    RS
+                </div>
+            </div>
+            <h2 class="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-2">Click to Initialize</h2>
+            <div class="text-[8px] font-mono text-white/20 uppercase tracking-widest">Protocol_v1.0 // Auth_Required</div>
+        </div>
+
+        <!-- Loading Sequence (Hidden initially) -->
+        <div id="loading-sequence" class="hidden w-full max-w-xs">
+            <div class="flex justify-between items-end mb-4 font-mono text-[10px]">
+                <div class="text-primary tracking-widest uppercase" id="load-status">System_Booting...</div>
+                <div class="text-white/40" id="load-percent">0%</div>
+            </div>
+            <div class="w-full h-px bg-white/10 relative overflow-hidden">
+                <div id="load-bar" class="absolute top-0 left-0 h-full bg-primary w-0 transition-all duration-300 shadow-[0_0_10px_var(--primary)]"></div>
+            </div>
+            <div class="mt-8 text-[8px] font-mono text-white/10 uppercase tracking-widest" id="load-details">Loading_Core_Modules...</div>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 w-full z-[100] p-6 md:p-10 flex justify-between items-center mix-blend-difference md:mix-blend-difference">
         <div class="text-2xl font-black tracking-tighter hover:scale-110 transition-transform cursor-pointer relative z-[101]" id="nav-logo">
@@ -84,7 +111,7 @@
         <section id="hero" class="min-h-screen flex flex-col justify-center px-6 md:px-20 relative pt-20">
             <div class="max-w-5xl">
                 <p class="text-primary font-mono mb-4 tracking-tighter text-lg md:text-xl overflow-hidden h-7" id="hero-tagline">
-                    <span class="inline-block translate-y-full">// INITIALIZING VIBE_PROTOCOL...</span>
+                    <span class="inline-block translate-y-full">// VIBE_PROTOCOL_INITIALIZED...</span>
                 </p>
                 <h1 class="text-6xl md:text-9xl font-black mb-6 leading-[0.9] tracking-tighter" id="hero-title">
                     RAJ <br> <span class="text-transparent border-text">SIMARIA</span>

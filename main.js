@@ -48,7 +48,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    vibeLog('INITIALIZING VIBE_PROTOCOL...');
+    vibeLog('VIBE_PROTOCOL_INITIALIZED...');
 
     // --- Three.js Background ---
     let torusKnot;
@@ -207,9 +207,71 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Hero Intro
-    const tl = gsap.timeline();
-    tl.to('#hero-tagline span', { y: 0, duration: 1, ease: 'power4.out', delay: 0.5 })
+    // --- Cinematic Preloader Logic ---
+    const bootTrigger = document.getElementById('boot-trigger');
+    const loadingSequence = document.getElementById('loading-sequence');
+    const loadBar = document.getElementById('load-bar');
+    const loadPercent = document.getElementById('load-percent');
+    const loadDetails = document.getElementById('load-details');
+    const tl = gsap.timeline({ paused: true });
+
+    if (bootTrigger) {
+        bootTrigger.addEventListener('click', () => {
+            bootTrigger.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                bootTrigger.classList.add('hidden');
+                loadingSequence.classList.remove('hidden');
+                startLoading();
+            }, 300);
+            speakVibeInit(); // Play audio on click
+        });
+    }
+
+    function startLoading() {
+        let progress = 0;
+        const details = [
+            'LOAD_SYSTEM_CORE...',
+            'SYNC_VIBE_PROTOCOL...',
+            'MOUNT_3D_ASSETS...',
+            'INIT_GSAP_ENGINE...',
+            'STABILIZING_INTERFACE...',
+            'READY_FOR_DEPLOYMENT'
+        ];
+
+        const interval = setInterval(() => {
+            progress += Math.random() * 3;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                finishLoading();
+            }
+            
+            if (loadBar) loadBar.style.width = `${progress}%`;
+            if (loadPercent) loadPercent.innerText = `${Math.floor(progress)}%`;
+            
+            if (Math.random() > 0.8 && loadDetails) {
+                loadDetails.innerText = details[Math.floor(Math.random() * details.length)];
+            }
+        }, 40);
+    }
+
+    function finishLoading() {
+        setTimeout(() => {
+            const splash = document.getElementById('vibe-splash');
+            if (splash) {
+                splash.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => splash.remove(), 1000);
+            }
+            tl.play(); // Play hero animation
+            vibeLog('SYSTEM_BOOT_SEQUENCE: SUCCESS');
+        }, 500);
+    }
+    tl.to('#hero-tagline span', { 
+        y: 0, 
+        duration: 1, 
+        ease: 'power4.out', 
+        delay: 0.5
+    })
       .from('#hero-title', { opacity: 0, y: 100, duration: 1.5, ease: 'power4.out' }, '-=0.5')
       .from('#hero-desc', { opacity: 0, y: 30, duration: 1, ease: 'power4.out' }, '-=1')
       .from('#hero-cta', { opacity: 0, y: 30, duration: 1, ease: 'power4.out' }, '-=0.8')
@@ -431,10 +493,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Trigger on load and first interaction
-    window.addEventListener('load', () => {
-        setTimeout(speakVibeInit, 1000);
-    });
     document.addEventListener('click', speakVibeInit, { once: true });
     document.addEventListener('keydown', speakVibeInit, { once: true });
 
