@@ -1,7 +1,7 @@
 /* Base Styles */
 :root {
     --primary: #00f2ff;
-    --secondary: #7000ff;
+    --secondary: #bf00ff;
     --dark: #050505;
 }
 
@@ -188,11 +188,12 @@ html.lenis {
 }
 
 .work-item img {
-    filter: brightness(0.8) contrast(1.1);
+    filter: grayscale(1) brightness(0.8) contrast(1.1);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .work-item:hover img {
-    filter: brightness(1) contrast(1.2);
+    filter: grayscale(0) brightness(1) contrast(1.2);
 }
 
 /* Scroll Indicators and Accents */

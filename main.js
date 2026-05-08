@@ -207,6 +207,73 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Robotic Welcome Voice Optimization ---
+    let vibeSpoken = false;
+    let vibeUtterance = new SpeechSynthesisUtterance("WELCOME. INITIALIZING VIBE PROTOCOL.");
+    vibeUtterance.pitch = 0.1;
+    vibeUtterance.rate = 0.85;
+    vibeUtterance.volume = 1;
+
+    // Pre-load voices as soon as possible
+    function loadVoices() {
+        let voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            vibeUtterance.voice = voices.find(v => v.name.includes('Google UK English Male')) || 
+                           voices.find(v => v.lang.includes('en')) || 
+                           voices[0];
+        }
+    }
+
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices();
+
+    // Immediate click feedback using Web Audio API (no lag)
+    function playClickSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        } catch (e) {
+            console.warn('Web Audio click failed', e);
+        }
+    }
+
+    function speakVibeInit() {
+        if (vibeSpoken) return;
+        
+        playClickSound(); // Instant feedback
+
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
+
+        vibeSpoken = true;
+        
+        // Ensure voice is set
+        if (!vibeUtterance.voice) loadVoices();
+        
+        window.speechSynthesis.speak(vibeUtterance);
+
+        // Clean up document listeners
+        document.removeEventListener('click', speakVibeInit);
+        document.removeEventListener('keydown', speakVibeInit);
+    }
+
     // --- Cinematic Preloader Logic ---
     const bootTrigger = document.getElementById('boot-trigger');
     const loadingSequence = document.getElementById('loading-sequence');
@@ -216,14 +283,16 @@ window.addEventListener('DOMContentLoaded', () => {
     const tl = gsap.timeline({ paused: true });
 
     if (bootTrigger) {
-        bootTrigger.addEventListener('click', () => {
+        bootTrigger.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent multiple triggers
+            speakVibeInit(); // Play audio on click
+            
             bootTrigger.classList.add('opacity-0', 'pointer-events-none');
             setTimeout(() => {
                 bootTrigger.classList.add('hidden');
                 loadingSequence.classList.remove('hidden');
                 startLoading();
             }, 300);
-            speakVibeInit(); // Play audio on click
         });
     }
 
@@ -471,43 +540,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Robotic Welcome Voice ---
-    let vibeSpoken = false;
-
-    function speakVibeInit() {
-        if (vibeSpoken) return;
-
-        if (window.speechSynthesis.speaking) return;
-        window.speechSynthesis.cancel(); // Clear queue
-
-        const msg = new SpeechSynthesisUtterance("WELCOME. INITIALIZING VIBE PROTOCOL.");
-        msg.pitch = 0.1;
-        msg.rate = 0.85;
-        msg.volume = 1;
-
-        const startSpeaking = () => {
-            if (vibeSpoken) return;
-            vibeSpoken = true;
-
-            let voices = window.speechSynthesis.getVoices();
-            msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
-            window.speechSynthesis.speak(msg);
-
-            // Clean up listeners
-            document.removeEventListener('click', speakVibeInit);
-            document.removeEventListener('keydown', speakVibeInit);
-        };
-
-        if (window.speechSynthesis.getVoices().length === 0) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.onvoiceschanged = null;
-                startSpeaking();
-            };
-        } else {
-            startSpeaking();
-        }
-    }
-
     document.addEventListener('click', speakVibeInit);
     document.addEventListener('keydown', speakVibeInit);
 
@@ -515,3 +547,4 @@ window.addEventListener('DOMContentLoaded', () => {
     ScrollTrigger.refresh();
     vibeLog('VIBE_PROTOCOL: FULLY_SYNCED');
 });
+

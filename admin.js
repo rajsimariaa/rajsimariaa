@@ -13,47 +13,80 @@ function checkAccess() {
     }
 }
 
-// Robotic Welcome Voice
+// Robotic Welcome Voice Optimization
 let welcomeSpoken = false;
+let welcomeUtterance = new SpeechSynthesisUtterance("WELCOME MASTER. PLEASE ENTER THE ACCESS CODE TO ENTER THE VAULT.");
+welcomeUtterance.pitch = 0.1; 
+welcomeUtterance.rate = 0.85;
+welcomeUtterance.volume = 1;
+
+function loadAdminVoices() {
+    let voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+        welcomeUtterance.voice = voices.find(v => v.name.includes('Google UK English Male')) || 
+                                voices.find(v => v.lang.includes('en')) || 
+                                voices[0];
+    }
+}
+
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadAdminVoices;
+}
+loadAdminVoices();
+
+// Immediate click feedback using Web Audio API (no lag)
+function playAdminClickSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {
+        console.warn('Web Audio click failed', e);
+    }
+}
 
 function speakWelcome() {
     if (welcomeSpoken) return;
     
     // Only proceed if not already speaking to avoid overlap
-    if (window.speechSynthesis.speaking) return;
-
-    const msg = new SpeechSynthesisUtterance("WELCOME MASTER. PLEASE ENTER THE ACCESS CODE TO ENTER THE VAULT.");
-    msg.pitch = 0.1; 
-    msg.rate = 0.85;
-    msg.volume = 1;
-    
-    const startSpeaking = () => {
-        if (welcomeSpoken) return;
-        welcomeSpoken = true;
-        
-        let voices = window.speechSynthesis.getVoices();
-        msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices[0];
-        window.speechSynthesis.speak(msg);
-        
-        // Remove listeners once we've successfully initiated speech
-        overlay.removeEventListener('click', speakWelcome);
-        document.removeEventListener('keydown', speakWelcome);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.onvoiceschanged = null; // Prevent repeat triggers
-            startSpeaking();
-        };
-    } else {
-        startSpeaking();
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
     }
+
+    playAdminClickSound(); // Instant feedback
+    welcomeSpoken = true;
+    
+    // Ensure voice is set
+    if (!welcomeUtterance.voice) loadAdminVoices();
+    
+    window.speechSynthesis.speak(welcomeUtterance);
+    
+    // Remove listeners once we've successfully initiated speech
+    overlay.removeEventListener('click', speakWelcome);
+    document.removeEventListener('keydown', speakWelcome);
 }
 
 // Trigger voice on load and first interaction
 window.addEventListener('load', () => {
+    // Try to warm up
+    loadAdminVoices();
     // Small delay to ensure voices are loaded
-    setTimeout(speakWelcome, 500);
+    setTimeout(() => {
+        if (!welcomeSpoken) speakWelcome();
+    }, 1500);
 });
 
 overlay.addEventListener('click', speakWelcome);
