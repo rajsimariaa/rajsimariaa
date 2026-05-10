@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="shortcut icon" type="image/png" href="logo.png">
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,8 +58,8 @@
         <div id="boot-trigger" class="flex flex-col items-center cursor-pointer group">
             <div class="relative mb-8">
                 <div class="w-20 h-20 border-2 border-primary/20 rounded-full animate-ping absolute inset-0"></div>
-                <div class="w-20 h-20 border border-primary/50 flex items-center justify-center rounded-full text-primary font-black text-xl group-hover:scale-110 transition-transform">
-                    RS
+                <div class="w-20 h-20 border border-primary/30 flex items-center justify-center rounded-full overflow-hidden group-hover:scale-110 transition-transform bg-dark/50 backdrop-blur-sm">
+                    <img src="logo.png" alt="RS" class="w-20 h-20 object-contain">
                 </div>
             </div>
             <h2 class="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-2">Click to Initialize</h2>
@@ -79,8 +81,8 @@
 
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 w-full z-[100] p-6 md:p-10 flex justify-between items-center mix-blend-difference md:mix-blend-difference">
-        <div class="text-2xl font-black tracking-tighter hover:scale-110 transition-transform cursor-pointer relative z-[101]" id="nav-logo">
-            RS<span class="text-primary">.</span>
+        <div class="hover:scale-110 transition-transform cursor-pointer relative z-[101]" id="nav-logo">
+            <img src="logo.png" alt="RS" class="h-14 md:h-16 w-auto">
         </div>
         <div class="hidden md:flex gap-12 text-sm font-medium tracking-widest uppercase">
             <a href="#hero" class="nav-link hover:text-primary transition-colors">Intro</a>
