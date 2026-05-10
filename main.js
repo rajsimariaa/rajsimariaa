@@ -35,79 +35,240 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Vibe Console Logger ---
     const consoleLogs = document.getElementById('console-logs');
-    function vibeLog(message) {
+    function vibeLog(message, type = 'default') {
         if (!consoleLogs) return;
         const log = document.createElement('div');
-        log.className = 'opacity-0 transition-opacity duration-300';
-        log.innerText = `> ${message}`;
-        consoleLogs.prepend(log);
-        setTimeout(() => log.classList.remove('opacity-0'), 10);
+        log.className = `opacity-0 transition-opacity duration-300 ${type === 'command' ? 'text-white font-bold' : ''} ${type === 'error' ? 'text-red-500' : ''} ${type === 'success' ? 'text-secondary' : ''}`;
+        log.innerText = message.startsWith('>') ? message : `> ${message}`;
+        consoleLogs.appendChild(log);
+        setTimeout(() => {
+            log.classList.remove('opacity-0');
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }, 10);
         
-        if (consoleLogs.children.length > 6) {
-            consoleLogs.lastElementChild.remove();
+        if (consoleLogs.children.length > 20) {
+            consoleLogs.firstElementChild.remove();
         }
     }
 
     vibeLog('VIBE_PROTOCOL_INITIALIZED...');
+    
+    // --- Terminal Controls ---
+    const vibeConsole = document.getElementById('vibe-console');
+    const closeBtn = document.getElementById('vibe-close');
+    const minimizeBtn = document.getElementById('vibe-minimize');
+    const maximizeBtn = document.getElementById('vibe-maximize');
+    
+    const terminalTrigger = document.getElementById('terminal-trigger');
+    
+    let isMinimized = false;
 
-    // --- Three.js Background ---
-    let torusKnot;
-    let camera, scene, renderer;
-    let mouseX = 0, mouseY = 0;
-
-    try {
-        const canvas = document.getElementById('vibe-canvas');
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        // Create a 3D Mesh - Slightly smaller and more responsive
-        const geometry = new THREE.TorusKnotGeometry(8, 2.5, 120, 20);
-        const material = new THREE.MeshNormalMaterial({ 
-            wireframe: true, 
-            transparent: true, 
-            opacity: 0.2,
-            blending: THREE.AdditiveBlending 
+    if (closeBtn && vibeConsole && terminalTrigger) {
+        closeBtn.addEventListener('click', () => {
+            vibeLog('TERMINATING_TERMINAL...');
+            gsap.to(vibeConsole, { 
+                scale: 0.8, 
+                opacity: 0, 
+                duration: 0.5, 
+                ease: 'power4.in',
+                onComplete: () => {
+                    vibeConsole.classList.add('hidden');
+                    // Show small trigger button
+                    gsap.to(terminalTrigger, { 
+                        scale: 1, 
+                        opacity: 1, 
+                        duration: 0.5, 
+                        ease: 'back.out(1.7)',
+                        onStart: () => {
+                            terminalTrigger.classList.remove('pointer-events-none');
+                        }
+                    });
+                }
+            });
         });
-        torusKnot = new THREE.Mesh(geometry, material);
-        scene.add(torusKnot);
 
-        camera.position.z = 30;
-        vibeLog('THREE_JS_SCENE: READY');
+        terminalTrigger.addEventListener('click', () => {
+            vibeConsole.classList.remove('hidden');
+            vibeLog('RESTORING_FROM_VOID...');
+            
+            // Hide trigger button
+            gsap.to(terminalTrigger, { 
+                scale: 0, 
+                opacity: 0, 
+                duration: 0.3, 
+                ease: 'back.in(1.7)',
+                onComplete: () => {
+                    terminalTrigger.classList.add('pointer-events-none');
+                }
+            });
 
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            if (torusKnot) {
-                torusKnot.rotation.x += 0.005;
-                torusKnot.rotation.y += 0.005;
-                torusKnot.rotation.x += (mouseY * 0.5 - torusKnot.rotation.x) * 0.05;
-                torusKnot.rotation.y += (mouseX * 0.5 - torusKnot.rotation.y) * 0.05;
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-    } catch (e) {
-        console.error('Three.js Init Failed:', e);
+            // Show terminal
+            gsap.to(vibeConsole, { 
+                scale: 1, 
+                opacity: 1, 
+                duration: 0.5, 
+                ease: 'power4.out'
+            });
+        });
     }
 
-    // Mouse Movement
-    document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) / 100;
-        mouseY = (e.clientY - window.innerHeight / 2) / 100;
-    });
+    if (minimizeBtn && vibeConsole) {
+        minimizeBtn.addEventListener('click', () => {
+            if (!isMinimized) {
+                vibeLog('MINIMIZING_TERMINAL...');
+                gsap.to(vibeConsole, { 
+                    height: '32px', 
+                    width: '220px',
+                    duration: 0.6, 
+                    ease: 'expo.inOut' 
+                });
+                gsap.to('#console-logs', { opacity: 0, duration: 0.3 });
+                isMinimized = true;
+            } else {
+                restoreTerminal();
+            }
+        });
+    }
 
-    // Handle Resize
-    window.addEventListener('resize', () => {
-        if (camera && renderer) {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+    function restoreTerminal() {
+        if (!isMinimized) return;
+        vibeLog('RESTORING_TERMINAL...');
+        gsap.to(vibeConsole, { 
+            height: '160px', 
+            width: '288px', 
+            duration: 0.6, 
+            ease: 'expo.inOut' 
+        });
+        gsap.to('#console-logs', { opacity: 1, duration: 0.3, delay: 0.3 });
+        isMinimized = false;
+    }
+
+    if (maximizeBtn) {
+        maximizeBtn.addEventListener('click', () => {
+            if (isMinimized) {
+                restoreTerminal();
+            } else {
+                vibeLog('STAYING_AS_IS...');
+            }
+        });
+    }
+
+    // --- Interactive Terminal Logic ---
+    const terminalInput = document.getElementById('terminal-input');
+    let terminalFlow = {
+        active: false,
+        step: 0,
+        data: {}
+    };
+
+    const flowSteps = [
+        { key: 'name', prompt: 'ENTER_YOUR_NAME:' },
+        { key: 'email', prompt: 'ENTER_EMAIL_ADDRESS:' },
+        { key: 'phone', prompt: 'ENTER_PHONE_NUMBER:' },
+        { key: 'details', prompt: 'DESCRIBE_REQUIREMENTS:' }
+    ];
+
+    if (terminalInput) {
+        terminalInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                const rawInput = terminalInput.value.trim();
+                if (!rawInput) return;
+
+                vibeLog(`$ ${rawInput}`, 'command');
+                terminalInput.value = '';
+                
+                if (terminalFlow.active) {
+                    await handleFlowStep(rawInput);
+                } else {
+                    const parts = rawInput.split(' ');
+                    const baseCmd = parts[0].toLowerCase();
+                    const args = parts.slice(1);
+                    await processCommand(baseCmd, args, rawInput);
+                }
+            }
+        });
+    }
+
+    async function handleFlowStep(input) {
+        const currentStep = flowSteps[terminalFlow.step];
+        terminalFlow.data[currentStep.key] = input;
+        
+        terminalFlow.step++;
+        
+        if (terminalFlow.step < flowSteps.length) {
+            vibeLog(flowSteps[terminalFlow.step].prompt);
+            terminalInput.placeholder = `Provide ${flowSteps[terminalFlow.step].key}...`;
+        } else {
+            vibeLog('COMPILING_TRANSMISSION...');
+            await submitFinalInquiry(terminalFlow.data);
+            resetTerminalFlow();
         }
-    });
+    }
+
+    function resetTerminalFlow() {
+        terminalFlow = { active: false, step: 0, data: {} };
+        terminalInput.placeholder = "Type 'help'...";
+    }
+
+    async function processCommand(baseCmd, args, rawInput) {
+        switch (baseCmd) {
+            case 'help':
+                vibeLog('AVAILABLE_COMMANDS:');
+                vibeLog(' - start: Begin inquiry flow');
+                vibeLog(' - about: Core bio');
+                vibeLog(' - work: View portfolio');
+                vibeLog(' - clear: Flush console');
+                break;
+            case 'start':
+            case 'inquiry':
+                vibeLog('INITIATING_INQUIRY_PROTOCOL...');
+                terminalFlow.active = true;
+                terminalFlow.step = 0;
+                vibeLog(flowSteps[0].prompt);
+                terminalInput.placeholder = "Provide name...";
+                break;
+            case 'about':
+                vibeLog('RAJ SIMARIA: FREELANCE VIBE CODER.');
+                break;
+            case 'work':
+                vibeLog('NAVIGATING_TO_WORK...');
+                document.querySelector('#work').scrollIntoView({ behavior: 'smooth' });
+                break;
+            case 'clear':
+                consoleLogs.innerHTML = '';
+                vibeLog('CONSOLE_FLUSHED');
+                break;
+            default:
+                vibeLog(`UNKNOWN_COMMAND: ${baseCmd}`, 'error');
+                vibeLog("TYPE 'start' TO BEGIN INQUIRY");
+        }
+    }
+
+    async function submitFinalInquiry(data) {
+        vibeLog('SENDING_TO_VAULT...');
+        const formData = {
+            ...data,
+            countryCode: '', // Captured in phone usually in terminal
+            date: new Date().toISOString(),
+            id: Date.now(),
+            source: 'terminal_flow'
+        };
+
+        try {
+            if (window.db) {
+                await window.db.collection('enquiries').add(formData);
+                vibeLog('TRANSMISSION_COMPLETE', 'success');
+                vibeLog('SYSTEM_IDLE');
+            } else {
+                const vault = JSON.parse(localStorage.getItem('vibe_vault') || '[]');
+                vault.push(formData);
+                localStorage.setItem('vibe_vault', JSON.stringify(vault));
+                vibeLog('LOCAL_SYNC_COMPLETE', 'success');
+            }
+        } catch (e) {
+            vibeLog('TRANSMISSION_FAILED', 'error');
+        }
+    }
 
     // --- Smooth Section Transitions (Vibe Warp) ---
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -121,11 +282,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 vibeLog(`INITIATING_WARP: ${targetId.toUpperCase()}`);
                 
                 gsap.to('main', { filter: 'blur(10px)', opacity: 0.3, duration: 0.5 });
-                if (torusKnot) {
-                    gsap.to(torusKnot.material, { opacity: 0.8, duration: 0.5 });
-                    gsap.to(torusKnot.rotation, { z: '+=2', duration: 1 });
-                }
-
                 lenis.scrollTo(target, {
                     offset: 0,
                     duration: 2.5,
@@ -133,7 +289,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     onComplete: () => {
                         // Safety: Ensure main is restored even if scroll ends abruptly
                         gsap.to('main', { filter: 'blur(0px)', opacity: 1, duration: 0.8, ease: 'power2.out' });
-                        if (torusKnot) gsap.to(torusKnot.material, { opacity: 0.3, duration: 0.8 });
                         vibeLog(`WARP_COMPLETE: ${targetId.toUpperCase()}`);
                         isWarping = false;
                         ScrollTrigger.refresh();
@@ -141,19 +296,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-    });
-
-    // --- Scroll Effects ---
-    if (torusKnot) {
-        gsap.to(torusKnot.rotation, {
-            scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 1 },
-            x: Math.PI * 2, y: Math.PI, ease: 'none'
-        });
-    }
-
-    gsap.to(camera.position, {
-        scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 1 },
-        z: 50, ease: 'none'
     });
 
     // Hero Effects
@@ -505,6 +647,8 @@ window.addEventListener('DOMContentLoaded', () => {
             const formData = {
                 name: document.getElementById('form-name').value,
                 email: document.getElementById('form-email').value,
+                countryCode: document.getElementById('form-country-code').value,
+                phone: document.getElementById('form-phone').value,
                 details: document.getElementById('form-details').value,
                 date: new Date().toISOString(), 
                 id: Date.now()
@@ -542,6 +686,89 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('click', speakVibeInit);
     document.addEventListener('keydown', speakVibeInit);
+
+    // --- Isometric Dot Grid Background ---
+    function initDotGrid() {
+        const canvas = document.getElementById('dot-grid-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let dots = [];
+        const spacing = 45;
+        const baseDotSize = 1.2;
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            createGrid();
+        }
+        
+        function createGrid() {
+            dots = [];
+            const rows = Math.ceil(canvas.height / spacing) + 1;
+            const cols = Math.ceil(canvas.width / spacing) + 1;
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const xOffset = r % 2 === 0 ? 0 : spacing / 2;
+                    dots.push({
+                        x: c * spacing + xOffset,
+                        y: r * spacing,
+                        opacity: 0.1,
+                        size: baseDotSize
+                    });
+                }
+            }
+        }
+        
+        let mouse = { x: -2000, y: -2000 };
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            dots.forEach(dot => {
+                const dx = mouse.x - dot.x;
+                const dy = mouse.y - dot.y;
+                const distSq = dx * dx + dy * dy;
+                const maxDistSq = 150 * 150;
+                
+                if (distSq < maxDistSq) {
+                    const dist = Math.sqrt(distSq);
+                    const force = (150 - dist) / 150;
+                    dot.opacity = 0.3 + (force * 0.7);
+                    dot.size = baseDotSize + (force * 2.5);
+                    ctx.fillStyle = `rgba(0, 242, 255, ${dot.opacity})`;
+                } else {
+                    dot.opacity += (0.2 - dot.opacity) * 0.05;
+                    dot.size += (baseDotSize - dot.size) * 0.05;
+                    ctx.fillStyle = `rgba(150, 150, 150, ${dot.opacity})`;
+                }
+                
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+    }
+
+    initDotGrid();
 
     // Final Engine Refresh
     ScrollTrigger.refresh();

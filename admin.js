@@ -150,7 +150,10 @@ function renderCards(vault) {
                 <div>
                     <div class="text-[10px] text-primary font-mono tracking-widest uppercase mb-1">TRANSMISSION_ID: ${item.id}</div>
                     <h3 class="text-3xl font-black tracking-tighter">${item.name}</h3>
-                    <a href="mailto:${item.email}" class="text-white/40 hover:text-primary transition-colors text-sm font-medium">${item.email}</a>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1">
+                        <a href="mailto:${item.email}" class="text-white/40 hover:text-primary transition-colors text-sm font-medium">${item.email}</a>
+                        <a href="tel:${item.countryCode}${item.phone}" class="text-white/40 hover:text-secondary transition-colors text-sm font-medium">${item.countryCode} ${item.phone}</a>
+                    </div>
                 </div>
                 <div class="text-right">
                     <div class="text-[10px] text-white/20 font-mono tracking-widest uppercase mb-1">RECEIVED_AT</div>
@@ -159,14 +162,29 @@ function renderCards(vault) {
             </div>
             <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
                 <p class="text-white/60 leading-relaxed font-light">${item.details}</p>
+                ${(item.source === 'terminal' || item.source === 'terminal_flow') ? '<div class="mt-4 text-[10px] text-primary/40 font-mono tracking-widest uppercase">Source: Terminal</div>' : ''}
             </div>
         `;
         listContainer.appendChild(card);
     });
 }
 
-function clearVault() {
-    if (confirm('CAUTION: THIS WILL WIPE ALL ENQUIRIES. PROCEED?')) {
+async function clearVault() {
+    if (confirm('CAUTION: THIS WILL WIPE ALL ENQUIRIES FROM THE CLOUD AND LOCAL STORAGE. PROCEED?')) {
+        if (window.db) {
+            try {
+                const snapshot = await window.db.collection('enquiries').get();
+                if (snapshot.size > 0) {
+                    const batch = window.db.batch();
+                    snapshot.docs.forEach((doc) => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                }
+            } catch (error) {
+                console.error("Firestore Clear Error:", error);
+            }
+        }
         localStorage.removeItem('vibe_vault');
         loadEnquiries();
     }

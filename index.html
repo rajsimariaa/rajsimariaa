@@ -47,8 +47,8 @@
     <div id="cursor" class="fixed w-4 h-4 bg-primary rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"></div>
     <div id="cursor-follower" class="fixed w-10 h-10 border border-primary rounded-full pointer-events-none z-[9998] transition-transform duration-300 ease-out hidden md:block"></div>
 
-    <!-- 3D Background Canvas -->
-    <canvas id="vibe-canvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-40"></canvas>
+    <!-- Background Effects -->
+    <canvas id="dot-grid-canvas" class="fixed inset-0 z-[-2] pointer-events-none opacity-40"></canvas>
 
     <!-- Cinematic Preloader -->
     <div id="vibe-splash" class="fixed inset-0 z-[9999] bg-dark flex flex-col items-center justify-center text-center p-6 transition-all duration-1000">
@@ -379,6 +379,16 @@
                             <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Email Address</label>
                             <input type="email" id="form-email" required placeholder="john@example.com" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-primary transition-colors text-lg">
                         </div>
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="space-y-2 col-span-1">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Country Code</label>
+                                <input type="text" id="form-country-code" required placeholder="+91" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-primary transition-colors text-lg">
+                            </div>
+                            <div class="space-y-2 col-span-2">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Phone Number</label>
+                                <input type="tel" id="form-phone" required placeholder="9876543210" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-primary transition-colors text-lg">
+                            </div>
+                        </div>
                         <div class="space-y-2">
                             <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Project Details</label>
                             <textarea id="form-details" required rows="4" placeholder="Tell me about your vision..." class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-primary transition-colors text-lg resize-none"></textarea>
@@ -411,18 +421,31 @@
     </footer>
 
     <!-- Vibe Console -->
-    <div id="vibe-console" class="fixed bottom-6 left-6 w-72 h-40 bg-black/80 border border-primary/20 rounded-xl backdrop-blur-xl z-[100] p-4 font-mono text-[10px] text-primary/70 overflow-hidden pointer-events-none hidden md:block">
-        <div class="flex items-center gap-2 mb-2 border-b border-primary/10 pb-1">
-            <div class="w-2 h-2 rounded-full bg-red-500"></div>
-            <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+    <div id="vibe-console" class="fixed bottom-6 left-6 w-72 h-40 bg-black/80 border border-primary/20 rounded-xl backdrop-blur-xl z-[100] p-4 font-mono text-[10px] text-primary/70 overflow-hidden pointer-events-auto hidden md:block transition-all duration-500">
+        <div class="flex items-center flex-nowrap gap-2 mb-2 border-b border-primary/10 pb-1">
+            <div id="vibe-close" class="w-2 h-2 rounded-full bg-red-500 cursor-pointer hover:scale-125 transition-transform"></div>
+            <div id="vibe-minimize" class="w-2 h-2 rounded-full bg-yellow-500 cursor-pointer hover:scale-125 transition-transform"></div>
+            <div id="vibe-maximize" class="w-2 h-2 rounded-full bg-green-500 cursor-pointer hover:scale-125 transition-transform"></div>
             <span class="ml-2 text-white/40 uppercase tracking-widest">vibe_terminal</span>
         </div>
-        <div id="console-logs" class="space-y-1">
-            <div class="opacity-100">SYSTEM READY...</div>
-            <div class="opacity-60">THREE_JS_ENGINE: LOADED</div>
-            <div class="opacity-60">GSAP_PROTOCOL: ACTIVE</div>
+        <div class="flex flex-col h-[calc(100%-25px)]">
+            <div id="console-logs" class="flex-grow space-y-1 overflow-y-auto no-scrollbar pr-2">
+                <div class="opacity-100">SYSTEM READY...</div>
+                <div class="opacity-60">THREE_JS_ENGINE: LOADED</div>
+                <div class="opacity-60">GSAP_PROTOCOL: ACTIVE</div>
+            </div>
+            <div class="mt-2 flex items-center gap-2 border-t border-primary/10 pt-2 shrink-0">
+                <span class="text-primary animate-pulse">></span>
+                <input type="text" id="terminal-input" class="bg-transparent border-none outline-none text-primary w-full placeholder:text-primary/20" placeholder="Type 'help'..." autocomplete="off">
+            </div>
         </div>
+    </div>
+    
+    <!-- Terminal Trigger Button (Hidden by default) -->
+    <div id="terminal-trigger" class="fixed bottom-6 left-6 w-12 h-12 bg-black/80 border border-primary/20 rounded-full backdrop-blur-xl z-[100] flex items-center justify-center cursor-pointer hover:border-primary transition-all opacity-0 pointer-events-none hidden md:flex scale-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
     </div>
 
     <!-- Firebase SDK (v8 Compatibility) -->
