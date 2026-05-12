@@ -215,6 +215,7 @@ window.addEventListener('DOMContentLoaded', () => {
             case 'help':
                 vibeLog('AVAILABLE_COMMANDS:');
                 vibeLog(' - start: Begin inquiry flow');
+                vibeLog(' - book: Schedule a 1:1 call');
                 vibeLog(' - about: Core bio');
                 vibeLog(' - work: View portfolio');
                 vibeLog(' - clear: Flush console');
@@ -226,6 +227,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 terminalFlow.step = 0;
                 vibeLog(flowSteps[0].prompt);
                 terminalInput.placeholder = "Provide name...";
+                break;
+            case 'book':
+            case 'meet':
+            case 'schedule':
+                vibeLog('OPENING_MEETING_PORTAL...');
+                window.open('https://calendar.app.google/F7Qg6tBBHf3MCRBE7', '_blank');
                 break;
             case 'about':
                 vibeLog('RAJ SIMARIA: FREELANCE VIBE CODER.');
