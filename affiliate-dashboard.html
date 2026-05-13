@@ -36,11 +36,17 @@
             <img src="logo.png" alt="RS" class="h-10 w-auto">
             <div class="text-xl font-black tracking-tighter uppercase italic">Agent <span class="text-accent">Portal.</span></div>
         </div>
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4">
             <div class="hidden md:block text-right">
                 <p id="agent-name" class="text-xs font-bold uppercase tracking-widest text-white/60">Loading...</p>
                 <p id="agent-code-display" class="text-[10px] font-mono text-accent">CODE: ----</p>
             </div>
+            <button onclick="openProfileModal()" class="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/40 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </button>
             <button onclick="logout()" class="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/60 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all">Logout</button>
         </div>
     </nav>
@@ -124,12 +130,43 @@
         </div>
     </main>
 
+    <!-- Edit Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 z-[150] bg-dark/95 backdrop-blur-xl flex items-center justify-center p-6 hidden">
+        <div class="max-w-md w-full glass p-10 rounded-[40px]">
+            <div class="text-accent font-mono mb-4 tracking-widest uppercase text-xs">// EDIT_PROFILE</div>
+            <h2 class="text-4xl font-black mb-8 tracking-tighter uppercase italic">Account Settings</h2>
+            
+            <form id="profile-form" class="space-y-6">
+                <div>
+                    <label class="block text-[10px] text-white/40 uppercase font-bold tracking-widest mb-2 ml-2">Full Name</label>
+                    <input type="text" id="edit-name" required class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl outline-none focus:border-accent transition-all text-lg font-bold">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-white/40 uppercase font-bold tracking-widest mb-2 ml-2">UPI ID (For Payouts)</label>
+                    <input type="text" id="edit-upi" required class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl outline-none focus:border-accent transition-all text-lg font-bold">
+                </div>
+                
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="closeProfileModal()" class="flex-1 py-4 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all">Cancel</button>
+                    <button type="submit" class="flex-1 py-4 bg-accent text-black font-black uppercase tracking-widest rounded-full hover:scale-105 transition-transform flex justify-center items-center gap-2">
+                        <span>Save Changes</span>
+                        <div id="save-loader" class="hidden w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Firebase SDK (v8 Compatibility) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="firebase-config.js"></script>
 
     <script>
+        let currentAffId = null;
+        const profileModal = document.getElementById('profile-modal');
+        const saveLoader = document.getElementById('save-loader');
+
         document.addEventListener('DOMContentLoaded', () => {
             const session = JSON.parse(localStorage.getItem('affiliate_session'));
             if (!session) {
@@ -137,10 +174,7 @@
                 return;
             }
 
-            document.getElementById('agent-name').innerText = session.name;
-            document.getElementById('agent-code-display').innerText = `CODE: ${session.code}`;
-            document.getElementById('referral-code-input').value = session.code;
-
+            currentAffId = session.id;
             loadAffiliateData(session.id, session.code);
         });
 
@@ -152,9 +186,17 @@
                 const affDoc = await window.db.collection('affiliates').doc(affId).get();
                 if (affDoc.exists) {
                     const data = affDoc.data();
+                    document.getElementById('agent-name').innerText = data.name;
+                    document.getElementById('agent-code-display').innerText = `CODE: ${data.referralCode}`;
+                    document.getElementById('referral-code-input').value = data.referralCode;
+                    
                     document.getElementById('pending-balance').innerText = `₹${data.pendingBalance || 0}`;
                     document.getElementById('total-earnings').innerText = `₹${data.totalEarnings || 0}`;
                     document.getElementById('referral-count').innerText = data.referralsCount || 0;
+
+                    // Pre-fill edit modal
+                    document.getElementById('edit-name').value = data.name;
+                    document.getElementById('edit-upi').value = data.upiId || '';
                 }
 
                 // 2. Get Related Contracts
@@ -168,6 +210,7 @@
 
                 if (!contractsSnapshot.empty) {
                     empty.classList.add('hidden');
+                    list.innerHTML = ''; // Clear loading
                     contractsSnapshot.docs.forEach(doc => {
                         const contract = doc.data();
                         const date = new Date(contract.date).toLocaleDateString('en-IN', {
@@ -209,6 +252,41 @@
             }
         }
 
+        window.openProfileModal = () => profileModal.classList.remove('hidden');
+        window.closeProfileModal = () => profileModal.classList.add('hidden');
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!window.db || !currentAffId) return;
+
+            saveLoader.classList.remove('hidden');
+            const newName = document.getElementById('edit-name').value;
+            const newUpi = document.getElementById('edit-upi').value.trim();
+
+            try {
+                await window.db.collection('affiliates').doc(currentAffId).update({
+                    name: newName,
+                    upiId: newUpi
+                });
+
+                // Update UI instantly
+                document.getElementById('agent-name').innerText = newName;
+                
+                // Update session
+                const session = JSON.parse(localStorage.getItem('affiliate_session'));
+                session.name = newName;
+                localStorage.setItem('affiliate_session', JSON.stringify(session));
+
+                alert('PROFILE_UPDATED: VAULT_SYNC_COMPLETE');
+                closeProfileModal();
+            } catch (error) {
+                console.error("Update Error:", error);
+                alert('SYSTEM_ERROR: UPDATE_FAILED');
+            } finally {
+                saveLoader.classList.add('hidden');
+            }
+        });
+
         window.logout = () => {
             localStorage.removeItem('affiliate_session');
             window.location.href = 'affiliate.html';
@@ -219,7 +297,6 @@
             const siteLink = window.location.origin;
             const message = `🚀 Unlock a 5% DISCOUNT on your next project with Raj Simaria!\n\nUse my exclusive referral code: ${code}\nBook your consultation here: ${siteLink}`;
             
-            // Create a temporary textarea to copy the multi-line message
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = message;
             document.body.appendChild(tempTextArea);

@@ -145,7 +145,13 @@ function renderCards(vault) {
     contractStatsLine.innerText = `// ${closedContracts.length} DEALS FINALIZED`;
 
     if (activeLeads.length === 0) {
-        listContainer.appendChild(emptyState.cloneNode(true));
+        const empty = document.createElement('div');
+        empty.className = 'text-center py-40 opacity-20';
+        empty.innerHTML = `
+            <div class="text-8xl mb-4 font-black">EMPTY</div>
+            <p class="font-mono tracking-widest uppercase">Waiting for the first vibe...</p>
+        `;
+        listContainer.appendChild(empty);
     }
 
     if (closedContracts.length === 0) {
@@ -326,8 +332,9 @@ function renderAffiliates(affiliates) {
                     <div class="text-xl font-black text-green-400">₹${aff.totalEarnings || 0}</div>
                 </div>
             </div>
-            <div class="mt-6 flex justify-end">
+            <div class="mt-6 flex justify-between items-center">
                 <button onclick="deleteAffiliate('${aff.id}', '${aff.name}')" class="text-[10px] text-red-400/40 hover:text-red-400 font-bold uppercase tracking-widest transition-colors">Terminate Agent</button>
+                <button onclick="openPaymentModal('${aff.id}', '${aff.name}', ${aff.pendingBalance || 0})" class="px-5 py-2 bg-secondary/10 hover:bg-secondary text-secondary hover:text-black text-[10px] font-bold uppercase tracking-widest rounded-full transition-all border border-secondary/20">Record Payment</button>
             </div>
         `;
         affListContainer.appendChild(card);
@@ -477,3 +484,95 @@ if (adminMenuToggle) {
     adminMenuToggle.addEventListener('click', toggleMobileMenu);
 }
 
+// --- Payment Modal Management ---
+let currentPaymentAffId = null;
+let currentAffUpi = null;
+let currentAffName = null;
+const paymentModal = document.getElementById('payment-modal');
+const paymentInput = document.getElementById('payment-amount');
+const upiSection = document.getElementById('upi-section');
+const upiQr = document.getElementById('upi-qr');
+const payViaAppBtn = document.getElementById('pay-via-app');
+
+window.openPaymentModal = async (id, name, pending) => {
+    currentPaymentAffId = id;
+    currentAffName = name;
+    document.getElementById('payment-agent-name').innerText = name;
+    document.getElementById('payment-pending-hint').innerText = `PENDING: ₹${pending}`;
+    paymentInput.value = '';
+    upiSection.classList.add('hidden');
+    paymentModal.classList.remove('hidden');
+
+    // Fetch UPI ID
+    if (window.db) {
+        const doc = await window.db.collection('affiliates').doc(id).get();
+        if (doc.exists) {
+            currentAffUpi = doc.data().upiId;
+        }
+    }
+};
+
+paymentInput.addEventListener('input', () => {
+    const amount = parseFloat(paymentInput.value);
+    const warning = document.getElementById('upi-warning');
+    
+    if (amount > 0) {
+        if (currentAffUpi) {
+            // Construct UPI URI
+            const upiUri = `upi://pay?pa=${currentAffUpi}&pn=${encodeURIComponent(currentAffName)}&am=${amount}&cu=INR&tn=Affiliate%20Payout`;
+            
+            // Update QR Code
+            upiQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
+            
+            // Update App Link
+            payViaAppBtn.href = upiUri;
+            
+            upiSection.classList.remove('hidden');
+            if (warning) warning.classList.add('hidden');
+        } else {
+            // Show missing UPI warning
+            upiSection.classList.add('hidden');
+            if (warning) {
+                warning.innerText = "Agent has not provided a UPI ID. Payout must be handled manually.";
+                warning.classList.remove('hidden');
+            }
+        }
+    } else {
+        upiSection.classList.add('hidden');
+        if (warning) warning.classList.add('hidden');
+    }
+});
+
+window.closePaymentModal = () => {
+    paymentModal.classList.add('hidden');
+};
+
+document.getElementById('confirm-payment-btn').addEventListener('click', async () => {
+    const payAmount = Math.round(parseFloat(paymentInput.value));
+    if (!payAmount || payAmount <= 0) return;
+
+    try {
+        if (window.db && currentPaymentAffId) {
+            const affRef = window.db.collection('affiliates').doc(currentPaymentAffId);
+            const doc = await affRef.get();
+            
+            if (doc.exists) {
+                const data = doc.data();
+                const newPending = Math.max(0, (data.pendingBalance || 0) - payAmount);
+                const newTotalPaid = (data.totalEarnings || 0) + payAmount; // totalEarnings acts as 'Total Paid'
+
+                await affRef.update({
+                    pendingBalance: newPending,
+                    totalEarnings: newTotalPaid
+                });
+
+                alert('PAYMENT_RECORDED: BALANCES_UPDATED');
+                closePaymentModal();
+                loadAffiliates();
+            }
+        }
+    } catch (error) {
+        console.error("Payment Record Error:", error);
+        alert('SYSTEM_ERROR: PAYMENT_FAILED');
+    }
+});

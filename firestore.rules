@@ -1,25 +1,28 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ENQUIRIES: Handles lead capture
+    
+    // ENQUIRIES: Handles lead capture from the main site
     match /enquiries/{enquiry} {
-      allow create: if true;
-      allow read, update, delete: if true;
+      allow create: if true; // Anyone can submit a lead
+      allow read, update, delete: if true; // Admin access
     }
 
-    // AFFILIATES: Handles agent data and balances
+    // AFFILIATES: Handles agent profiles, UPI IDs, and balances
     match /affiliates/{affiliate} {
-      allow read, create, update, delete: if true;
+      allow read, create, update: if true; // Agents can sign up and edit profiles
+      allow delete: if true; // Admin can terminate agents
     }
 
-    // CONTRACTS: Handles finalized deal records
+    // CONTRACTS: Handles finalized deals and commission records
     match /contracts/{contract} {
-      allow read, write: if true;
+      allow read, write: if true; // Used by Admin and Dashboard for tracking
     }
 
-    // GLOBAL: Allow read for any other collection if needed
+    // GLOBAL: Protective fallback
     match /{document=**} {
       allow read: if true;
+      allow write: if false; // Deny unexpected writes by default
     }
   }
 }

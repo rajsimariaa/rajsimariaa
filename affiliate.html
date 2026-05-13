@@ -101,9 +101,15 @@
                             </div>
                             <p id="code-status" class="text-[10px] font-mono mt-2 hidden"></p>
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Access Password</label>
-                            <input type="password" id="aff-pass" required placeholder="••••••••" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-2">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">UPI ID (For Payouts)</label>
+                                <input type="text" id="aff-upi" required placeholder="name@upi" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Access Password</label>
+                                <input type="password" id="aff-pass" required placeholder="••••••••" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                            </div>
                         </div>
                     </div>
                     
@@ -237,7 +243,8 @@
                         name: document.getElementById('aff-name').value,
                         email: document.getElementById('aff-email').value,
                         referralCode: code,
-                        password: password, // Simple password storage
+                        upiId: document.getElementById('aff-upi').value.trim(),
+                        password: password,
                         totalEarnings: 0,
                         pendingBalance: 0,
                         referralsCount: 0,
