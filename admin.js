@@ -110,31 +110,50 @@ async function loadEnquiries() {
     if (window.db) {
         try {
             const snapshot = await window.db.collection('enquiries').orderBy('date', 'desc').get();
-            vault = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            vault = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return { ...data, id: doc.id, internalId: data.id };
+            });
+            // Save to cache for optimistic UI updates
+            localStorage.setItem('vibe_vault_cache', JSON.stringify(vault));
         } catch (error) {
             console.error("Firestore Load Error:", error);
-            // Fallback if rules are not set yet
             vault = JSON.parse(localStorage.getItem('vibe_vault') || '[]');
         }
     } else {
         vault = JSON.parse(localStorage.getItem('vibe_vault') || '[]');
-        vault.reverse(); // Newest first for localStorage
+        vault.reverse();
     }
     
     renderCards(vault);
 }
 
 function renderCards(vault) {
+    const listContainer = document.getElementById('enquiry-list');
+    const contractListContainer = document.getElementById('contract-list');
+    const emptyState = document.getElementById('empty-state');
+    const statsLine = document.getElementById('stats-line');
+    const contractStatsLine = document.getElementById('contracts-stats-line');
+
     listContainer.innerHTML = '';
+    contractListContainer.innerHTML = '';
     
-    if (vault.length === 0) {
-        listContainer.appendChild(emptyState);
-        statsLine.innerText = '// 0 TRANSMISSIONS CAPTURED';
-        return;
+    const activeLeads = vault.filter(item => item.contractClosed !== true);
+    const closedContracts = vault.filter(item => item.contractClosed === true);
+
+    statsLine.innerText = `// ${activeLeads.length} TRANSMISSIONS CAPTURED`;
+    contractStatsLine.innerText = `// ${closedContracts.length} DEALS FINALIZED`;
+
+    if (activeLeads.length === 0) {
+        listContainer.appendChild(emptyState.cloneNode(true));
     }
 
-    emptyState.remove();
-    statsLine.innerText = `// ${vault.length} TRANSMISSIONS CAPTURED`;
+    if (closedContracts.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'text-center py-20 opacity-20 font-mono uppercase tracking-widest';
+        empty.innerText = 'No closed contracts yet.';
+        contractListContainer.appendChild(empty);
+    }
 
     vault.forEach(item => {
         const date = new Date(item.date).toLocaleString('en-IN', {
@@ -145,7 +164,7 @@ function renderCards(vault) {
         });
 
         const card = document.createElement('div');
-        card.className = 'glass p-8 md:p-10 rounded-[32px] border border-white/5 hover:border-primary/30 transition-all group';
+        card.className = 'glass p-8 md:p-10 rounded-[40px] border border-white/10 hover:border-white/20 transition-all group relative overflow-hidden';
         card.innerHTML = `
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                 <div>
@@ -176,7 +195,12 @@ function renderCards(vault) {
                 </div>
             </div>
         `;
-        listContainer.appendChild(card);
+        
+        if (item.contractClosed) {
+            contractListContainer.appendChild(card);
+        } else {
+            listContainer.appendChild(card);
+        }
     });
 }
 
@@ -226,24 +250,32 @@ function logout() {
 // --- Tab System ---
 window.switchTab = (tab) => {
     const enqSec = document.getElementById('enquiries-section');
+    const conSec = document.getElementById('contracts-section');
     const affSec = document.getElementById('affiliates-section');
+    
     const enqBtn = document.getElementById('tab-enquiries');
+    const conBtn = document.getElementById('tab-contracts');
     const affBtn = document.getElementById('tab-affiliates');
+
+    // Reset all
+    [enqSec, conSec, affSec].forEach(s => s.classList.add('hidden'));
+    [enqBtn, conBtn, affBtn].forEach(b => {
+        b.classList.replace('bg-primary', 'bg-white/5');
+        b.classList.replace('text-black', 'text-white/40');
+    });
 
     if (tab === 'enquiries') {
         enqSec.classList.remove('hidden');
-        affSec.classList.add('hidden');
         enqBtn.classList.replace('bg-white/5', 'bg-primary');
         enqBtn.classList.replace('text-white/40', 'text-black');
-        affBtn.classList.replace('bg-primary', 'bg-white/5');
-        affBtn.classList.replace('text-black', 'text-white/40');
+    } else if (tab === 'contracts') {
+        conSec.classList.remove('hidden');
+        conBtn.classList.replace('bg-white/5', 'bg-primary');
+        conBtn.classList.replace('text-white/40', 'text-black');
     } else {
-        enqSec.classList.add('hidden');
         affSec.classList.remove('hidden');
         affBtn.classList.replace('bg-white/5', 'bg-primary');
         affBtn.classList.replace('text-white/40', 'text-black');
-        enqBtn.classList.replace('bg-primary', 'bg-white/5');
-        enqBtn.classList.replace('text-black', 'text-white/40');
         loadAffiliates();
     }
 };
@@ -340,8 +372,8 @@ contractInput.addEventListener('input', () => {
     const amount = parseFloat(contractInput.value) || 0;
     if (amount > 0) {
         contractCalc.classList.remove('hidden');
-        const discount = currentReferralCode ? Math.floor(amount * 0.05) : 0;
-        const commission = currentReferralCode ? Math.floor(amount * 0.10) : 0;
+        const discount = currentReferralCode ? Math.round(amount * 0.05) : 0;
+        const commission = currentReferralCode ? Math.round(amount * 0.10) : 0;
         const finalValue = amount - discount;
 
         document.getElementById('calc-gross').innerText = `₹${amount}`;
@@ -357,16 +389,21 @@ document.getElementById('confirm-contract-btn').addEventListener('click', async 
     const amount = parseFloat(contractInput.value);
     if (!amount || amount <= 0) return;
 
-    const commission = currentReferralCode ? Math.floor(amount * 0.10) : 0;
+    if (!currentEnquiryId) {
+        alert('ERROR: SESSION_EXPIRED. RE-OPEN CONTRACT.');
+        return;
+    }
+
+    const commission = currentReferralCode ? Math.round(amount * 0.10) : 0;
 
     try {
         if (window.db) {
-            // 1. Mark Enquiry as closed
-            await window.db.collection('enquiries').doc(currentEnquiryId).update({
+            // 1. Mark Enquiry as closed (use set with merge to be safe)
+            await window.db.collection('enquiries').doc(currentEnquiryId).set({
                 contractClosed: true,
                 contractAmount: amount,
                 commissionEarned: commission
-            });
+            }, { merge: true });
 
             // 2. Create Contract record
             await window.db.collection('contracts').add({
@@ -393,14 +430,28 @@ document.getElementById('confirm-contract-btn').addEventListener('click', async 
                 }
             }
 
+            console.log("Transaction Success:", { enquiryId: currentEnquiryId, amount, commission });
             alert('CONTRACT_FINALIZED: DATA_SYNC_COMPLETE');
             closeContractModal();
-            loadEnquiries();
+            
+            // 3. Optimistic UI Update: Update local vault and re-render immediately
+            const vault = JSON.parse(localStorage.getItem('vibe_vault_cache') || '[]');
+            const index = vault.findIndex(item => item.id === currentEnquiryId);
+            if (index !== -1) {
+                vault[index].contractClosed = true;
+                vault[index].contractAmount = amount;
+                vault[index].commissionEarned = commission;
+                localStorage.setItem('vibe_vault_cache', JSON.stringify(vault));
+                renderCards(vault);
+            } else {
+                // Fallback: Full reload if cache is missing
+                loadEnquiries();
+            }
             loadAffiliates();
         }
     } catch (error) {
         console.error("Contract finalize error:", error);
-        alert('SYSTEM_ERROR: TRANSACTION_FAILED');
+        alert(`SYSTEM_ERROR: TRANSACTION_FAILED\nReason: ${error.message}`);
     }
 });
 

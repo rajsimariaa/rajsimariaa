@@ -83,22 +83,34 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-8 md:p-12">
         <div class="flex flex-wrap gap-4 mb-12 border-b border-white/5 pb-8">
-            <button onclick="switchTab('enquiries')" id="tab-enquiries" class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-full transition-all text-xs">Enquiries</button>
-            <button onclick="switchTab('affiliates')" id="tab-affiliates" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Affiliates</button>
+            <button onclick="switchTab('enquiries')" id="tab-enquiries" class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-full transition-all text-xs">Active Leads</button>
+            <button onclick="switchTab('contracts')" id="tab-contracts" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Completed Contracts</button>
+            <button onclick="switchTab('affiliates')" id="tab-affiliates" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Affiliate Network</button>
         </div>
 
         <div id="enquiries-section">
             <div class="mb-12">
-                <h2 class="text-5xl font-black tracking-tighter mb-2 uppercase italic">Incoming <span class="text-primary">Enquiries</span></h2>
+                <h2 class="text-5xl font-black tracking-tighter mb-2 uppercase italic">Active <span class="text-primary">Leads</span></h2>
                 <p class="text-white/40 font-mono text-sm tracking-widest" id="stats-line">// 0 TRANSMISSIONS CAPTURED</p>
             </div>
 
             <div id="enquiry-list" class="grid grid-cols-1 gap-6">
-                <!-- Cards will be injected here -->
+                <!-- Active cards will be injected here -->
                 <div class="text-center py-40 opacity-20" id="empty-state">
                     <div class="text-8xl mb-4 font-black">EMPTY</div>
                     <p class="font-mono tracking-widest uppercase">Waiting for the first vibe...</p>
                 </div>
+            </div>
+        </div>
+
+        <div id="contracts-section" class="hidden">
+            <div class="mb-12">
+                <h2 class="text-5xl font-black tracking-tighter mb-2 uppercase italic">Closed <span class="text-secondary">Contracts</span></h2>
+                <p class="text-white/40 font-mono text-sm tracking-widest" id="contracts-stats-line">// 0 DEALS FINALIZED</p>
+            </div>
+
+            <div id="contract-list" class="grid grid-cols-1 gap-6">
+                <!-- Completed contracts will be injected here -->
             </div>
         </div>
 

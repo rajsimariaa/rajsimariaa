@@ -1,30 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ENQUIRIES: Handles lead capture
     match /enquiries/{enquiry} {
-      // Anyone can submit an inquiry
-      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'date']);
-      // Admin panel needs to read and update (for closing contracts)
+      allow create: if true;
       allow read, update, delete: if true;
     }
 
+    // AFFILIATES: Handles agent data and balances
     match /affiliates/{affiliate} {
-      // Anyone can check if a referral code exists, enroll, or login
-      // Login check is done via query on referralCode/email and password
-      allow read, create: if true;
-      
-      // Admin panel updates earnings and balance
-      // Affiliates can only update their own profile (if implemented)
-      allow update: if true; 
-      allow delete: if true;
+      allow read, create, update, delete: if true;
     }
 
+    // CONTRACTS: Handles finalized deal records
     match /contracts/{contract} {
-      // Contracts are created by admin
-      // Read by admin for management AND by affiliates to see their conversion log
+      allow read, write: if true;
+    }
+
+    // GLOBAL: Allow read for any other collection if needed
+    match /{document=**} {
       allow read: if true;
-      allow write: if true;
     }
   }
 }
-

@@ -659,8 +659,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 phone: document.getElementById('form-phone').value,
                 details: document.getElementById('form-details').value,
                 referralCode: document.getElementById('form-referral').value.trim().toUpperCase() || null,
-                date: new Date().toISOString(), 
-                id: Date.now()
+                date: new Date().toISOString()
             };
 
             document.getElementById('submit-loader').classList.remove('hidden');
