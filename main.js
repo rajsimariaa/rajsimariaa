@@ -165,7 +165,8 @@ window.addEventListener('DOMContentLoaded', () => {
         { key: 'name', prompt: 'ENTER_YOUR_NAME:' },
         { key: 'email', prompt: 'ENTER_EMAIL_ADDRESS:' },
         { key: 'phone', prompt: 'ENTER_PHONE_NUMBER:' },
-        { key: 'details', prompt: 'DESCRIBE_REQUIREMENTS:' }
+        { key: 'details', prompt: 'DESCRIBE_REQUIREMENTS:' },
+        { key: 'referralCode', prompt: 'REFERRAL_CODE_(OPTIONAL):' }
     ];
 
     if (terminalInput) {
@@ -657,6 +658,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 countryCode: document.getElementById('form-country-code').value,
                 phone: document.getElementById('form-phone').value,
                 details: document.getElementById('form-details').value,
+                referralCode: document.getElementById('form-referral').value.trim().toUpperCase() || null,
                 date: new Date().toISOString(), 
                 id: Date.now()
             };

@@ -7,6 +7,7 @@ function checkAccess() {
     if (input.value === PASS) {
         overlay.style.display = 'none';
         loadEnquiries();
+        loadAffiliates();
     } else {
         alert('ACCESS DENIED: INCORRECT VIBE CODE');
         input.value = '';
@@ -162,7 +163,17 @@ function renderCards(vault) {
             </div>
             <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
                 <p class="text-white/60 leading-relaxed font-light">${item.details}</p>
-                ${(item.source === 'terminal' || item.source === 'terminal_flow') ? '<div class="mt-4 text-[10px] text-primary/40 font-mono tracking-widest uppercase">Source: Terminal</div>' : ''}
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex flex-wrap gap-4">
+                        ${(item.source === 'terminal' || item.source === 'terminal_flow') ? '<div class="text-[10px] text-primary/40 font-mono tracking-widest uppercase">Source: Terminal</div>' : ''}
+                        ${item.referralCode ? `<div class="text-[10px] text-accent font-mono tracking-widest uppercase border border-accent/20 px-2 py-0.5 rounded">Referral: ${item.referralCode}</div>` : ''}
+                    </div>
+                    ${!item.contractClosed ? `
+                        <button onclick="openContractModal('${item.id}', '${item.referralCode || ''}')" class="px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-black text-[10px] font-bold uppercase tracking-widest rounded-full transition-all border border-primary/20">Close Contract</button>
+                    ` : `
+                        <div class="text-[10px] text-green-400 font-mono tracking-widest uppercase border border-green-400/20 px-2 py-0.5 rounded">Contract Closed (₹${item.contractAmount})</div>
+                    `}
+                </div>
             </div>
         `;
         listContainer.appendChild(card);
@@ -212,12 +223,193 @@ function logout() {
     window.location.reload();
 }
 
+// --- Tab System ---
+window.switchTab = (tab) => {
+    const enqSec = document.getElementById('enquiries-section');
+    const affSec = document.getElementById('affiliates-section');
+    const enqBtn = document.getElementById('tab-enquiries');
+    const affBtn = document.getElementById('tab-affiliates');
+
+    if (tab === 'enquiries') {
+        enqSec.classList.remove('hidden');
+        affSec.classList.add('hidden');
+        enqBtn.classList.replace('bg-white/5', 'bg-primary');
+        enqBtn.classList.replace('text-white/40', 'text-black');
+        affBtn.classList.replace('bg-primary', 'bg-white/5');
+        affBtn.classList.replace('text-black', 'text-white/40');
+    } else {
+        enqSec.classList.add('hidden');
+        affSec.classList.remove('hidden');
+        affBtn.classList.replace('bg-white/5', 'bg-primary');
+        affBtn.classList.replace('text-white/40', 'text-black');
+        enqBtn.classList.replace('bg-primary', 'bg-white/5');
+        enqBtn.classList.replace('text-black', 'text-white/40');
+        loadAffiliates();
+    }
+};
+
+// --- Affiliate Management ---
+const affListContainer = document.getElementById('affiliate-list');
+const affStatsLine = document.getElementById('aff-stats-line');
+
+async function loadAffiliates() {
+    if (!window.db) return;
+    try {
+        const snapshot = await window.db.collection('affiliates').orderBy('dateJoined', 'desc').get();
+        const affiliates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderAffiliates(affiliates);
+    } catch (error) {
+        console.error("Affiliate Load Error:", error);
+    }
+}
+
+function renderAffiliates(affiliates) {
+    affListContainer.innerHTML = '';
+    affStatsLine.innerText = `// ${affiliates.length} AGENTS ACTIVE`;
+
+    affiliates.forEach(aff => {
+        const card = document.createElement('div');
+        card.className = 'glass p-8 rounded-[32px] border border-white/5 hover:border-secondary/30 transition-all';
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-2xl font-black tracking-tighter">${aff.name}</h3>
+                    <p class="text-white/40 text-sm font-medium">${aff.email}</p>
+                </div>
+                <div class="bg-secondary/10 text-secondary border border-secondary/20 px-4 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest uppercase">
+                    ${aff.referralCode}
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white/5 p-4 rounded-2xl">
+                    <div class="text-[8px] text-white/20 uppercase font-bold mb-1">Referrals</div>
+                    <div class="text-xl font-black">${aff.referralsCount || 0}</div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl">
+                    <div class="text-[8px] text-white/20 uppercase font-bold mb-1">Pending</div>
+                    <div class="text-xl font-black text-primary">₹${aff.pendingBalance || 0}</div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl">
+                    <div class="text-[8px] text-white/20 uppercase font-bold mb-1">Total Paid</div>
+                    <div class="text-xl font-black text-green-400">₹${aff.totalEarnings || 0}</div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="deleteAffiliate('${aff.id}', '${aff.name}')" class="text-[10px] text-red-400/40 hover:text-red-400 font-bold uppercase tracking-widest transition-colors">Terminate Agent</button>
+            </div>
+        `;
+        affListContainer.appendChild(card);
+    });
+}
+
+window.deleteAffiliate = async function(id, name) {
+    if (confirm(`CAUTION: TERMINATING AGENT "${name.toUpperCase()}". THIS WILL REMOVE THEM FROM THE NETWORK. PROCEED?`)) {
+        try {
+            if (window.db) {
+                await window.db.collection('affiliates').doc(id).delete();
+                alert('AGENT_TERMINATED: VAULT_UPDATED');
+                loadAffiliates();
+            }
+        } catch (error) {
+            console.error("Delete Affiliate Error:", error);
+            alert('ERROR: TERMINATION_FAILED');
+        }
+    }
+}
+
+// --- Contract Management ---
+let currentEnquiryId = null;
+let currentReferralCode = null;
+
+window.openContractModal = (enquiryId, referralCode) => {
+    currentEnquiryId = enquiryId;
+    currentReferralCode = referralCode;
+    document.getElementById('contract-modal').classList.remove('hidden');
+    document.getElementById('contract-amount').value = '';
+    document.getElementById('contract-calc').classList.add('hidden');
+};
+
+window.closeContractModal = () => {
+    document.getElementById('contract-modal').classList.add('hidden');
+};
+
+const contractInput = document.getElementById('contract-amount');
+const contractCalc = document.getElementById('contract-calc');
+
+contractInput.addEventListener('input', () => {
+    const amount = parseFloat(contractInput.value) || 0;
+    if (amount > 0) {
+        contractCalc.classList.remove('hidden');
+        const discount = currentReferralCode ? Math.floor(amount * 0.05) : 0;
+        const commission = currentReferralCode ? Math.floor(amount * 0.10) : 0;
+        const finalValue = amount - discount;
+
+        document.getElementById('calc-gross').innerText = `₹${amount}`;
+        document.getElementById('calc-discount').innerText = `-₹${discount}`;
+        document.getElementById('calc-comm').innerText = `₹${commission}`;
+        document.getElementById('calc-final').innerText = `₹${finalValue}`;
+    } else {
+        contractCalc.classList.add('hidden');
+    }
+});
+
+document.getElementById('confirm-contract-btn').addEventListener('click', async () => {
+    const amount = parseFloat(contractInput.value);
+    if (!amount || amount <= 0) return;
+
+    const commission = currentReferralCode ? Math.floor(amount * 0.10) : 0;
+
+    try {
+        if (window.db) {
+            // 1. Mark Enquiry as closed
+            await window.db.collection('enquiries').doc(currentEnquiryId).update({
+                contractClosed: true,
+                contractAmount: amount,
+                commissionEarned: commission
+            });
+
+            // 2. Create Contract record
+            await window.db.collection('contracts').add({
+                enquiryId: currentEnquiryId,
+                amount: amount,
+                referralCode: currentReferralCode || 'NONE',
+                commission: commission,
+                date: new Date().toISOString()
+            });
+
+            // 3. Update Affiliate balance if applicable
+            if (currentReferralCode) {
+                const affSnapshot = await window.db.collection('affiliates')
+                    .where('referralCode', '==', currentReferralCode)
+                    .get();
+                
+                if (!affSnapshot.empty) {
+                    const affDoc = affSnapshot.docs[0];
+                    const affData = affDoc.data();
+                    await affDoc.ref.update({
+                        referralsCount: (affData.referralsCount || 0) + 1,
+                        pendingBalance: (affData.pendingBalance || 0) + commission
+                    });
+                }
+            }
+
+            alert('CONTRACT_FINALIZED: DATA_SYNC_COMPLETE');
+            closeContractModal();
+            loadEnquiries();
+            loadAffiliates();
+        }
+    } catch (error) {
+        console.error("Contract finalize error:", error);
+        alert('SYSTEM_ERROR: TRANSACTION_FAILED');
+    }
+});
+
 // --- Mobile Menu Toggle ---
 const adminMenuToggle = document.getElementById('admin-menu-toggle');
 const adminMobileMenu = document.getElementById('admin-mobile-menu');
 let isMenuOpen = false;
 
-function toggleMobileMenu() {
+window.toggleMobileMenu = () => {
     isMenuOpen = !isMenuOpen;
     if (isMenuOpen) {
         adminMobileMenu.classList.remove('translate-x-full', 'opacity-0', 'pointer-events-none');

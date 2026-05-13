@@ -89,6 +89,7 @@
             <a href="#expertise" class="nav-link hover:text-primary transition-colors">Skills</a>
             <a href="#work" class="nav-link hover:text-primary transition-colors">Work</a>
             <a href="#contact" class="nav-link hover:text-primary transition-colors">Connect</a>
+            <a href="affiliate.html" class="hover:text-accent transition-colors">Affiliate</a>
         </div>
         <div class="md:hidden relative z-[101]">
             <!-- Mobile Menu Toggle -->
@@ -105,6 +106,7 @@
         <a href="#expertise" class="mobile-nav-link hover:text-primary">SKILLS</a>
         <a href="#work" class="mobile-nav-link hover:text-primary">WORK</a>
         <a href="#contact" class="mobile-nav-link hover:text-primary">CONNECT</a>
+        <a href="affiliate.html" class="hover:text-accent">AFFILIATE</a>
     </div>
 
     <!-- Main Content -->
@@ -405,6 +407,10 @@
                             <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Project Details</label>
                             <textarea id="form-details" required rows="4" placeholder="Tell me about your vision..." class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-primary transition-colors text-lg resize-none"></textarea>
                         </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Referral Code (Optional)</label>
+                            <input type="text" id="form-referral" placeholder="VIBE5" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-primary transition-colors text-lg uppercase tracking-widest">
+                        </div>
                         <button type="submit" id="form-submit" class="w-full py-6 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-[1.02] transition-transform active:scale-95 flex justify-center items-center gap-3">
                             <span>Send Inquiry</span>
                             <div id="submit-loader" class="hidden w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
@@ -428,8 +434,9 @@
     </main>
 
     <!-- Footer -->
-    <footer class="py-10 px-6 border-t border-white/5 text-center text-white/20 text-[10px] uppercase tracking-[0.2em]">
-        &copy; 2026 <a href="admin.html" class="hover:text-primary transition-colors cursor-pointer">Raj Simaria</a>. Engineered with Vibe & Precision.
+    <footer class="py-10 px-6 border-t border-white/5 text-center text-white/20 text-[10px] uppercase tracking-[0.2em] flex flex-col items-center gap-4">
+        <div>&copy; 2026 <a href="admin.html" class="hover:text-primary transition-colors cursor-pointer">Raj Simaria</a>. Engineered with Vibe & Precision.</div>
+        <a href="affiliate.html" class="text-white/40 hover:text-accent transition-colors border-b border-white/10 hover:border-accent/50 pb-1">Affiliate Program</a>
     </footer>
 
     <!-- Vibe Console -->

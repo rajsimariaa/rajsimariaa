@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Program | Raj Simaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ffffff',
+                        accent: '#00ffcc',
+                        dark: '#080808',
+                        darker: '#050505',
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        .text-gradient { background: linear-gradient(to right, #fff, #00ffcc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .border-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3); }
+    </style>
+</head>
+<body class="bg-dark text-white selection:bg-primary selection:text-black overflow-x-hidden font-sans">
+
+    <!-- Background Effects -->
+    <canvas id="dot-grid-canvas" class="fixed inset-0 z-[-2] pointer-events-none opacity-20"></canvas>
+    <div class="fixed inset-0 z-[-1] pointer-events-none opacity-[0.04] noise-overlay"></div>
+
+    <nav class="p-6 md:p-10 flex justify-between items-center relative z-50">
+        <a href="index.html" class="hover:scale-110 transition-transform cursor-pointer">
+            <img src="logo.png" alt="RS" class="h-12 w-auto">
+        </a>
+        <a href="index.html" class="text-[10px] font-mono text-white/40 uppercase tracking-[0.3em] hover:text-primary transition-colors">
+            Back to Home
+        </a>
+    </nav>
+
+    <main class="min-h-screen flex flex-col items-center justify-center px-6 py-20 relative">
+        <div class="max-w-4xl w-full">
+            <div class="text-center mb-16">
+                <div class="w-20 h-px bg-primary/20 mx-auto mb-8"></div>
+                <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tighter uppercase italic text-gradient">
+                    Affiliate <span class="text-transparent border-text">Network.</span>
+                </h1>
+                <p class="text-white/40 font-mono tracking-[0.4em] uppercase text-xs mb-8">// ACCELERATE YOUR EARNINGS</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left mt-16">
+                    <div class="glass p-8 rounded-3xl border border-white/5 hover:border-accent/20 transition-all">
+                        <div class="text-accent font-mono text-3xl mb-4">High</div>
+                        <h3 class="text-xl font-bold mb-2 uppercase">Your Commission</h3>
+                        <p class="text-white/40 text-sm leading-relaxed">Earn a premium commission on every contract value you refer. Direct bank transfer on project completion.</p>
+                    </div>
+                    <div class="glass p-8 rounded-3xl border border-white/5 hover:border-primary/20 transition-all">
+                        <div class="text-primary font-mono text-3xl mb-4">5%</div>
+                        <h3 class="text-xl font-bold mb-2 uppercase">Client Discount</h3>
+                        <p class="text-white/40 text-sm leading-relaxed">Your clients receive an instant 5% discount on their total contract value using your code.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 mb-8 border-b border-white/5 pb-4">
+                <button onclick="switchTab('enroll')" id="tab-enroll" class="px-6 py-2 bg-accent text-black font-bold uppercase tracking-widest rounded-full text-[10px] transition-all">Enroll</button>
+                <button onclick="switchTab('login')" id="tab-login" class="px-6 py-2 bg-white/5 text-white/40 font-bold uppercase tracking-widest rounded-full text-[10px] transition-all hover:bg-white/10">Login</button>
+            </div>
+
+            <div class="bg-white/5 border border-white/10 p-8 md:p-12 rounded-[40px] backdrop-blur-xl relative">
+                <!-- Enrollment Form -->
+                <form id="enrollment-form" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Full Name</label>
+                            <input type="text" id="aff-name" required placeholder="Agent Name" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Email Address</label>
+                            <input type="email" id="aff-email" required placeholder="agent@network.com" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Custom Referral Code</label>
+                            <div class="flex items-center gap-4">
+                                <input type="text" id="aff-code" required placeholder="RAJ10" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg uppercase font-bold tracking-widest">
+                                <button type="button" id="check-code" class="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">Check</button>
+                            </div>
+                            <p id="code-status" class="text-[10px] font-mono mt-2 hidden"></p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Access Password</label>
+                            <input type="password" id="aff-pass" required placeholder="••••••••" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full py-6 bg-accent text-black font-black uppercase tracking-widest rounded-full hover:scale-[1.02] transition-transform active:scale-95 flex justify-center items-center gap-3">
+                        <span>Enroll Now</span>
+                        <div id="submit-loader" class="hidden w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                    </button>
+                </form>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-8 hidden">
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Referral Code or Email</label>
+                        <input type="text" id="login-id" required placeholder="RAJ10 or agent@mail.com" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg uppercase">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Password</label>
+                        <input type="password" id="login-pass" required placeholder="••••••••" class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent transition-colors text-lg">
+                    </div>
+                    
+                    <button type="submit" class="w-full py-6 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-[1.02] transition-transform active:scale-95 flex justify-center items-center gap-3">
+                        <span>Login to Dashboard</span>
+                        <div id="login-loader" class="hidden w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                    </button>
+                </form>
+
+                <!-- Success Screen -->
+                <div id="enroll-success" class="absolute inset-0 bg-dark/95 backdrop-blur-xl rounded-[40px] flex flex-col items-center justify-center text-center p-10 opacity-0 pointer-events-none transition-opacity duration-500">
+                    <div class="w-24 h-24 bg-accent/20 rounded-full flex items-center justify-center mb-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-4xl font-black mb-4 uppercase tracking-tighter">Welcome Agent!</h3>
+                    <p class="text-white/60 mb-8 max-w-sm">Your referral network is now active. Share your code to start earning commission on every closed deal.</p>
+                    <div class="bg-white/5 border border-white/5 p-6 rounded-2xl mb-8 w-full">
+                        <p class="text-[10px] text-white/40 uppercase tracking-widest mb-2 font-bold">Your Active Code</p>
+                        <p id="display-code" class="text-3xl font-black text-accent tracking-widest uppercase"></p>
+                    </div>
+                    <button onclick="window.location.href='affiliate-dashboard.html'" class="w-full py-4 bg-accent text-black font-bold uppercase tracking-widest rounded-full hover:scale-105 transition-transform">Go to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const enrollmentForm = document.getElementById('enrollment-form');
+            const loginForm = document.getElementById('login-form');
+            const codeInput = document.getElementById('aff-code');
+            const checkBtn = document.getElementById('check-code');
+            const statusText = document.getElementById('code-status');
+            const loader = document.getElementById('submit-loader');
+            const loginLoader = document.getElementById('login-loader');
+            const successScreen = document.getElementById('enroll-success');
+            const displayCode = document.getElementById('display-code');
+
+            // --- Tab System ---
+            window.switchTab = (tab) => {
+                const enrollBtn = document.getElementById('tab-enroll');
+                const loginBtn = document.getElementById('tab-login');
+                
+                if (tab === 'enroll') {
+                    enrollmentForm.classList.remove('hidden');
+                    loginForm.classList.add('hidden');
+                    enrollBtn.classList.replace('bg-white/5', 'bg-accent');
+                    enrollBtn.classList.replace('text-white/40', 'text-black');
+                    loginBtn.classList.replace('bg-accent', 'bg-white/5');
+                    loginBtn.classList.replace('text-black', 'text-white/40');
+                } else {
+                    enrollmentForm.classList.add('hidden');
+                    loginForm.classList.remove('hidden');
+                    loginBtn.classList.replace('bg-white/5', 'bg-accent');
+                    loginBtn.classList.replace('text-white/40', 'text-black');
+                    enrollBtn.classList.replace('bg-accent', 'bg-white/5');
+                    enrollBtn.classList.replace('text-black', 'text-white/40');
+                }
+            };
+
+            async function checkCodeAvailability(code) {
+                if (!code) return false;
+                if (!window.db) return true;
+                
+                const snapshot = await window.db.collection('affiliates')
+                    .where('referralCode', '==', code.toUpperCase())
+                    .get();
+                
+                return snapshot.empty;
+            }
+
+            checkBtn.addEventListener('click', async () => {
+                const code = codeInput.value.trim();
+                if (!code) return;
+                
+                statusText.classList.remove('hidden', 'text-accent', 'text-red-500');
+                statusText.innerText = 'Checking...';
+                statusText.classList.add('text-white/40', 'block');
+
+                const available = await checkCodeAvailability(code);
+                
+                statusText.classList.remove('text-white/40');
+                if (available) {
+                    statusText.innerText = 'CODE_AVAILABLE';
+                    statusText.classList.add('text-accent');
+                } else {
+                    statusText.innerText = 'CODE_ALREADY_EXISTS_IN_VAULT';
+                    statusText.classList.add('text-red-500');
+                }
+            });
+
+            enrollmentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = codeInput.value.trim().toUpperCase();
+                const password = document.getElementById('aff-pass').value;
+                
+                loader.classList.remove('hidden');
+                
+                try {
+                    const available = await checkCodeAvailability(code);
+                    if (!available) {
+                        alert('Referral code already taken. Please choose another.');
+                        loader.classList.add('hidden');
+                        return;
+                    }
+
+                    const affData = {
+                        name: document.getElementById('aff-name').value,
+                        email: document.getElementById('aff-email').value,
+                        referralCode: code,
+                        password: password, // Simple password storage
+                        totalEarnings: 0,
+                        pendingBalance: 0,
+                        referralsCount: 0,
+                        status: 'active',
+                        dateJoined: new Date().toISOString()
+                    };
+
+                    if (window.db) {
+                        const docRef = await window.db.collection('affiliates').add(affData);
+                        localStorage.setItem('affiliate_session', JSON.stringify({
+                            id: docRef.id,
+                            code: code,
+                            name: affData.name
+                        }));
+                    }
+
+                    displayCode.innerText = code;
+                    successScreen.classList.remove('opacity-0', 'pointer-events-none');
+                    gsap.from('#enroll-success > *', { y: 20, opacity: 0, stagger: 0.1, duration: 0.8 });
+                    
+                } catch (error) {
+                    console.error("Enrollment error:", error);
+                    alert('CRITICAL_ERROR: SYSTEM_OVERLOAD');
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            });
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const loginId = document.getElementById('login-id').value.trim().toUpperCase();
+                const password = document.getElementById('login-pass').value;
+                
+                loginLoader.classList.remove('hidden');
+                
+                try {
+                    if (!window.db) throw new Error('DB_NOT_INITIALIZED');
+                    
+                    // Check by referral code first
+                    let snapshot = await window.db.collection('affiliates')
+                        .where('referralCode', '==', loginId)
+                        .where('password', '==', password)
+                        .get();
+                    
+                    // If not found, check by email (need to handle case-sensitivity if email is stored as is)
+                    if (snapshot.empty) {
+                        snapshot = await window.db.collection('affiliates')
+                            .where('email', '==', loginId.toLowerCase())
+                            .where('password', '==', password)
+                            .get();
+                    }
+
+                    if (!snapshot.empty) {
+                        const affData = snapshot.docs[0].data();
+                        localStorage.setItem('affiliate_session', JSON.stringify({
+                            id: snapshot.docs[0].id,
+                            code: affData.referralCode,
+                            name: affData.name
+                        }));
+                        window.location.href = 'affiliate-dashboard.html';
+                    } else {
+                        alert('INVALID_CREDENTIALS: ACCESS_DENIED');
+                    }
+                } catch (error) {
+                    console.error("Login error:", error);
+                    alert('SYSTEM_ERROR: AUTH_FAILED');
+                } finally {
+                    loginLoader.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
