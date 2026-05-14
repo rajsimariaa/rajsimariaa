@@ -219,6 +219,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 vibeLog(' - book: Schedule a 1:1 call');
                 vibeLog(' - about: Core bio');
                 vibeLog(' - work: View portfolio');
+                vibeLog(' - instagram: My social profile');
                 vibeLog(' - clear: Flush console');
                 break;
             case 'start':
@@ -241,6 +242,11 @@ window.addEventListener('DOMContentLoaded', () => {
             case 'work':
                 vibeLog('NAVIGATING_TO_WORK...');
                 document.querySelector('#work').scrollIntoView({ behavior: 'smooth' });
+                break;
+            case 'instagram':
+            case 'social':
+                vibeLog('OPENING_INSTAGRAM_PROFILE...');
+                window.open('https://www.instagram.com/raj.simaria', '_blank');
                 break;
             case 'clear':
                 consoleLogs.innerHTML = '';
