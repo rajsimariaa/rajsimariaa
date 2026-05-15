@@ -4,19 +4,32 @@ service cloud.firestore {
     
     // ENQUIRIES: Handles lead capture from the main site
     match /enquiries/{enquiry} {
-      allow create: if true; // Anyone can submit a lead
-      allow read, update, delete: if true; // Admin access
+      // Anyone can submit a lead (create)
+      allow create: if true;
+      // Admin logic (read/update/delete) - currently wide open as admin site doesn't use Firebase Auth
+      allow read, update, delete: if true; 
     }
 
     // AFFILIATES: Handles agent profiles, UPI IDs, and balances
     match /affiliates/{affiliate} {
-      allow read, create, update: if true; // Agents can sign up and edit profiles
-      allow delete: if true; // Admin can terminate agents
+      // Agents need to check for code availability and log in
+      allow read: if true; 
+      // Agents can sign up
+      allow create: if true;
+      // Agents can update their own profile (in theory should be restricted to own doc)
+      allow update: if true;
+      // Admin only termination
+      allow delete: if true;
     }
 
     // CONTRACTS: Handles finalized deals and commission records
     match /contracts/{contract} {
-      allow read, write: if true; // Used by Admin and Dashboard for tracking
+      // Admin site creates them, Dashboard reads them
+      allow create: if true;
+      // Dashboard needs to query contracts by referralCode
+      allow read: if true;
+      // Only admin should update/delete (though currently not used)
+      allow update, delete: if true;
     }
 
     // GLOBAL: Protective fallback

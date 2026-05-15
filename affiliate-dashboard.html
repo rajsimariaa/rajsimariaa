@@ -294,8 +294,9 @@
 
         window.copyCode = () => {
             const code = document.getElementById('referral-code-input').value;
-            const siteLink = window.location.origin;
-            const message = `🚀 Unlock a 5% DISCOUNT on your next project with Raj Simaria!\n\nUse my exclusive referral code: ${code}\nBook your consultation here: ${siteLink}`;
+            const siteLink = window.location.origin + window.location.pathname.replace('affiliate-dashboard.html', 'index.html');
+            const referralLink = `${siteLink}?ref=${code}`;
+            const message = `🚀 Unlock a 5% DISCOUNT on your next project with Raj Simaria!\n\nUse my exclusive referral code: ${code}\n\nClaim your discount here: ${referralLink}`;
             
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = message;

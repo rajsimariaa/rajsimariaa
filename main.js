@@ -32,6 +32,22 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     requestAnimationFrame(raf);
+    
+    // --- Referral Logic ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+        localStorage.setItem('active_referral', refCode.toUpperCase());
+        // Clean URL to keep it pretty
+        window.history.replaceState({}, document.title, window.location.pathname);
+        vibeLog(`REFERRAL_CODE_DETECTED: ${refCode.toUpperCase()}`);
+    }
+
+    const activeRef = localStorage.getItem('active_referral');
+    if (activeRef) {
+        const referralInput = document.getElementById('form-referral');
+        if (referralInput) referralInput.value = activeRef;
+    }
 
     // --- Vibe Console Logger ---
     const consoleLogs = document.getElementById('console-logs');
@@ -197,6 +213,12 @@ window.addEventListener('DOMContentLoaded', () => {
         terminalFlow.step++;
         
         if (terminalFlow.step < flowSteps.length) {
+            // Skip referral step if already auto-filled
+            if (flowSteps[terminalFlow.step].key === 'referralCode' && terminalFlow.data.referralCode) {
+                vibeLog(`CONFIRMING_REFERRAL: ${terminalFlow.data.referralCode}`);
+                await handleFlowStep(terminalFlow.data.referralCode);
+                return;
+            }
             vibeLog(flowSteps[terminalFlow.step].prompt);
             terminalInput.placeholder = `Provide ${flowSteps[terminalFlow.step].key}...`;
         } else {
@@ -227,6 +249,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 vibeLog('INITIATING_INQUIRY_PROTOCOL...');
                 terminalFlow.active = true;
                 terminalFlow.step = 0;
+                
+                // Pre-fill referral if available
+                const storedRef = localStorage.getItem('active_referral');
+                if (storedRef) {
+                    terminalFlow.data.referralCode = storedRef;
+                    vibeLog(`APPLYING_STORED_REFERRAL: ${storedRef}`);
+                }
+
                 vibeLog(flowSteps[0].prompt);
                 terminalInput.placeholder = "Provide name...";
                 break;
@@ -500,10 +530,30 @@ window.addEventListener('DOMContentLoaded', () => {
       .from('#hero-title', { opacity: 0, y: 100, duration: 1.5, ease: 'power4.out' }, '-=0.5')
       .from('#hero-desc', { opacity: 0, y: 30, duration: 1, ease: 'power4.out' }, '-=1')
       .from('#hero-cta', { opacity: 0, y: 30, duration: 1, ease: 'power4.out' }, '-=0.8')
+      .to('#hero-image-container', { opacity: 1, duration: 1.5, ease: 'power2.out' }, '-=1')
       .add(() => {
           ScrollTrigger.refresh();
           vibeLog('SCROLL_ENGINE: OPTIMIZED');
       });
+
+    // --- Hero Floating Image Effects ---
+    const heroImgContainer = document.getElementById('hero-image-container');
+    const heroImg = heroImgContainer ? heroImgContainer.querySelector('img') : null;
+
+    if (heroImg) {
+        // Cursor Follow
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) / 30;
+            const moveY = (e.clientY - window.innerHeight / 2) / 30;
+            gsap.to(heroImg, { 
+                x: moveX, 
+                y: moveY, 
+                rotate: moveX / 10,
+                duration: 0.8, 
+                ease: 'power2.out' 
+            });
+        });
+    }
 
     // --- Expertise Cards Reveal ---
     const techCards = document.querySelectorAll('.expertise-card');
