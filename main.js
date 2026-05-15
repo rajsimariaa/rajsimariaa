@@ -60,11 +60,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const affId = urlParams.get('aff');
 
     if (refCode) {
-        localStorage.setItem('active_referral', refCode.toUpperCase());
+        sessionStorage.setItem('active_referral', refCode.toUpperCase());
         vibeLog(`REFERRAL_CODE_DETECTED: ${refCode.toUpperCase()}`);
     }
     if (affId) {
-        localStorage.setItem('active_affiliate_id', affId);
+        sessionStorage.setItem('active_affiliate_id', affId);
         vibeLog(`DIRECT_AFFILIATE_LINK_ACTIVE`);
     }
 
@@ -73,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    const activeRef = localStorage.getItem('active_referral');
+    const activeRef = sessionStorage.getItem('active_referral');
     if (activeRef) {
         const referralInput = document.getElementById('form-referral');
         if (referralInput) referralInput.value = activeRef;
@@ -261,8 +261,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 terminalFlow.step = 0;
                 
                 // Pre-fill referral if available
-                const storedRef = localStorage.getItem('active_referral');
-                const storedAffId = localStorage.getItem('active_affiliate_id');
+                const storedRef = sessionStorage.getItem('active_referral');
+                const storedAffId = sessionStorage.getItem('active_affiliate_id');
 
                 if (storedRef) {
                     terminalFlow.data.referralCode = storedRef;
@@ -308,7 +308,7 @@ window.addEventListener('DOMContentLoaded', () => {
         vibeLog('SENDING_TO_VAULT...');
         const formData = {
             ...data,
-            affiliateId: localStorage.getItem('active_affiliate_id') || null,
+            affiliateId: sessionStorage.getItem('active_affiliate_id') || null,
             countryCode: '', // Captured in phone usually in terminal
             date: new Date().toISOString(),
             id: Date.now(),
@@ -732,7 +732,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 phone: document.getElementById('form-phone').value,
                 details: document.getElementById('form-details').value,
                 referralCode: document.getElementById('form-referral').value.trim().toUpperCase() || null,
-                affiliateId: localStorage.getItem('active_affiliate_id') || null,
+                affiliateId: sessionStorage.getItem('active_affiliate_id') || null,
                 date: new Date().toISOString()
             };
 
