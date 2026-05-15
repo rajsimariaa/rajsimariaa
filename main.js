@@ -667,14 +667,15 @@ window.addEventListener('DOMContentLoaded', () => {
                         backdropFilter: 'none'
                     });
                 } else {
-                    // Vertical Sidebar State
+                    // Vertical Sidebar State (Dynamic for screen sizes)
+                    const isMobile = window.innerWidth < 768;
                     gsap.set(container, {
                         flexDirection: 'column',
                         position: 'fixed',
-                        right: '5vw',
+                        right: isMobile ? '20px' : '5vw',
                         top: (50 - (p * 45)) + 'vh',
                         yPercent: -50,
-                        gap: (1.5 + (p * 1.5)) + 'rem',
+                        gap: (1 + (p * 2)) + 'rem',
                         backgroundColor: 'transparent',
                         padding: '0',
                         borderRadius: '0',
@@ -965,12 +966,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // --- Interactive Tech Balls (Matter.js) ---
     function initTechBalls() {
         const container = document.getElementById('tech-balls-container');
-        if (!container || window.innerWidth < 768) {
-            // Show fallback for mobile or if container missing
-            const fallback = document.getElementById('expertise-fallback');
-            if (fallback) fallback.classList.remove('hidden');
-            return;
-        }
+        if (!container) return;
 
         const techItems = [
             { name: 'HTML5', color: '#FF4D00' },
@@ -1022,19 +1018,29 @@ window.addEventListener('DOMContentLoaded', () => {
         // Central Cluster Logic (Clustered Structure)
         let centerX = container.offsetWidth / 2;
         let centerY = container.offsetHeight / 2;
-        const balls = [];
-        
-        techItems.forEach((item, idx) => {
-            // Random sizes for more dynamic clustering
-            const radius = 60 + Math.random() * 40;
+        const isMobile = window.innerWidth < 768;
+        const itemsToDisplay = isMobile ? techItems.slice(0, 8) : techItems;
+
+        itemsToDisplay.forEach((item, idx) => {
+            // Responsive radius for mobile/desktop
+            const radius = isMobile ? (35 + Math.random() * 15) : (60 + Math.random() * 30);
+            
+            // Diamond Grid Logic
+            const rowCount = Math.ceil(Math.sqrt(itemsToDisplay.length));
+            const row = Math.floor(idx / rowCount);
+            const col = idx % rowCount;
+            
+            // Offset for diamond shape
+            const xOffset = (col - (rowCount / 2)) * (radius * 2.2);
+            const yOffset = (row - (rowCount / 2)) * (radius * 2.2) + (col % 2 === 0 ? 0 : radius);
             
             const ball = Bodies.circle(
-                centerX + (Math.random() - 0.5) * 200, 
-                centerY + (Math.random() - 0.5) * 200, 
+                centerX + xOffset, 
+                centerY + yOffset, 
                 radius, 
                 {
-                    restitution: 0.6,
-                    friction: 0.2,
+                    restitution: 0.8,
+                    friction: 0.1,
                     frictionAir: 0.05,
                     render: {
                         fillStyle: 'rgba(255, 255, 255, 0.03)',
@@ -1160,26 +1166,32 @@ window.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('resize', () => {
             if (!container) return;
-            render.canvas.width = container.offsetWidth;
-            render.canvas.height = container.offsetHeight;
-            render.options.width = container.offsetWidth;
-            render.options.height = container.offsetHeight;
+            const newWidth = container.offsetWidth;
+            const newHeight = container.offsetHeight;
+            
+            render.canvas.width = newWidth;
+            render.canvas.height = newHeight;
+            render.options.width = newWidth;
+            render.options.height = newHeight;
             
             // Re-calculate center for gravity
-            centerX = container.offsetWidth / 2;
-            centerY = container.offsetHeight / 2;
+            centerX = newWidth / 2;
+            centerY = newHeight / 2;
             
             // Re-position walls
-            Matter.Body.setPosition(walls[0], { x: container.offsetWidth / 2, y: -50 });
-            Matter.Body.setPosition(walls[1], { x: container.offsetWidth / 2, y: container.offsetHeight + 50 });
-            Matter.Body.setPosition(walls[2], { x: -50, y: container.offsetHeight / 2 });
-            Matter.Body.setPosition(walls[3], { x: container.offsetWidth + 50, y: container.offsetHeight / 2 });
+            Matter.Body.setPosition(walls[0], { x: newWidth / 2, y: -50 });
+            Matter.Body.setPosition(walls[1], { x: newWidth / 2, y: newHeight + 50 });
+            Matter.Body.setPosition(walls[2], { x: -50, y: newHeight / 2 });
+            Matter.Body.setPosition(walls[3], { x: newWidth + 50, y: newHeight / 2 });
+            
+            // Re-calculate bounds for walls
+            walls[0].vertices = Matter.Vertices.fromPath(`0 0 ${newWidth} 0 ${newWidth} 100 0 100`);
+            walls[1].vertices = Matter.Vertices.fromPath(`0 0 ${newWidth} 0 ${newWidth} 100 0 100`);
         });
 
         vibeLog('TECH_BALLS_LOADED');
     }
 
-    initTechBalls();
     initDotGrid();
 
     // Final Engine Refresh
