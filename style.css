@@ -44,6 +44,17 @@ body {
     -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
 }
 
+.border-text-dark {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.8);
+}
+
+.border-text-thick {
+    color: transparent;
+    -webkit-text-stroke: 2px white;
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+}
+
 /* Custom Cursor */
 #cursor, #cursor-follower {
     pointer-events: none;
@@ -111,6 +122,8 @@ html.lenis {
 /* Navigation Link Underline */
 .nav-link {
     position: relative;
+    color: white !important;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
 }
 
 .nav-link::after {
@@ -206,4 +219,11 @@ html.lenis {
     opacity: 0.2;
     pointer-events: none;
     z-index: -1;
+}
+
+.no-scroll {
+    overflow: hidden !important;
+    height: 100vh !important;
+    touch-action: none;
+    -ms-touch-action: none;
 }

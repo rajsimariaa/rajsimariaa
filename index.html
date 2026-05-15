@@ -36,18 +36,25 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        #tech-balls-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .expertise-card { transition: all 0.5s ease; }
+    </style>
 
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
 </head>
 <body class="bg-dark text-white selection:bg-primary selection:text-black overflow-x-hidden">
 
-    <!-- Custom Cursor -->
-    <div id="cursor" class="fixed w-4 h-4 bg-primary rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"></div>
-    <div id="cursor-follower" class="fixed w-10 h-10 border border-primary rounded-full pointer-events-none z-[9998] transition-transform duration-300 ease-out hidden md:block"></div>
+    <!-- Custom Cursor Removed for cleaner Tech Arsenal interaction -->
 
     <!-- Background Effects -->
     <canvas id="dot-grid-canvas" class="fixed inset-0 z-[-2] pointer-events-none opacity-40"></canvas>
@@ -80,11 +87,11 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 w-full z-[100] p-6 md:p-10 flex justify-between items-center mix-blend-difference md:mix-blend-difference">
+    <nav class="fixed top-0 left-0 w-full z-[100] p-6 md:p-10 flex justify-between items-center">
         <div class="hover:scale-110 transition-transform cursor-pointer relative z-[101]" id="nav-logo">
             <img src="logo.png" alt="RS" class="h-14 md:h-16 w-auto">
         </div>
-        <div class="hidden md:flex gap-12 text-sm font-medium tracking-widest uppercase">
+        <div id="nav-links-container" class="hidden md:flex gap-12 text-sm font-medium tracking-widest uppercase items-center">
             <a href="#hero" class="nav-link hover:text-primary transition-colors">Intro</a>
             <a href="#expertise" class="nav-link hover:text-primary transition-colors">Skills</a>
             <a href="#work" class="nav-link hover:text-primary transition-colors">Work</a>
@@ -111,39 +118,38 @@
 
     <!-- Main Content -->
     <main>
-        <!-- Hero Section -->
-        <section id="hero" class="min-h-screen flex flex-col justify-center px-6 md:px-20 relative pt-20">
-            <div class="max-w-5xl">
-                <p class="text-primary font-mono mb-4 tracking-tighter text-lg md:text-xl overflow-hidden h-7" id="hero-tagline">
-                    <span class="inline-block translate-y-full">// VIBE_PROTOCOL_INITIALIZED...</span>
-                </p>
-                <h1 class="text-6xl md:text-9xl font-black mb-6 leading-[0.9] tracking-tighter" id="hero-title">
-                    RAJ <br> <span class="text-transparent border-text">SIMARIA</span>
-                </h1>
-                <p class="text-xl md:text-2xl text-white/60 max-w-2xl font-light mb-10 leading-relaxed" id="hero-desc">
-                    A <span class="text-white font-medium italic underline decoration-primary decoration-2 underline-offset-4">freelance vibe coder</span> crafting high-performance digital experiences that merge cutting-edge technology with premium aesthetics.
-                </p>
-                <div class="flex flex-wrap gap-6" id="hero-cta">
-                    <a href="#work" class="group relative px-8 py-4 overflow-hidden rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm transition-all hover:bg-primary hover:text-black">
-                        <span class="relative z-10 font-bold uppercase tracking-widest text-sm">Explore Work</span>
-                    </a>
-                    <a href="#contact" class="px-8 py-4 font-bold uppercase tracking-widest text-sm border-b border-white/20 hover:border-primary transition-colors">
-                        Hire Me
-                    </a>
+        <!-- Hero Scrollytelling Section -->
+        <div id="hero-trigger" class="relative" style="height: 250vh;">
+            <section id="hero" class="h-screen flex flex-col justify-center px-6 md:px-20 overflow-hidden relative">
+                <!-- Background Canvas for Scrollytelling Frames -->
+                <canvas id="hero-canvas" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-0 transition-opacity duration-1000"></canvas>
+                
+                <!-- Subtle Overlay -->
+                <div class="absolute inset-0 bg-black/30 z-[1] pointer-events-none"></div>
+                
+                <div class="max-w-5xl relative z-10">
+                    <p class="text-primary font-mono mb-4 tracking-tighter text-lg md:text-xl overflow-hidden h-7 opacity-0 translate-y-10" id="hero-tagline-scroll">
+                        <span class="inline-block">// VIBE_PROTOCOL_INITIALIZED...</span>
+                    </p>
+                    <h1 class="text-6xl md:text-9xl font-black mb-6 leading-[0.9] tracking-tighter text-white drop-shadow-2xl" id="hero-title">
+                        RAJ <br> <span class="border-text-thick">SIMARIA</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl text-white/60 max-w-2xl font-light mb-10 leading-relaxed opacity-0 translate-y-10" id="hero-desc-scroll">
+                        A <span class="text-white font-medium italic underline decoration-primary decoration-2 underline-offset-4">freelance vibe coder</span> crafting high-performance digital experiences that merge cutting-edge technology with premium aesthetics.
+                    </p>
+                    <div class="flex flex-wrap gap-6 opacity-0 translate-y-10" id="hero-cta-scroll">
+                        <a href="#work" class="group relative px-8 py-4 overflow-hidden rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm transition-all hover:bg-primary hover:text-black">
+                            <span class="relative z-10 font-bold uppercase tracking-widest text-sm">Explore Work</span>
+                        </a>
+                        <a href="#contact" class="px-8 py-4 font-bold uppercase tracking-widest text-sm border-b border-white/20 hover:border-primary transition-colors">
+                            Hire Me
+                        </a>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Hero Floating Image -->
-            <div id="hero-image-container" class="absolute right-[5%] top-1/2 -translate-y-1/2 w-[35vw] max-w-[500px] z-0 pointer-events-none opacity-0 hidden md:block">
-                <img src="Image_1-removebg-preview.png" alt="Visual" class="w-full h-auto drop-shadow-[0_0_50px_rgba(0,242,255,0.2)]">
-            </div>
 
-            <!-- Scroll Indicator -->
-            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-                <span class="text-[10px] uppercase tracking-widest font-bold">Scroll</span>
-                <div class="w-px h-12 bg-gradient-to-b from-primary to-transparent"></div>
-            </div>
-        </section>
+            </section>
+        </div>
 
         <!-- Expertise Section (The Stack) -->
         <section id="expertise" class="py-32 px-6 md:px-20 bg-dark/50 relative overflow-hidden">
@@ -157,74 +163,16 @@
                     <p class="text-white/40 font-mono tracking-widest">// ARCHITECTING MODERN DIGITAL FRONTIERS</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-30">
-                    <!-- Tech Card 01 -->
-                    <div class="expertise-card group p-8 bg-white/5 border border-white/10 rounded-[2rem] hover:border-primary/50 transition-all duration-500 relative overflow-hidden backdrop-blur-sm z-30">
-                        <div class="absolute -right-6 -top-6 text-7xl font-black opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-all font-mono italic">01</div>
-                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 border border-primary/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Core Engine</h3>
-                        <p class="text-sm text-white/50 leading-relaxed mb-6">Ultra-modern HTML5, CSS3, and ESNext logic for pixel-perfect delivery.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-primary/80">HTML5</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-primary/80">CSS3</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-primary/80">JS_ES12</span>
-                        </div>
+                <!-- Interactive Tech Balls Container -->
+                <div id="tech-balls-container" class="w-full h-[800px] relative rounded-[3rem] border border-white/5 bg-black/20 backdrop-blur-sm overflow-hidden cursor-grab active:cursor-grabbing">
+                    <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                        <p class="text-white/5 font-black text-6xl md:text-9xl uppercase italic tracking-tighter select-none">Tech Stack</p>
                     </div>
+                </div>
 
-                    <!-- Tech Card 02 -->
-                    <div class="expertise-card group p-8 bg-white/5 border border-white/10 rounded-[2rem] hover:border-secondary/50 transition-all duration-500 relative overflow-hidden backdrop-blur-sm z-30">
-                        <div class="absolute -right-6 -top-6 text-7xl font-black opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-all font-mono italic">02</div>
-                        <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mb-6 border border-secondary/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Styling Pro</h3>
-                        <p class="text-sm text-white/50 leading-relaxed mb-6">Rapid development using Tailwind CSS & custom design systems.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-secondary/80">Tailwind</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-secondary/80">GSAP</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-secondary/80">SASS</span>
-                        </div>
-                    </div>
-
-                    <!-- Tech Card 03 -->
-                    <div class="expertise-card group p-8 bg-white/5 border border-white/10 rounded-[2rem] hover:border-primary/50 transition-all duration-500 relative overflow-hidden backdrop-blur-sm z-30">
-                        <div class="absolute -right-6 -top-6 text-7xl font-black opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-all font-mono italic">03</div>
-                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 border border-primary/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Immersive UI</h3>
-                        <p class="text-sm text-white/50 leading-relaxed mb-6">3D experiences and high-speed animations for engagement.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-primary/80">Three.js</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-primary/80">WebGL</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-primary/80">Shaders</span>
-                        </div>
-                    </div>
-
-                    <!-- Tech Card 04 -->
-                    <div class="expertise-card group p-8 bg-white/5 border border-white/10 rounded-[2rem] hover:border-secondary/50 transition-all duration-500 relative overflow-hidden backdrop-blur-sm z-30">
-                        <div class="absolute -right-6 -top-6 text-7xl font-black opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-all font-mono italic">04</div>
-                        <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mb-6 border border-secondary/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Ecosystem</h3>
-                        <p class="text-sm text-white/50 leading-relaxed mb-6">Seamless integration with Firebase, Supabase, and cloud stacks.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-secondary/80">Firebase</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-secondary/80">Supabase</span>
-                            <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[10px] font-mono text-secondary/80">PostgreSQL</span>
-                        </div>
-                    </div>
+                <!-- Fallback/Mobile Cards (Hidden on Large screens by balls logic) -->
+                <div id="expertise-fallback" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 relative z-30">
+                    <!-- Cards will be hidden if balls initialization is successful -->
                 </div>
             </div>
         </section>

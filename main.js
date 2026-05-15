@@ -22,6 +22,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Synchronize Lenis with ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
+    lenis.stop(); // Stop scroll initially
+    document.body.classList.add('no-scroll'); // Lock native scroll
 
     // Warp State
     let isWarping = false;
@@ -390,25 +392,7 @@ window.addEventListener('DOMContentLoaded', () => {
     updateNav('hero');
     vibeLog('SCROLL_PROTOCOL: SYNCED');
 
-    // --- Custom Cursor ---
-    const cursor = document.getElementById('cursor');
-    const follower = document.getElementById('cursor-follower');
-    if (cursor && follower) {
-        document.addEventListener('mousemove', (e) => {
-            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
-            gsap.to(follower, { x: e.clientX, y: e.clientY, duration: 0.3 });
-        });
-        document.querySelectorAll('a, button, .expertise-card, .work-item').forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                gsap.to(cursor, { scale: 4, duration: 0.3 });
-                gsap.to(follower, { scale: 1.5, duration: 0.3 });
-            });
-            el.addEventListener('mouseleave', () => {
-                gsap.to(cursor, { scale: 1, duration: 0.3 });
-                gsap.to(follower, { scale: 1, duration: 0.3 });
-            });
-        });
-    }
+    // --- Custom Cursor Removed ---
 
     // --- Robotic Welcome Voice Optimization ---
     let vibeSpoken = false;
@@ -476,7 +460,6 @@ window.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('click', speakVibeInit);
         document.removeEventListener('keydown', speakVibeInit);
     }
-
     // --- Cinematic Preloader Logic ---
     const bootTrigger = document.getElementById('boot-trigger');
     const loadingSequence = document.getElementById('loading-sequence');
@@ -487,123 +470,252 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (bootTrigger) {
         bootTrigger.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent multiple triggers
-            speakVibeInit(); // Play audio on click
+            e.stopPropagation(); 
+            speakVibeInit(); 
             
             bootTrigger.classList.add('opacity-0', 'pointer-events-none');
             setTimeout(() => {
                 bootTrigger.classList.add('hidden');
-                loadingSequence.classList.remove('hidden');
+                if (loadingSequence) loadingSequence.classList.remove('hidden');
                 startLoading();
             }, 300);
         });
     }
+    // --- Scrollytelling & Preloader Logic ---
+    const frameCount = 65;
+    const frames = [];
+    const airbnb = { frame: 0 };
+    const canvas = document.getElementById('hero-canvas');
+    const context = canvas ? canvas.getContext('2d') : null;
+
+    function initHeroScrollytelling() {
+        if (!canvas || !context) return;
+
+        // Resize Canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            render();
+        }
+
+        // Draw Current Frame
+        function render() {
+            const img = frames[airbnb.frame];
+            if (!img) return;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Aspect Fill Logic
+            const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+            const x = (canvas.width / 2) - (img.width / 2) * scale;
+            const y = (canvas.height / 2) - (img.height / 2) * scale;
+            
+            context.drawImage(img, x, y, img.width * scale, img.height * scale);
+        }
+
+        // Create Scrub Animation
+        gsap.to(airbnb, {
+            frame: frameCount - 1,
+            snap: "frame",
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#hero-trigger",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.1,
+                pin: "#hero", // Robust pinning via GSAP
+                anticipatePin: 1
+            },
+            onUpdate: render
+        });
+
+        // Ensure first frame is drawn
+        if (frames[0]) frames[0].onload = render;
+        render();
+
+        ScrollTrigger.refresh();
+        vibeLog('HERO_SCROLLY_SYNCED');
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    }
+
+    function preloadFrames(onProgress) {
+        let loadedCount = 0;
+        for (let i = 0; i < frameCount; i++) {
+            const img = new Image();
+            const frameNum = i.toString().padStart(2, '0');
+            img.src = `frame_${frameNum}_delay-0.041s.webp`;
+            img.onload = () => {
+                loadedCount++;
+                onProgress(loadedCount / frameCount);
+                if (loadedCount === frameCount) {
+                    initHeroScrollytelling();
+                }
+            };
+            img.onerror = () => {
+                loadedCount++;
+                if (loadedCount === frameCount) initHeroScrollytelling();
+            };
+            frames.push(img);
+        }
+    }
 
     function startLoading() {
-        let progress = 0;
         const details = [
             'LOAD_SYSTEM_CORE...',
             'SYNC_VIBE_PROTOCOL...',
-            'MOUNT_3D_ASSETS...',
+            'CACHING_HERO_FRAMES...',
             'INIT_GSAP_ENGINE...',
             'STABILIZING_INTERFACE...',
             'READY_FOR_DEPLOYMENT'
         ];
 
-        const interval = setInterval(() => {
-            progress += Math.random() * 3;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                finishLoading();
-            }
-            
-            if (loadBar) loadBar.style.width = `${progress}%`;
-            if (loadPercent) loadPercent.innerText = `${Math.floor(progress)}%`;
+        preloadFrames((progress) => {
+            const totalProgress = progress * 100;
+            if (loadBar) loadBar.style.width = `${totalProgress}%`;
+            if (loadPercent) loadPercent.innerText = `${Math.floor(totalProgress)}%`;
             
             if (Math.random() > 0.8 && loadDetails) {
                 loadDetails.innerText = details[Math.floor(Math.random() * details.length)];
             }
-        }, 40);
-    }
 
-    function finishLoading() {
-        setTimeout(() => {
-            const splash = document.getElementById('vibe-splash');
-            if (splash) {
-                splash.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => splash.remove(), 1000);
+            if (totalProgress >= 100) {
+                setTimeout(finishLoading, 500);
             }
-            tl.play(); // Play hero animation
-            vibeLog('SYSTEM_BOOT_SEQUENCE: SUCCESS');
-        }, 500);
-    }
-    tl.to('#hero-tagline span', { 
-        y: 0, 
-        duration: 1, 
-        ease: 'power4.out', 
-        delay: 0.5
-    })
-      .from('#hero-title', { opacity: 0, y: 100, duration: 1.5, ease: 'power4.out' }, '-=0.5')
-      .from('#hero-desc', { opacity: 0, y: 30, duration: 1, ease: 'power4.out' }, '-=1')
-      .from('#hero-cta', { opacity: 0, y: 30, duration: 1, ease: 'power4.out' }, '-=0.8')
-      .to('#hero-image-container', { opacity: 1, duration: 1.5, ease: 'power2.out' }, '-=1')
-      .add(() => {
-          ScrollTrigger.refresh();
-          vibeLog('SCROLL_ENGINE: OPTIMIZED');
-      });
-
-    // --- Hero Floating Image Effects ---
-    const heroImgContainer = document.getElementById('hero-image-container');
-    const heroImg = heroImgContainer ? heroImgContainer.querySelector('img') : null;
-
-    if (heroImg) {
-        // Cursor Follow
-        document.addEventListener('mousemove', (e) => {
-            const moveX = (e.clientX - window.innerWidth / 2) / 30;
-            const moveY = (e.clientY - window.innerHeight / 2) / 30;
-            gsap.to(heroImg, { 
-                x: moveX, 
-                y: moveY, 
-                rotate: moveX / 10,
-                duration: 0.8, 
-                ease: 'power2.out' 
-            });
         });
     }
 
-    // --- Expertise Cards Reveal ---
-    const techCards = document.querySelectorAll('.expertise-card');
-    if (techCards && techCards.length > 0) {
-        gsap.set(techCards, { opacity: 0, y: 50 });
+    function finishLoading() {
+        const splash = document.getElementById('vibe-splash');
+        if (splash) {
+            splash.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => splash.remove(), 1000);
+        }
+        
+        // Show Canvas & Nav
+        if (canvas) canvas.classList.remove('opacity-0');
+        const navLinks = document.getElementById('nav-links-container');
+        if (navLinks) gsap.to(navLinks, { opacity: 1, pointerEvents: 'auto', duration: 1.5 });
+        
+        // Re-enable Scroll
+        document.body.classList.remove('no-scroll');
+        lenis.start();
+        
+        tl.play(); // Play hero animation
+        ScrollTrigger.refresh();
+        vibeLog('SYSTEM_BOOT_SEQUENCE: SUCCESS');
+    }
+
+    // Hero Timeline Setup (Entrance only for Name)
+    tl.to('#hero-title', { opacity: 1, duration: 1.5, ease: 'power4.out', delay: 0.5 });
+
+    // Scroll-Linked Reveal for Intro Text
+    gsap.to(['#hero-tagline-scroll', '#hero-desc-scroll', '#hero-cta-scroll'], {
+        opacity: 1,
+        y: 0,
+        stagger: 0.2,
+        scrollTrigger: {
+            trigger: "#hero-trigger",
+            start: "top -10%", // Start showing after a bit of scroll
+            end: "top -60%",  // Fully visible by mid-scroll
+            scrub: 1
+        }
+    });
+
+    // Navigation Layout Transition
+    function initNavTransition() {
+        const container = document.getElementById('nav-links-container');
+        if (!container) return;
+
+        // Start as Vertical Sidebar
+        gsap.set(container, {
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '1.5rem',
+            position: 'fixed',
+            right: '5vw',
+            top: '50vh',
+            yPercent: -50,
+            opacity: 0,
+            pointerEvents: 'none'
+        });
+
+        // Reveal Nav after boot
+        tl.to(container, { opacity: 1, pointerEvents: 'auto', duration: 1 }, '-=1');
+
+        // Transition to Horizontal (Only after reaching black section)
+        ScrollTrigger.create({
+            trigger: '#expertise',
+            start: 'top 80%', // Starts when Tech Arsenal is nearly at the top
+            end: 'top 20%',
+            scrub: 0.5, // Faster, punchier transition
+            onUpdate: (self) => {
+                const p = self.progress;
+                if (p > 0.8) {
+                    // Final Horizontal State (Top Bar)
+                    gsap.set(container, {
+                        flexDirection: 'row',
+                        position: 'relative',
+                        top: 'auto',
+                        right: 'auto',
+                        yPercent: 0,
+                        gap: '3rem',
+                        backgroundColor: 'transparent',
+                        padding: '0',
+                        borderRadius: '0',
+                        backdropFilter: 'none'
+                    });
+                } else {
+                    // Vertical Sidebar State
+                    gsap.set(container, {
+                        flexDirection: 'column',
+                        position: 'fixed',
+                        right: '5vw',
+                        top: (50 - (p * 45)) + 'vh',
+                        yPercent: -50,
+                        gap: (1.5 + (p * 1.5)) + 'rem',
+                        backgroundColor: 'transparent',
+                        padding: '0',
+                        borderRadius: '0',
+                        backdropFilter: 'none',
+                        opacity: 1
+                    });
+                }
+            }
+        });
+    }
+
+    initNavTransition();
+    ScrollTrigger.refresh();
+    vibeLog('SCROLL_REVEAL_ACTIVE');
+
+
+
+    // --- Hero Scrollytelling Sequence ---
+    // (Managed by initHeroScrollytelling)
+
+    // --- Expertise Section Reveal ---
+    const techBallsContainer = document.getElementById('tech-balls-container');
+    if (techBallsContainer) {
+        gsap.set(techBallsContainer, { opacity: 0, scale: 0.9 });
         
         ScrollTrigger.create({
             trigger: '#expertise',
             start: 'top 85%',
             onEnter: () => {
-                gsap.to(techCards, {
+                gsap.to(techBallsContainer, {
                     opacity: 1,
-                    y: 0,
-                    stagger: 0.1,
-                    duration: 0.8,
-                    ease: 'power2.out',
-                    overwrite: true
+                    scale: 1,
+                    duration: 1.2,
+                    ease: 'expo.out'
                 });
-                vibeLog('STACK_VISIBLE');
+                vibeLog('TECH_BALLS_ACTIVE');
             },
             onLeaveBack: () => {
-                gsap.to(techCards, { opacity: 0, y: 50, duration: 0.5, overwrite: true });
+                gsap.to(techBallsContainer, { opacity: 0, scale: 0.9, duration: 0.8 });
             }
         });
-
-        // Fail-safe visibility
-        setTimeout(() => {
-            techCards.forEach(card => {
-                if (window.getComputedStyle(card).opacity === "0") {
-                    gsap.to(card, { opacity: 1, y: 0, duration: 1, ease: 'power2.out' });
-                }
-            });
-        }, 3000);
     }
 
     // --- Work Items Animations ---
@@ -850,6 +962,224 @@ window.addEventListener('DOMContentLoaded', () => {
         animate();
     }
 
+    // --- Interactive Tech Balls (Matter.js) ---
+    function initTechBalls() {
+        const container = document.getElementById('tech-balls-container');
+        if (!container || window.innerWidth < 768) {
+            // Show fallback for mobile or if container missing
+            const fallback = document.getElementById('expertise-fallback');
+            if (fallback) fallback.classList.remove('hidden');
+            return;
+        }
+
+        const techItems = [
+            { name: 'HTML5', color: '#FF4D00' },
+            { name: 'CSS3', color: '#00A8FF' },
+            { name: 'JS_ESNext', color: '#FFD700' },
+            { name: 'Tailwind', color: '#00F2FF' },
+            { name: 'GSAP', color: '#88CE02' },
+            { name: 'SASS', color: '#FF66B2' },
+            { name: 'Three.js', color: '#FFFFFF' },
+            { name: 'WebGL', color: '#FF3333' },
+            { name: 'Shaders', color: '#BF00FF' },
+            { name: 'Firebase', color: '#FFCA28' },
+            { name: 'Supabase', color: '#3ECF8E' },
+            { name: 'PostgreSQL', color: '#4D90FE' },
+            { name: 'VibeEngine', color: '#00F2FF' }
+        ];
+
+        const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events } = Matter;
+
+        const engine = Engine.create();
+        engine.world.gravity.y = 0; // No gravity for floaty vibe
+
+        const render = Render.create({
+            element: container,
+            engine: engine,
+            options: {
+                width: container.offsetWidth,
+                height: container.offsetHeight,
+                wireframes: false,
+                background: 'transparent',
+                pixelRatio: window.devicePixelRatio
+            }
+        });
+
+        const runner = Runner.create();
+        Runner.run(runner, engine);
+        Render.run(render);
+
+        // Walls
+        const wallOptions = { isStatic: true, render: { visible: false } };
+        const walls = [
+            Bodies.rectangle(container.offsetWidth / 2, -50, container.offsetWidth, 100, wallOptions),
+            Bodies.rectangle(container.offsetWidth / 2, container.offsetHeight + 50, container.offsetWidth, 100, wallOptions),
+            Bodies.rectangle(-50, container.offsetHeight / 2, 100, container.offsetHeight, wallOptions),
+            Bodies.rectangle(container.offsetWidth + 50, container.offsetHeight / 2, 100, container.offsetHeight, wallOptions)
+        ];
+        Composite.add(engine.world, walls);
+
+        // Central Cluster Logic (Clustered Structure)
+        let centerX = container.offsetWidth / 2;
+        let centerY = container.offsetHeight / 2;
+        const balls = [];
+        
+        techItems.forEach((item, idx) => {
+            // Random sizes for more dynamic clustering
+            const radius = 60 + Math.random() * 40;
+            
+            const ball = Bodies.circle(
+                centerX + (Math.random() - 0.5) * 200, 
+                centerY + (Math.random() - 0.5) * 200, 
+                radius, 
+                {
+                    restitution: 0.6,
+                    friction: 0.2,
+                    frictionAir: 0.05,
+                    render: {
+                        fillStyle: 'rgba(255, 255, 255, 0.03)',
+                        strokeStyle: item.color,
+                        lineWidth: 2
+                    }
+                }
+            );
+            
+            ball.label = item.name;
+            ball.color = item.color;
+            balls.push(ball);
+        });
+
+        Composite.add(engine.world, balls);
+
+        // Mouse Control
+        const mouse = Mouse.create(render.canvas);
+        const mouseConstraint = MouseConstraint.create(engine, {
+            mouse: mouse,
+            constraint: {
+                stiffness: 0.2,
+                render: { visible: false }
+            }
+        });
+        Composite.add(engine.world, mouseConstraint);
+
+        // Custom Rendering for Illustrative 3D Spheres
+        Events.on(render, 'afterRender', () => {
+            const ctx = render.context;
+            
+            // Sort balls by Y to handle overlapping correctly
+            const sortedBalls = [...balls].sort((a, b) => a.position.y - b.position.y);
+
+            sortedBalls.forEach(ball => {
+                const { x, y } = ball.position;
+                const radius = ball.circleRadius;
+
+                // 1. Thick Outer Outline (Cartoon/Illustrative style)
+                ctx.beginPath();
+                ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
+                ctx.fillStyle = '#000000';
+                ctx.fill();
+
+                // 2. 3D Shaded Sphere (Opaque)
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.clip();
+
+                const gradient = ctx.createRadialGradient(
+                    x - radius * 0.3, 
+                    y - radius * 0.3, 
+                    radius * 0.1, 
+                    x, y, radius
+                );
+                
+                const baseColor = ball.color;
+                gradient.addColorStop(0, '#ffffff'); // Highlight
+                gradient.addColorStop(0.2, baseColor); 
+                gradient.addColorStop(1, '#050505'); // Deep shadow
+                
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Subtle rim light
+                ctx.strokeStyle = baseColor;
+                ctx.lineWidth = 4;
+                ctx.globalAlpha = 0.3;
+                ctx.stroke();
+                ctx.restore();
+
+                // 3. Illustrative "Pattern" (Subtle curves like basketball)
+                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x - radius, y, radius, -0.5, 0.5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(x + radius, y, radius, Math.PI - 0.5, Math.PI + 0.5);
+                ctx.stroke();
+
+                // 4. Label
+                ctx.font = `bold ${Math.floor(radius/4.5)}px "JetBrains Mono"`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(ball.label, x, y);
+                ctx.shadowBlur = 0;
+            });
+        });
+
+        // Update Loop: Central Gravity (Cluster) + Mouse Attraction
+        Events.on(engine, 'beforeUpdate', () => {
+            balls.forEach(ball => {
+                // 1. Central Gravity Force (Keep them clustered)
+                const clusterDx = centerX - ball.position.x;
+                const clusterDy = centerY - ball.position.y;
+                Matter.Body.applyForce(ball, ball.position, {
+                    x: clusterDx * 0.0005,
+                    y: clusterDy * 0.0005
+                });
+
+                // 2. Mouse Attraction
+                if (mouse.position.x > 0 && mouse.position.y > 0) {
+                    const mouseDx = mouse.position.x - ball.position.x;
+                    const mouseDy = mouse.position.y - ball.position.y;
+                    const distSq = mouseDx * mouseDx + mouseDy * mouseDy;
+                    
+                    if (distSq < 300 * 300) {
+                        const dist = Math.sqrt(distSq);
+                        const force = 0.003 * (1 - dist / 300);
+                        Matter.Body.applyForce(ball, ball.position, {
+                            x: mouseDx * force,
+                            y: mouseDy * force
+                        });
+                    }
+                }
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            if (!container) return;
+            render.canvas.width = container.offsetWidth;
+            render.canvas.height = container.offsetHeight;
+            render.options.width = container.offsetWidth;
+            render.options.height = container.offsetHeight;
+            
+            // Re-calculate center for gravity
+            centerX = container.offsetWidth / 2;
+            centerY = container.offsetHeight / 2;
+            
+            // Re-position walls
+            Matter.Body.setPosition(walls[0], { x: container.offsetWidth / 2, y: -50 });
+            Matter.Body.setPosition(walls[1], { x: container.offsetWidth / 2, y: container.offsetHeight + 50 });
+            Matter.Body.setPosition(walls[2], { x: -50, y: container.offsetHeight / 2 });
+            Matter.Body.setPosition(walls[3], { x: container.offsetWidth + 50, y: container.offsetHeight / 2 });
+        });
+
+        vibeLog('TECH_BALLS_LOADED');
+    }
+
+    initTechBalls();
     initDotGrid();
 
     // Final Engine Refresh
