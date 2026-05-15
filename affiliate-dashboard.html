@@ -98,15 +98,24 @@
                         <label class="text-[10px] uppercase tracking-widest font-bold text-white/40 block mb-2">Your Unique Code</label>
                         <div class="flex gap-4">
                             <input type="text" id="referral-code-input" readonly value="----" class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl outline-none text-2xl font-black tracking-widest text-accent uppercase">
-                            <button onclick="copyCode()" class="px-8 py-4 bg-accent text-black font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-transform active:scale-95">Copy</button>
+                            <button onclick="copyCode()" class="px-8 py-4 bg-accent text-black font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-transform active:scale-95">Copy Message</button>
                         </div>
                     </div>
                     <div class="w-full md:w-72">
                         <label class="text-[10px] uppercase tracking-widest font-bold text-white/40 block mb-2">Client Reward</label>
-                        <div class="bg-white/5 border border-white/5 p-4 rounded-2xl">
+                        <div class="bg-white/5 border border-white/5 p-4 rounded-2xl text-center">
                             <p class="text-xl font-bold text-white/80">5% DISCOUNT</p>
                             <p class="text-[10px] text-white/40 uppercase tracking-widest">ON ALL CONTRACTS</p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Automatic Link Section -->
+                <div class="mt-8 pt-8 border-t border-white/5">
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-white/40 block mb-2">Automatic Referral Link (No Manual Code Needed)</label>
+                    <div class="flex gap-4">
+                        <input type="text" id="auto-referral-link" readonly value="Loading link..." class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl outline-none text-[10px] font-mono text-white/40">
+                        <button onclick="copyAutoLink()" class="px-8 py-4 bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-transform active:scale-95 text-[10px] whitespace-nowrap">Copy Link Only</button>
                     </div>
                 </div>
             </div>
@@ -197,6 +206,10 @@
                     // Pre-fill edit modal
                     document.getElementById('edit-name').value = data.name;
                     document.getElementById('edit-upi').value = data.upiId || '';
+
+                    // Set Auto Link
+                    const siteLink = window.location.origin + window.location.pathname.replace('affiliate-dashboard.html', 'index.html');
+                    document.getElementById('auto-referral-link').value = `${siteLink}?aff=${affId}`;
                 }
 
                 // 2. Get Related Contracts
@@ -294,9 +307,10 @@
 
         window.copyCode = () => {
             const code = document.getElementById('referral-code-input').value;
-            const siteLink = window.location.origin + window.location.pathname.replace('affiliate-dashboard.html', 'index.html');
-            const referralLink = `${siteLink}?ref=${code}`;
-            const message = `🚀 Unlock a 5% DISCOUNT on your next project with Raj Simaria!\n\nUse my exclusive referral code: ${code}\n\nClaim your discount here: ${referralLink}`;
+            const autoLink = document.getElementById('auto-referral-link').value;
+            const referralLink = `${autoLink}&ref=${code}`;
+            
+            const message = `✨ *Exclusive Invitation: Transform Your Digital Vision with Raj Simaria* ✨\n\nI’m thrilled to share an exclusive opportunity to collaborate with a premier developer specializing in high-end, cinematic digital experiences.\n\nBy using my personal invite, you’ll receive:\n✅ **Priority Consultation**\n✅ **5% Loyalty Discount** on your total project value\n\n🚀 *Experience the future of the web here:* ${referralLink}\n\n🎟️ *Use Invite Code:* **${code}**`;
             
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = message;
@@ -314,6 +328,25 @@
                 btn.innerText = originalText;
                 btn.classList.replace('bg-white/20', 'bg-accent');
                 btn.classList.replace('text-white', 'text-black');
+            }, 2000);
+        };
+
+        window.copyAutoLink = () => {
+            const link = document.getElementById('auto-referral-link').value;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = link;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'LINK COPIED!';
+            btn.classList.add('bg-accent/20', 'text-accent');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('bg-accent/20', 'text-accent');
             }, 2000);
         };
     </script>

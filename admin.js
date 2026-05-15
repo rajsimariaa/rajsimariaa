@@ -194,7 +194,7 @@ function renderCards(vault) {
                         ${item.referralCode ? `<div class="text-[10px] text-accent font-mono tracking-widest uppercase border border-accent/20 px-2 py-0.5 rounded">Referral: ${item.referralCode}</div>` : ''}
                     </div>
                     ${!item.contractClosed ? `
-                        <button onclick="openContractModal('${item.id}', '${item.referralCode || ''}')" class="px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-black text-[10px] font-bold uppercase tracking-widest rounded-full transition-all border border-primary/20">Close Contract</button>
+                        <button onclick="openContractModal('${item.id}', '${item.referralCode || ''}', '${item.affiliateId || ''}')" class="px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-black text-[10px] font-bold uppercase tracking-widest rounded-full transition-all border border-primary/20">Close Contract</button>
                     ` : `
                         <div class="text-[10px] text-green-400 font-mono tracking-widest uppercase border border-green-400/20 px-2 py-0.5 rounded">Contract Closed (₹${item.contractAmount})</div>
                     `}
@@ -359,10 +359,12 @@ window.deleteAffiliate = async function(id, name) {
 // --- Contract Management ---
 let currentEnquiryId = null;
 let currentReferralCode = null;
+let currentAffiliateId = null;
 
-window.openContractModal = (enquiryId, referralCode) => {
+window.openContractModal = (enquiryId, referralCode, affiliateId) => {
     currentEnquiryId = enquiryId;
     currentReferralCode = referralCode;
+    currentAffiliateId = affiliateId;
     document.getElementById('contract-modal').classList.remove('hidden');
     document.getElementById('contract-amount').value = '';
     document.getElementById('contract-calc').classList.add('hidden');
@@ -379,8 +381,9 @@ contractInput.addEventListener('input', () => {
     const amount = parseFloat(contractInput.value) || 0;
     if (amount > 0) {
         contractCalc.classList.remove('hidden');
-        const discount = currentReferralCode ? Math.round(amount * 0.05) : 0;
-        const commission = currentReferralCode ? Math.round(amount * 0.10) : 0;
+        const hasReferral = currentReferralCode || currentAffiliateId;
+        const discount = hasReferral ? Math.round(amount * 0.05) : 0;
+        const commission = hasReferral ? Math.round(amount * 0.10) : 0;
         const finalValue = amount - discount;
 
         document.getElementById('calc-gross').innerText = `₹${amount}`;
@@ -401,7 +404,7 @@ document.getElementById('confirm-contract-btn').addEventListener('click', async 
         return;
     }
 
-    const commission = currentReferralCode ? Math.round(amount * 0.10) : 0;
+    const commission = (currentReferralCode || currentAffiliateId) ? Math.round(amount * 0.10) : 0;
 
     try {
         if (window.db) {
@@ -422,18 +425,31 @@ document.getElementById('confirm-contract-btn').addEventListener('click', async 
             });
 
             // 3. Update Affiliate balance if applicable
-            if (currentReferralCode) {
-                const affSnapshot = await window.db.collection('affiliates')
-                    .where('referralCode', '==', currentReferralCode)
-                    .get();
-                
-                if (!affSnapshot.empty) {
-                    const affDoc = affSnapshot.docs[0];
-                    const affData = affDoc.data();
-                    await affDoc.ref.update({
-                        referralsCount: (affData.referralsCount || 0) + 1,
-                        pendingBalance: (affData.pendingBalance || 0) + commission
-                    });
+            if (currentAffiliateId || currentReferralCode) {
+                if (currentAffiliateId) {
+                    // DIRECT AUTOMATIC LOOKUP
+                    const affDoc = await window.db.collection('affiliates').doc(currentAffiliateId).get();
+                    if (affDoc.exists) {
+                        const affData = affDoc.data();
+                        await affDoc.ref.update({
+                            referralsCount: (affData.referralsCount || 0) + 1,
+                            pendingBalance: (affData.pendingBalance || 0) + commission
+                        });
+                    }
+                } else if (currentReferralCode) {
+                    // MANUAL CODE FALLBACK
+                    const affSnapshot = await window.db.collection('affiliates')
+                        .where('referralCode', '==', currentReferralCode)
+                        .get();
+                    
+                    if (!affSnapshot.empty) {
+                        const affDoc = affSnapshot.docs[0];
+                        const affData = affDoc.data();
+                        await affDoc.ref.update({
+                            referralsCount: (affData.referralsCount || 0) + 1,
+                            pendingBalance: (affData.pendingBalance || 0) + commission
+                        });
+                    }
                 }
             }
 
