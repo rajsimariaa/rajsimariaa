@@ -32,22 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     requestAnimationFrame(raf);
-    
-    // --- Referral Logic ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    if (refCode) {
-        localStorage.setItem('active_referral', refCode.toUpperCase());
-        // Clean URL to keep it pretty
-        window.history.replaceState({}, document.title, window.location.pathname);
-        vibeLog(`REFERRAL_CODE_DETECTED: ${refCode.toUpperCase()}`);
-    }
 
-    const activeRef = localStorage.getItem('active_referral');
-    if (activeRef) {
-        const referralInput = document.getElementById('form-referral');
-        if (referralInput) referralInput.value = activeRef;
-    }
 
     // --- Vibe Console Logger ---
     const consoleLogs = document.getElementById('console-logs');
@@ -68,6 +53,22 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     vibeLog('VIBE_PROTOCOL_INITIALIZED...');
+
+    // --- Referral Logic ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+        localStorage.setItem('active_referral', refCode.toUpperCase());
+        // Clean URL to keep it pretty
+        window.history.replaceState({}, document.title, window.location.pathname);
+        vibeLog(`REFERRAL_CODE_DETECTED: ${refCode.toUpperCase()}`);
+    }
+
+    const activeRef = localStorage.getItem('active_referral');
+    if (activeRef) {
+        const referralInput = document.getElementById('form-referral');
+        if (referralInput) referralInput.value = activeRef;
+    }
     
     // --- Terminal Controls ---
     const vibeConsole = document.getElementById('vibe-console');
