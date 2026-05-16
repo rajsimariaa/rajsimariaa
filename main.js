@@ -285,7 +285,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 window.open('https://calendar.app.google/F7Qg6tBBHf3MCRBE7', '_blank');
                 break;
             case 'about':
-                vibeLog('RAJ SIMARIA: FREELANCE VIBE CODER.');
+                vibeLog('RAJ SIMARIA: WEBSITE DEVELOPER.');
+                vibeLog('FOCUSED ON HIGH-PERFORMANCE DIGITAL SOLUTIONS.');
+                vibeLog('TECH: NEXT.JS | THREE.JS | GSAP');
+                vibeLog('STATUS: OPEN_FOR_CONTRACTS');
                 break;
             case 'work':
                 vibeLog('NAVIGATING_TO_WORK...');
