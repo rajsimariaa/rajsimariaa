@@ -32,6 +32,12 @@ service cloud.firestore {
       allow update, delete: if true;
     }
 
+    // TESTIMONIALS: Client feedback
+    match /testimonials/{testimonial} {
+      // Anyone can leave or view a testimonial
+      allow read, create: if true;
+    }
+
     // GLOBAL: Protective fallback
     match /{document=**} {
       allow read: if true;

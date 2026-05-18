@@ -882,6 +882,160 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Testimonials Logic ---
+    const leaveBtn = document.getElementById('leave-testimonial-btn');
+    const tModal = document.getElementById('testimonial-modal');
+    const tModalContent = document.getElementById('testimonial-modal-content');
+    const closeTBtn = document.getElementById('close-testimonial-modal');
+    
+    if (leaveBtn && tModal) {
+        leaveBtn.addEventListener('click', () => {
+            tModal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => tModalContent.classList.remove('scale-95'), 50);
+        });
+        
+        closeTBtn.addEventListener('click', () => {
+            tModalContent.classList.add('scale-95');
+            setTimeout(() => tModal.classList.add('opacity-0', 'pointer-events-none'), 300);
+        });
+    }
+
+    // Star Rating
+    const starBtns = document.querySelectorAll('.star-btn');
+    const ratingInput = document.getElementById('t-form-rating');
+    let currentRating = 0;
+    
+    starBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const value = parseInt(btn.getAttribute('data-value'));
+            currentRating = value;
+            ratingInput.value = value;
+            
+            starBtns.forEach(sb => {
+                const sv = parseInt(sb.getAttribute('data-value'));
+                if (sv <= value) {
+                    sb.classList.add('text-primary');
+                    sb.classList.remove('text-white/20');
+                } else {
+                    sb.classList.remove('text-primary');
+                    sb.classList.add('text-white/20');
+                }
+            });
+        });
+    });
+
+    // Submit Testimonial
+    const tForm = document.getElementById('testimonial-form');
+    if (tForm) {
+        tForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentRating) {
+                alert('Please provide a rating.');
+                return;
+            }
+            
+            const tData = {
+                name: document.getElementById('t-form-name').value,
+                role: document.getElementById('t-form-role').value || 'Client',
+                rating: currentRating,
+                message: document.getElementById('t-form-message').value,
+                date: new Date().toISOString(),
+                status: 'approved' // Automatically show for demo purposes
+            };
+            
+            document.getElementById('t-submit-loader').classList.remove('hidden');
+            
+            try {
+                if (window.db) {
+                    await window.db.collection('testimonials').add(tData);
+                    fetchTestimonials();
+                }
+                
+                document.getElementById('t-submit-loader').classList.add('hidden');
+                document.getElementById('t-success-msg').classList.remove('opacity-0', 'pointer-events-none');
+                tForm.reset();
+                currentRating = 0;
+                starBtns.forEach(sb => {
+                    sb.classList.remove('text-primary');
+                    sb.classList.add('text-white/20');
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('t-success-msg').classList.add('opacity-0', 'pointer-events-none');
+                    closeTBtn.click();
+                }, 3000);
+            } catch (error) {
+                console.error("Testimonial Error:", error);
+                document.getElementById('t-submit-loader').classList.add('hidden');
+                alert('Failed to submit testimonial.');
+            }
+        });
+    }
+
+    // Fetch and Display Testimonials
+    async function fetchTestimonials() {
+        const container = document.getElementById('testimonials-container');
+        if (!container || !window.db) return;
+        
+        try {
+            const snapshot = await window.db.collection('testimonials')
+                .orderBy('date', 'desc')
+                .limit(20)
+                .get();
+                
+            const approvedTestimonials = [];
+            snapshot.forEach(doc => {
+                if (doc.data().status === 'approved') {
+                    approvedTestimonials.push(doc.data());
+                }
+            });
+
+            if (approvedTestimonials.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center text-white/40 italic">No testimonials yet. Be the first!</div>`;
+                return;
+            }
+
+            
+            container.innerHTML = '';
+            approvedTestimonials.slice(0, 6).forEach(data => {
+                const starsHTML = Array(5).fill(0).map((_, i) => 
+                    `<svg class="w-4 h-4 ${i < data.rating ? 'text-primary' : 'text-white/20'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>`
+                ).join('');
+
+                
+                const card = document.createElement('div');
+                card.className = 'p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-primary/30 transition-all flex flex-col justify-between h-full';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex gap-1 mb-4">${starsHTML}</div>
+                        <p class="text-white/80 leading-relaxed mb-6 italic">"${data.message}"</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-primary">${data.name}</h4>
+                        <p class="text-xs text-white/40 uppercase tracking-widest font-mono mt-1">${data.role}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Add ScrollSpy for Testimonials section if not already added
+            if (!sections.includes('testimonials')) {
+                sections.push('testimonials');
+                ScrollTrigger.create({
+                    trigger: '#testimonials', start: 'top 20%', end: 'bottom 20%',
+                    onEnter: () => updateNav('testimonials'), onEnterBack: () => updateNav('testimonials'),
+                });
+            }
+            
+        } catch (error) {
+            console.error("Error fetching testimonials:", error);
+            container.innerHTML = `<div class="col-span-full text-center text-red-500/80">Unable to load testimonials at this time.</div>`;
+        }
+    }
+    
+    // Call fetch once DB might be ready. We wait a bit to ensure Firebase init.
+    setTimeout(fetchTestimonials, 1000);
+
     document.addEventListener('click', speakVibeInit);
     document.addEventListener('keydown', speakVibeInit);
 
