@@ -179,6 +179,7 @@ function renderCards(vault) {
                     <div class="flex flex-wrap gap-x-4 gap-y-1">
                         <a href="mailto:${item.email}" class="text-white/40 hover:text-primary transition-colors text-sm font-medium">${item.email}</a>
                         <a href="tel:${item.countryCode}${item.phone}" class="text-white/40 hover:text-secondary transition-colors text-sm font-medium">${item.countryCode} ${item.phone}</a>
+                        ${item.budget ? `<span class="text-primary text-sm font-black tracking-wide border-l border-white/10 pl-4">Budget: ${item.budget}</span>` : ''}
                     </div>
                 </div>
                 <div class="text-right">

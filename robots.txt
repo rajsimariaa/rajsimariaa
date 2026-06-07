@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /affiliate.html
+Disallow: /admin.html
+Disallow: /admin.css
+Disallow: /admin.js
+Disallow: /dashboard.html
+Disallow: /dashboard.js
+Disallow: /affiliate-dashboard.html
+Disallow: /login.html
+Disallow: /firebase-config.js
+Disallow: /firestore.rules
+
+Sitemap: https://rajsimaria.vercel.app/sitemap.xml

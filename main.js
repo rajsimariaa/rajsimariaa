@@ -193,6 +193,7 @@ window.addEventListener('DOMContentLoaded', () => {
         { key: 'name', prompt: 'ENTER_YOUR_NAME:' },
         { key: 'email', prompt: 'ENTER_EMAIL_ADDRESS:' },
         { key: 'phone', prompt: 'ENTER_PHONE_NUMBER:' },
+        { key: 'budget', prompt: 'ENTER_ESTIMATED_BUDGET (INR, e.g. 50000):' },
         { key: 'details', prompt: 'DESCRIBE_REQUIREMENTS:' },
         { key: 'referralCode', prompt: 'REFERRAL_CODE_(OPTIONAL):' }
     ];
@@ -311,6 +312,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
     async function submitFinalInquiry(data) {
         vibeLog('SENDING_TO_VAULT...');
+        if (data.budget && !data.budget.toString().includes('₹')) {
+            const rawVal = parseInt(data.budget.toString().replace(/[^\d]/g, '')) || 2500;
+            data.budget = `₹${rawVal.toLocaleString('en-IN')}`;
+        }
         const formData = {
             ...data,
             affiliateId: sessionStorage.getItem('active_affiliate_id') || null,
@@ -836,16 +841,80 @@ window.addEventListener('DOMContentLoaded', () => {
         vibeLog('PREPARING_NEW_TRANSMISSION');
     };
 
+    // Budget Slider Dynamic Display & Vibe reactions
+    const budgetSlider = document.getElementById('form-budget');
+    const budgetDisplay = document.getElementById('budget-value-display');
+    const budgetReaction = document.getElementById('budget-vibe-reaction');
+    const budgetTouched = document.getElementById('form-budget-touched');
+    const budgetContainer = document.getElementById('budget-container');
+
+    if (budgetSlider && budgetDisplay) {
+        budgetSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (budgetTouched) budgetTouched.value = "true";
+            
+            // Format value
+            budgetDisplay.innerText = `₹${val.toLocaleString('en-IN')}`;
+            budgetDisplay.className = "text-primary font-mono font-bold text-lg"; // Make active cyan
+            
+            // Reset validation style if it was red
+            if (budgetContainer) {
+                budgetContainer.style.borderColor = 'rgba(255,255,255,0.1)';
+                budgetContainer.style.boxShadow = 'none';
+            }
+
+            // Vibe Reactions based on budget
+            let reactionText = '';
+            let colorClass = '';
+            if (val < 15000) {
+                reactionText = '// TIGHT_BUDGET (MVP / Essential Setup) 🛠️';
+                colorClass = 'text-white/40';
+            } else if (val < 50000) {
+                reactionText = '// STANDARD_PROJECT (Professional & Clean) 💻';
+                colorClass = 'text-secondary';
+            } else if (val < 125000) {
+                reactionText = '// PREMIUM_SOLUTION (Cinematic & High Speed) 🚀';
+                colorClass = 'text-primary';
+            } else {
+                reactionText = '// ENTERPRISE_GRADE (Fully Custom & Matter.js) 💎';
+                colorClass = 'text-[#00ffcc] font-black drop-shadow-[0_0_5px_#00ffcc]';
+            }
+            if (budgetReaction) {
+                budgetReaction.innerHTML = reactionText;
+                budgetReaction.className = `text-[8px] font-mono uppercase tracking-widest mt-2 transition-all duration-300 ${colorClass}`;
+            }
+            budgetSlider.style.accentColor = val < 50000 ? '#bf00ff' : '#00f2ff'; // Purple to Cyan
+        });
+    }
+
     // Enquiry Form
     const enquiryForm = document.getElementById('enquiry-form');
     if (enquiryForm) {
         enquiryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Compulsory validation check
+            const isBudgetTouched = document.getElementById('form-budget-touched').value === "true";
+            if (!isBudgetTouched) {
+                if (budgetDisplay) {
+                    budgetDisplay.innerText = 'BUDGET_REQUIRED *';
+                    budgetDisplay.className = 'text-red-500 font-mono font-bold text-sm';
+                }
+                if (budgetContainer) {
+                    budgetContainer.style.borderColor = '#ef4444';
+                    budgetContainer.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.2)';
+                }
+                vibeLog('TRANSMISSION_ABORTED: BUDGET_REQUIRED', 'error');
+                return;
+            }
+
+            const rawBudget = document.getElementById('form-budget').value;
             const formData = {
                 name: document.getElementById('form-name').value,
                 email: document.getElementById('form-email').value,
                 countryCode: document.getElementById('form-country-code').value,
                 phone: document.getElementById('form-phone').value,
+                budget: rawBudget ? `₹${parseInt(rawBudget).toLocaleString('en-IN')}` : '',
                 details: document.getElementById('form-details').value,
                 referralCode: document.getElementById('form-referral').value.trim().toUpperCase() || null,
                 affiliateId: sessionStorage.getItem('active_affiliate_id') || null,
