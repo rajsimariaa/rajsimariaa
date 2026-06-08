@@ -185,17 +185,23 @@ window.addEventListener('DOMContentLoaded', () => {
     const terminalInput = document.getElementById('terminal-input');
     let terminalFlow = {
         active: false,
+        type: 'inquiry', // 'inquiry' or 'faq'
         step: 0,
         data: {}
     };
 
-    const flowSteps = [
+    const inquirySteps = [
         { key: 'name', prompt: 'ENTER_YOUR_NAME:' },
         { key: 'email', prompt: 'ENTER_EMAIL_ADDRESS:' },
         { key: 'phone', prompt: 'ENTER_PHONE_NUMBER:' },
         { key: 'budget', prompt: 'ENTER_ESTIMATED_BUDGET (INR, e.g. 50000):' },
         { key: 'details', prompt: 'DESCRIBE_REQUIREMENTS:' },
         { key: 'referralCode', prompt: 'REFERRAL_CODE_(OPTIONAL):' }
+    ];
+
+    const faqSteps = [
+        { key: 'askedByName', prompt: 'ENTER_YOUR_NAME (OPTIONAL):' },
+        { key: 'question', prompt: 'ENTER_YOUR_QUESTION:' }
     ];
 
     if (terminalInput) {
@@ -220,29 +226,35 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleFlowStep(input) {
-        const currentStep = flowSteps[terminalFlow.step];
+        const steps = terminalFlow.type === 'faq' ? faqSteps : inquirySteps;
+        const currentStep = steps[terminalFlow.step];
         terminalFlow.data[currentStep.key] = input;
         
         terminalFlow.step++;
         
-        if (terminalFlow.step < flowSteps.length) {
+        if (terminalFlow.step < steps.length) {
             // Skip referral step if already auto-filled
-            if (flowSteps[terminalFlow.step].key === 'referralCode' && terminalFlow.data.referralCode) {
+            if (terminalFlow.type === 'inquiry' && steps[terminalFlow.step].key === 'referralCode' && terminalFlow.data.referralCode) {
                 vibeLog(`CONFIRMING_REFERRAL: ${terminalFlow.data.referralCode}`);
                 await handleFlowStep(terminalFlow.data.referralCode);
                 return;
             }
-            vibeLog(flowSteps[terminalFlow.step].prompt);
-            terminalInput.placeholder = `Provide ${flowSteps[terminalFlow.step].key}...`;
+            vibeLog(steps[terminalFlow.step].prompt);
+            terminalInput.placeholder = `Provide ${steps[terminalFlow.step].key}...`;
         } else {
-            vibeLog('COMPILING_TRANSMISSION...');
-            await submitFinalInquiry(terminalFlow.data);
+            if (terminalFlow.type === 'faq') {
+                vibeLog('TRANSMITTING_QUESTION...');
+                await submitFAQFromTerminal(terminalFlow.data);
+            } else {
+                vibeLog('COMPILING_TRANSMISSION...');
+                await submitFinalInquiry(terminalFlow.data);
+            }
             resetTerminalFlow();
         }
     }
 
     function resetTerminalFlow() {
-        terminalFlow = { active: false, step: 0, data: {} };
+        terminalFlow = { active: false, type: 'inquiry', step: 0, data: {} };
         terminalInput.placeholder = "Type 'help'...";
     }
 
@@ -251,6 +263,8 @@ window.addEventListener('DOMContentLoaded', () => {
             case 'help':
                 vibeLog('AVAILABLE_COMMANDS:');
                 vibeLog(' - start: Begin inquiry flow');
+                vibeLog(' - faq: View knowledge base FAQs');
+                vibeLog(' - ask: Submit a new FAQ question');
                 vibeLog(' - book: Schedule a 1:1 call');
                 vibeLog(' - about: Core bio');
                 vibeLog(' - work: View portfolio');
@@ -261,6 +275,7 @@ window.addEventListener('DOMContentLoaded', () => {
             case 'inquiry':
                 vibeLog('INITIATING_INQUIRY_PROTOCOL...');
                 terminalFlow.active = true;
+                terminalFlow.type = 'inquiry';
                 terminalFlow.step = 0;
                 
                 // Pre-fill referral if available
@@ -276,7 +291,25 @@ window.addEventListener('DOMContentLoaded', () => {
                     vibeLog(`DIRECT_AFFILIATE_ID_ATTACHED`);
                 }
 
-                vibeLog(flowSteps[0].prompt);
+                vibeLog(inquirySteps[0].prompt);
+                terminalInput.placeholder = "Provide name...";
+                break;
+            case 'faq':
+                vibeLog('SYSTEM_KNOWLEDGE_BASE (FAQs):');
+                const faqsToPrint = window.loadedFAQs || DEFAULT_FAQS;
+                faqsToPrint.forEach((f, idx) => {
+                    vibeLog(`Q${idx + 1}: ${f.question}`);
+                    vibeLog(`A: ${f.answer}`);
+                    vibeLog('---------------------------');
+                });
+                vibeLog("TYPE 'ask' TO SUBMIT A NEW QUESTION.");
+                break;
+            case 'ask':
+                vibeLog('INITIATING_QUESTION_PROTOCOL...');
+                terminalFlow.active = true;
+                terminalFlow.type = 'faq';
+                terminalFlow.step = 0;
+                vibeLog(faqSteps[0].prompt);
                 terminalInput.placeholder = "Provide name...";
                 break;
             case 'book':
@@ -306,7 +339,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 break;
             default:
                 vibeLog(`UNKNOWN_COMMAND: ${baseCmd}`, 'error');
-                vibeLog("TYPE 'start' TO BEGIN INQUIRY");
+                vibeLog("TYPE 'help' FOR AVAILABLE PROTOCOLS");
         }
     }
 
@@ -337,6 +370,35 @@ window.addEventListener('DOMContentLoaded', () => {
                 vibeLog('LOCAL_SYNC_COMPLETE', 'success');
             }
         } catch (e) {
+            vibeLog('TRANSMISSION_FAILED', 'error');
+        }
+    }
+
+    async function submitFAQFromTerminal(data) {
+        vibeLog('SENDING_TO_FAQ_VAULT...');
+        const faqData = {
+            question: data.question,
+            askedByName: data.askedByName || 'Anonymous',
+            answer: '',
+            isAnswered: false,
+            isApproved: false,
+            dateAsked: new Date().toISOString()
+        };
+
+        try {
+            if (window.db) {
+                await window.db.collection('faqs').add(faqData);
+                vibeLog('TRANSMISSION_COMPLETE', 'success');
+                vibeLog('QUESTION_RECEIVED: SYSTEM_PENDING_ANSWER');
+            } else {
+                const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+                localFaqs.push({ ...faqData, id: Date.now() });
+                localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
+                vibeLog('LOCAL_SYNC_COMPLETE', 'success');
+                vibeLog('QUESTION_RECEIVED_LOCALLY');
+            }
+        } catch (e) {
+            console.error("Terminal FAQ submission error:", e);
             vibeLog('TRANSMISSION_FAILED', 'error');
         }
     }
@@ -1095,6 +1157,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     onEnter: () => updateNav('testimonials'), onEnterBack: () => updateNav('testimonials'),
                 });
             }
+            ScrollTrigger.refresh();
             
         } catch (error) {
             console.error("Error fetching testimonials:", error);
@@ -1104,6 +1167,202 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Call fetch once DB might be ready. We wait a bit to ensure Firebase init.
     setTimeout(fetchTestimonials, 1000);
+
+    // --- FAQs Logic ---
+    const DEFAULT_FAQS = [
+        {
+            question: "What technologies do you specialize in?",
+            answer: "I specialize in Next.js, React, HTML5, CSS3, JavaScript (ESNext), Tailwind CSS, GSAP for fluid animations, and Three.js for immersive 3D experiences.",
+            askedByName: "System"
+        },
+        {
+            question: "What is your typical turnaround time?",
+            answer: "Turnaround time varies by project size: MVP setups typically take 1-2 weeks, standard professional sites take 3-4 weeks, and premium custom interactive web apps take 6+ weeks.",
+            askedByName: "System"
+        },
+        {
+            question: "Do you offer post-launch support?",
+            answer: "Yes, I provide post-launch support including maintenance, speed optimization, and custom monthly retainers depending on your needs.",
+            askedByName: "System"
+        },
+        {
+            question: "How do we get started?",
+            answer: "You can send an inquiry via the Connect form below, initiate the inquiry flow in the Vibe Terminal (type 'start'), or schedule a free 15-minute call.",
+            askedByName: "System"
+        }
+    ];
+
+    async function fetchFAQs() {
+        const container = document.getElementById('faq-container');
+        if (!container) return;
+        
+        let activeFaqs = [];
+        try {
+            if (window.db) {
+                const snapshot = await window.db.collection('faqs')
+                    .orderBy('dateAsked', 'desc')
+                    .get();
+                    
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.isApproved && data.isAnswered) {
+                        activeFaqs.push(data);
+                    }
+                });
+            } else {
+                const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+                activeFaqs = localFaqs.filter(faq => faq.isApproved && faq.isAnswered);
+            }
+        } catch (error) {
+            console.warn("Firestore blocked or offline. Using LocalStorage fallback:", error);
+            try {
+                const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+                activeFaqs = localFaqs.filter(faq => faq.isApproved && faq.isAnswered);
+            } catch (fallbackError) {
+                console.error("LocalStorage fallback failed:", fallbackError);
+            }
+        }
+        
+        try {
+            // Merge defaults and active FAQs
+            const allFaqs = [...DEFAULT_FAQS, ...activeFaqs];
+            window.loadedFAQs = allFaqs;
+            
+            container.innerHTML = '';
+            allFaqs.forEach((faq, index) => {
+                const card = document.createElement('div');
+                card.className = 'glass rounded-[2rem] border border-white/10 hover:border-primary/20 transition-all overflow-hidden';
+                card.innerHTML = `
+                    <button class="w-full text-left p-8 flex justify-between items-center gap-6 focus:outline-none faq-toggle-btn" data-index="${index}">
+                        <h3 class="text-xl font-bold tracking-tight text-white transition-colors hover:text-primary">${faq.question}</h3>
+                        <span class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-primary font-bold text-lg faq-icon transition-all">+</span>
+                    </button>
+                    <div class="faq-answer-container h-0 overflow-hidden">
+                        <div class="px-8 pb-8 text-white/60 leading-relaxed border-t border-white/5 pt-6 mt-2">
+                            <p>${faq.answer}</p>
+                            ${faq.askedByName && faq.askedByName !== 'System' && faq.askedByName !== 'Anonymous' ? `<p class="text-[10px] uppercase font-mono tracking-widest text-primary/40 mt-4">// Asked by ${faq.askedByName}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Initialize Accordion interaction
+            const toggles = container.querySelectorAll('.faq-toggle-btn');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const answer = toggle.nextElementSibling;
+                    const icon = toggle.querySelector('.faq-icon');
+                    const isOpen = answer.classList.contains('faq-open');
+                    
+                    toggles.forEach(t => {
+                        const a = t.nextElementSibling;
+                        const i = t.querySelector('.faq-icon');
+                        if (a !== answer && a.classList.contains('faq-open')) {
+                            a.classList.remove('faq-open');
+                            gsap.to(a, { height: 0, duration: 0.4, ease: 'power2.inOut' });
+                            gsap.to(i, { rotation: 0, duration: 0.3 });
+                        }
+                    });
+                    
+                    if (isOpen) {
+                        answer.classList.remove('faq-open');
+                        gsap.to(answer, { height: 0, duration: 0.4, ease: 'power2.inOut' });
+                        gsap.to(icon, { rotation: 0, duration: 0.3 });
+                    } else {
+                        answer.classList.add('faq-open');
+                        gsap.to(answer, { height: answer.scrollHeight, duration: 0.5, ease: 'power2.out' });
+                        gsap.to(icon, { rotation: 45, duration: 0.3 });
+                    }
+                });
+            });
+            
+            // Add ScrollSpy for FAQ section if not already added
+            if (typeof sections !== 'undefined' && !sections.includes('faq')) {
+                sections.push('faq');
+                ScrollTrigger.create({
+                    trigger: '#faq', start: 'top 20%', end: 'bottom 20%',
+                    onEnter: () => updateNav('faq'), onEnterBack: () => updateNav('faq'),
+                });
+            }
+            ScrollTrigger.refresh();
+            
+        } catch (renderError) {
+            console.error("Error rendering FAQs:", renderError);
+            container.innerHTML = `<div class="text-center text-red-500/80">Unable to render FAQs.</div>`;
+        }
+    }
+    
+    // Call fetch once DB might be ready
+    setTimeout(fetchFAQs, 1000);
+
+    // --- FAQ Modal Logic ---
+    const askFaqBtn = document.getElementById('ask-question-btn');
+    const faqModal = document.getElementById('faq-modal');
+    const faqModalContent = document.getElementById('faq-modal-content');
+    const closeFaqBtn = document.getElementById('close-faq-modal');
+    
+    if (askFaqBtn && faqModal) {
+        askFaqBtn.addEventListener('click', () => {
+            faqModal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => faqModalContent.classList.remove('scale-95'), 50);
+        });
+        
+        closeFaqBtn.addEventListener('click', () => {
+            faqModalContent.classList.add('scale-95');
+            setTimeout(() => faqModal.classList.add('opacity-0', 'pointer-events-none'), 300);
+        });
+    }
+
+    const faqForm = document.getElementById('faq-form');
+    if (faqForm) {
+        faqForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const questionText = document.getElementById('faq-form-question').value.trim();
+            const askedBy = document.getElementById('faq-form-name').value.trim() || 'Anonymous';
+            
+            if (!questionText) return;
+            
+            const faqData = {
+                question: questionText,
+                askedByName: askedBy,
+                answer: '',
+                isAnswered: false,
+                isApproved: false,
+                dateAsked: new Date().toISOString()
+            };
+            
+            const loader = document.getElementById('faq-submit-loader');
+            if (loader) loader.classList.remove('hidden');
+            
+            try {
+                if (window.db) {
+                    await window.db.collection('faqs').add(faqData);
+                } else {
+                    const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+                    localFaqs.push({ ...faqData, id: Date.now() });
+                    localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
+                }
+                
+                if (loader) loader.classList.add('hidden');
+                
+                const successMsg = document.getElementById('faq-success-msg');
+                if (successMsg) successMsg.classList.remove('opacity-0', 'pointer-events-none');
+                
+                faqForm.reset();
+                
+                setTimeout(() => {
+                    if (successMsg) successMsg.classList.add('opacity-0', 'pointer-events-none');
+                    if (closeFaqBtn) closeFaqBtn.click();
+                }, 3000);
+            } catch (error) {
+                console.error("FAQ Submission Error:", error);
+                if (loader) loader.classList.add('hidden');
+                alert('Failed to submit question. Please try again.');
+            }
+        });
+    }
 
     document.addEventListener('click', speakVibeInit);
     document.addEventListener('keydown', speakVibeInit);
@@ -1246,6 +1505,7 @@ window.addEventListener('DOMContentLoaded', () => {
         let centerY = container.offsetHeight / 2;
         const isMobile = window.innerWidth < 768;
         const itemsToDisplay = isMobile ? techItems.slice(0, 8) : techItems;
+        const balls = [];
 
         itemsToDisplay.forEach((item, idx) => {
             // Responsive radius for mobile/desktop

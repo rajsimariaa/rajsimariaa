@@ -259,31 +259,48 @@ window.switchTab = (tab) => {
     const enqSec = document.getElementById('enquiries-section');
     const conSec = document.getElementById('contracts-section');
     const affSec = document.getElementById('affiliates-section');
+    const faqSec = document.getElementById('faqs-section');
     
     const enqBtn = document.getElementById('tab-enquiries');
     const conBtn = document.getElementById('tab-contracts');
     const affBtn = document.getElementById('tab-affiliates');
+    const faqBtn = document.getElementById('tab-faqs');
 
     // Reset all
-    [enqSec, conSec, affSec].forEach(s => s.classList.add('hidden'));
-    [enqBtn, conBtn, affBtn].forEach(b => {
-        b.classList.replace('bg-primary', 'bg-white/5');
-        b.classList.replace('text-black', 'text-white/40');
+    [enqSec, conSec, affSec, faqSec].forEach(s => { if (s) s.classList.add('hidden'); });
+    [enqBtn, conBtn, affBtn, faqBtn].forEach(b => {
+        if (b) {
+            b.classList.replace('bg-primary', 'bg-white/5');
+            b.classList.replace('text-black', 'text-white/40');
+        }
     });
 
     if (tab === 'enquiries') {
-        enqSec.classList.remove('hidden');
-        enqBtn.classList.replace('bg-white/5', 'bg-primary');
-        enqBtn.classList.replace('text-white/40', 'text-black');
+        if (enqSec) enqSec.classList.remove('hidden');
+        if (enqBtn) {
+            enqBtn.classList.replace('bg-white/5', 'bg-primary');
+            enqBtn.classList.replace('text-white/40', 'text-black');
+        }
     } else if (tab === 'contracts') {
-        conSec.classList.remove('hidden');
-        conBtn.classList.replace('bg-white/5', 'bg-primary');
-        conBtn.classList.replace('text-white/40', 'text-black');
-    } else {
-        affSec.classList.remove('hidden');
-        affBtn.classList.replace('bg-white/5', 'bg-primary');
-        affBtn.classList.replace('text-white/40', 'text-black');
+        if (conSec) conSec.classList.remove('hidden');
+        if (conBtn) {
+            conBtn.classList.replace('bg-white/5', 'bg-primary');
+            conBtn.classList.replace('text-white/40', 'text-black');
+        }
+    } else if (tab === 'affiliates') {
+        if (affSec) affSec.classList.remove('hidden');
+        if (affBtn) {
+            affBtn.classList.replace('bg-white/5', 'bg-primary');
+            affBtn.classList.replace('text-white/40', 'text-black');
+        }
         loadAffiliates();
+    } else if (tab === 'faqs') {
+        if (faqSec) faqSec.classList.remove('hidden');
+        if (faqBtn) {
+            faqBtn.classList.replace('bg-white/5', 'bg-primary');
+            faqBtn.classList.replace('text-white/40', 'text-black');
+        }
+        loadFAQs();
     }
 };
 
@@ -593,3 +610,266 @@ document.getElementById('confirm-payment-btn').addEventListener('click', async (
         alert('SYSTEM_ERROR: PAYMENT_FAILED');
     }
 });
+
+// --- FAQ Management ---
+async function loadFAQs() {
+    if (!window.db) {
+        const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+        renderFAQs(localFaqs);
+        return;
+    }
+    
+    try {
+        const snapshot = await window.db.collection('faqs').orderBy('dateAsked', 'desc').get();
+        const faqs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderFAQs(faqs);
+    } catch (error) {
+        console.warn("Error loading FAQs from Firestore, falling back to LocalStorage:", error);
+        const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+        renderFAQs(localFaqs);
+    }
+}
+
+function renderFAQs(faqs) {
+    const unansweredContainer = document.getElementById('unanswered-faq-list');
+    const activeContainer = document.getElementById('active-faq-list');
+    const statsLine = document.getElementById('faqs-stats-line');
+    
+    if (!unansweredContainer || !activeContainer) return;
+    
+    unansweredContainer.innerHTML = '';
+    activeContainer.innerHTML = '';
+    
+    const unanswered = faqs.filter(faq => !faq.isAnswered);
+    const active = faqs.filter(faq => faq.isAnswered);
+    
+    if (statsLine) {
+        statsLine.innerText = `// ${faqs.length} QUESTIONS IN DATABASE`;
+    }
+    
+    if (unanswered.length === 0) {
+        unansweredContainer.innerHTML = `
+            <div class="text-center py-20 opacity-20 font-mono uppercase tracking-widest bg-white/5 rounded-3xl border border-white/5">
+                No new questions.
+            </div>
+        `;
+    } else {
+        unanswered.forEach(faq => {
+            const date = new Date(faq.dateAsked).toLocaleString('en-IN', {
+                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+            });
+            const card = document.createElement('div');
+            card.className = 'glass p-8 rounded-[32px] border border-white/5 space-y-4 hover:border-primary/20 transition-all';
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-[10px] text-primary font-mono tracking-widest uppercase mb-1">// UNANSWERED</div>
+                        <h4 class="text-xl font-bold tracking-tight text-white font-sans">Q: "${faq.question}"</h4>
+                        <p class="text-white/40 text-xs mt-1 font-sans">Asked by: <span class="text-white/60">${faq.askedByName || 'Anonymous'}</span> | ${date}</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Write Answer</label>
+                    <textarea id="answer-text-${faq.id}" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-white text-sm resize-none font-sans" rows="3" placeholder="Provide answer..."></textarea>
+                </div>
+                <div class="flex gap-4 pt-2">
+                    <button onclick="deleteFAQ('${faq.id}')" class="px-5 py-2 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-500 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all">Delete</button>
+                    <button onclick="submitFAQAnswer('${faq.id}')" class="flex-1 py-2 bg-primary text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-transform flex justify-center items-center gap-2">
+                        <span>Answer & Approve</span>
+                    </button>
+                </div>
+            `;
+            unansweredContainer.appendChild(card);
+        });
+    }
+    
+    if (active.length === 0) {
+        activeContainer.innerHTML = `
+            <div class="text-center py-20 opacity-20 font-mono uppercase tracking-widest bg-white/5 rounded-3xl border border-white/5">
+                No active FAQs.
+            </div>
+        `;
+    } else {
+        active.forEach(faq => {
+            const date = new Date(faq.dateAsked).toLocaleString('en-IN', {
+                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+            });
+            const card = document.createElement('div');
+            card.className = 'glass p-8 rounded-[32px] border border-white/5 space-y-4 hover:border-secondary/20 transition-all';
+            card.innerHTML = `
+                <div>
+                    <div class="flex justify-between items-start">
+                        <div class="text-[10px] text-secondary font-mono tracking-widest uppercase mb-1">// ACTIVE FAQ</div>
+                        <span class="px-3 py-0.5 ${faq.isApproved ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'} text-[8px] font-mono rounded-full uppercase">
+                            ${faq.isApproved ? 'Public' : 'Hidden'}
+                        </span>
+                    </div>
+                    <h4 class="text-lg font-bold tracking-tight text-white font-sans">Q: "${faq.question}"</h4>
+                    <p class="text-white/40 text-xs mt-1 font-sans">Asked by: <span class="text-white/60">${faq.askedByName || 'Anonymous'}</span> | ${date}</p>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Edit Answer</label>
+                    <textarea id="answer-text-${faq.id}" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-secondary text-white text-sm resize-none font-sans" rows="3">${faq.answer}</textarea>
+                </div>
+                <div class="flex gap-4 pt-2">
+                    <button onclick="deleteFAQ('${faq.id}')" class="px-5 py-2 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-500 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all">Delete</button>
+                    <button onclick="toggleFAQApproval('${faq.id}', ${faq.isApproved})" class="px-5 py-2 border border-white/10 hover:bg-white/5 text-white/60 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all">
+                        ${faq.isApproved ? 'Hide/Unapprove' : 'Show/Approve'}
+                    </button>
+                    <button onclick="updateFAQAnswer('${faq.id}')" class="flex-1 py-2 bg-secondary text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-transform flex justify-center items-center gap-2">
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            `;
+            activeContainer.appendChild(card);
+        });
+    }
+}
+
+window.submitFAQAnswer = async function(id) {
+    const answerInput = document.getElementById(`answer-text-${id}`);
+    if (!answerInput) return;
+    
+    const answerText = answerInput.value.trim();
+    if (!answerText) {
+        alert("Please write an answer before submitting.");
+        return;
+    }
+    
+    let dbUpdated = false;
+    try {
+        if (window.db) {
+            await window.db.collection('faqs').doc(id).update({
+                answer: answerText,
+                isAnswered: true,
+                isApproved: true,
+                dateAnswered: new Date().toISOString()
+            });
+            dbUpdated = true;
+        }
+    } catch (error) {
+        console.warn("Firestore blocked or offline. Falling back to LocalStorage for write:", error);
+    }
+    
+    if (!dbUpdated) {
+        try {
+            const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+            const index = localFaqs.findIndex(f => f.id.toString() === id.toString());
+            if (index !== -1) {
+                localFaqs[index].answer = answerText;
+                localFaqs[index].isAnswered = true;
+                localFaqs[index].isApproved = true;
+                localFaqs[index].dateAnswered = new Date().toISOString();
+                localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
+            }
+        } catch (localError) {
+            console.error("LocalStorage write failed:", localError);
+            alert("Failed to save answer locally.");
+            return;
+        }
+    }
+    
+    alert(dbUpdated ? "Answer submitted and approved on Cloud!" : "Answer saved locally (offline fallback)!");
+    loadFAQs();
+};
+
+window.updateFAQAnswer = async function(id) {
+    const answerInput = document.getElementById(`answer-text-${id}`);
+    if (!answerInput) return;
+    
+    const answerText = answerInput.value.trim();
+    if (!answerText) {
+        alert("Please write an answer.");
+        return;
+    }
+    
+    let dbUpdated = false;
+    try {
+        if (window.db) {
+            await window.db.collection('faqs').doc(id).update({
+                answer: answerText
+            });
+            dbUpdated = true;
+        }
+    } catch (error) {
+        console.warn("Firestore blocked or offline. Falling back to LocalStorage for update:", error);
+    }
+    
+    if (!dbUpdated) {
+        try {
+            const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+            const index = localFaqs.findIndex(f => f.id.toString() === id.toString());
+            if (index !== -1) {
+                localFaqs[index].answer = answerText;
+                localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
+            }
+        } catch (localError) {
+            console.error("LocalStorage write failed:", localError);
+            alert("Failed to update answer locally.");
+            return;
+        }
+    }
+    
+    alert(dbUpdated ? "FAQ answer updated on Cloud!" : "FAQ answer updated locally (offline fallback)!");
+    loadFAQs();
+};
+
+window.toggleFAQApproval = async function(id, isApproved) {
+    let dbUpdated = false;
+    try {
+        if (window.db) {
+            await window.db.collection('faqs').doc(id).update({
+                isApproved: !isApproved
+            });
+            dbUpdated = true;
+        }
+    } catch (error) {
+        console.warn("Firestore blocked or offline. Falling back to LocalStorage for approval toggle:", error);
+    }
+    
+    if (!dbUpdated) {
+        try {
+            const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+            const index = localFaqs.findIndex(f => f.id.toString() === id.toString());
+            if (index !== -1) {
+                localFaqs[index].isApproved = !isApproved;
+                localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
+            }
+        } catch (localError) {
+            console.error("LocalStorage write failed:", localError);
+            alert("Failed to toggle approval locally.");
+            return;
+        }
+    }
+    
+    const statusText = !isApproved ? "visible (Public)" : "hidden (Private)";
+    alert(dbUpdated ? `FAQ status updated to ${statusText} on Cloud!` : `FAQ status updated to ${statusText} locally (offline fallback)!`);
+    loadFAQs();
+};
+
+window.deleteFAQ = async function(id) {
+    if (confirm("ARE YOU SURE YOU WANT TO DELETE THIS FAQ? THIS ACTION IS PERMANENT.")) {
+        let dbDeleted = false;
+        try {
+            if (window.db) {
+                await window.db.collection('faqs').doc(id).delete();
+                dbDeleted = true;
+            }
+        } catch (error) {
+            console.warn("Firestore blocked or offline. Falling back to LocalStorage for deletion:", error);
+        }
+        
+        try {
+            const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
+            const filtered = localFaqs.filter(f => f.id.toString() !== id.toString());
+            localStorage.setItem('vibe_faqs', JSON.stringify(filtered));
+        } catch (localError) {
+            console.error("LocalStorage write failed:", localError);
+            alert("Failed to delete FAQ locally.");
+            return;
+        }
+        
+        alert(dbDeleted ? "FAQ deleted from Cloud!" : "FAQ deleted locally!");
+        loadFAQs();
+    }
+};

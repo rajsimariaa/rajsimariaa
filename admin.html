@@ -87,6 +87,7 @@
             <button onclick="switchTab('enquiries')" id="tab-enquiries" class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-full transition-all text-xs">Active Leads</button>
             <button onclick="switchTab('contracts')" id="tab-contracts" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Completed Contracts</button>
             <button onclick="switchTab('affiliates')" id="tab-affiliates" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Affiliate Network</button>
+            <button onclick="switchTab('faqs')" id="tab-faqs" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">FAQs Management</button>
         </div>
 
         <div id="enquiries-section">
@@ -125,6 +126,37 @@
 
             <div id="affiliate-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Affiliate Cards will be injected here -->
+            </div>
+        </div>
+
+        <div id="faqs-section" class="hidden">
+            <div class="mb-12">
+                <h2 class="text-5xl font-black tracking-tighter mb-2 uppercase italic text-white font-sans">FAQs <span class="text-primary">Management</span></h2>
+                <p class="text-white/40 font-mono text-sm tracking-widest" id="faqs-stats-line">// 0 QUESTIONS IN DATABASE</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Column 1: Unanswered Questions -->
+                <div>
+                    <h3 class="text-2xl font-black tracking-tight mb-6 uppercase text-primary font-sans">// Unanswered Questions</h3>
+                    <div id="unanswered-faq-list" class="space-y-6">
+                        <!-- Unanswered cards injected here -->
+                        <div class="text-center py-20 opacity-20 font-mono uppercase tracking-widest bg-white/5 rounded-3xl border border-white/5">
+                            No new questions.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Active FAQs -->
+                <div>
+                    <h3 class="text-2xl font-black tracking-tight mb-6 uppercase text-secondary font-sans">// Active FAQs</h3>
+                    <div id="active-faq-list" class="space-y-6">
+                        <!-- Active cards injected here -->
+                        <div class="text-center py-20 opacity-20 font-mono uppercase tracking-widest bg-white/5 rounded-3xl border border-white/5">
+                            No active FAQs.
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
