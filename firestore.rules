@@ -38,6 +38,12 @@ service cloud.firestore {
       allow read, create: if true;
     }
 
+    // FAQS: Frequently Asked Questions and visitor-submitted questions
+    match /faqs/{faq} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
     // GLOBAL: Protective fallback
     match /{document=**} {
       allow read: if true;
