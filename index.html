@@ -179,6 +179,7 @@
         </div>
         <div id="nav-links-container" class="hidden md:flex gap-12 text-sm font-medium tracking-widest uppercase items-center">
             <a href="#hero" class="nav-link hover:text-primary transition-colors">Intro</a>
+            <a href="#about" class="nav-link hover:text-primary transition-colors">About</a>
             <a href="#expertise" class="nav-link hover:text-primary transition-colors">Skills</a>
             <a href="#work" class="nav-link hover:text-primary transition-colors">Work</a>
             <a href="#testimonials" class="nav-link hover:text-primary transition-colors">Testimonials</a>
@@ -198,6 +199,7 @@
     <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="fixed inset-0 bg-dark/95 backdrop-blur-2xl z-[45] flex flex-col justify-center items-center gap-8 text-3xl font-black tracking-tighter transition-all duration-500 translate-x-full opacity-0 pointer-events-none">
         <a href="#hero" class="mobile-nav-link hover:text-primary">INTRO</a>
+        <a href="#about" class="mobile-nav-link hover:text-primary">ABOUT</a>
         <a href="#expertise" class="mobile-nav-link hover:text-primary">SKILLS</a>
         <a href="#work" class="mobile-nav-link hover:text-primary">WORK</a>
         <a href="#testimonials" class="mobile-nav-link hover:text-primary">TESTIMONIALS</a>
@@ -221,13 +223,11 @@
                     <p class="text-primary font-mono mb-4 tracking-tighter text-lg md:text-xl overflow-hidden h-7 opacity-0 translate-y-10" id="hero-tagline-scroll">
                         <span class="inline-block">// VIBE_PROTOCOL_INITIALIZED...</span>
                     </p>
-                    <h1 class="text-6xl md:text-9xl font-black mb-6 leading-[0.9] tracking-tighter text-white drop-shadow-2xl" id="hero-title">
+                    <h1 class="text-6xl md:text-9xl font-black mb-16 md:mb-24 leading-[0.9] tracking-tighter text-white drop-shadow-2xl" id="hero-title">
                         RAJ <br> <span class="border-text-thick">SIMARIA</span><span class="sr-only"> - Expert Website Developer &amp; Cinematic Designer</span>
                     </h1>
-                    <p class="text-xl md:text-2xl text-white/60 max-w-2xl font-light mb-10 leading-relaxed opacity-0 translate-y-10" id="hero-desc-scroll">
-                        An <span class="text-white font-medium italic underline decoration-primary decoration-2 underline-offset-4">expert website developer</span> crafting high-performance digital experiences that merge cutting-edge technology with premium aesthetics.
-                    </p>
-                    <div class="flex flex-wrap gap-6 opacity-0 translate-y-10" id="hero-cta-scroll">
+
+                    <div class="flex flex-wrap gap-6 mt-8 md:mt-12 opacity-0 translate-y-10" id="hero-cta-scroll">
                         <a href="#work" class="group relative px-8 py-4 overflow-hidden rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm transition-all hover:bg-primary hover:text-black">
                             <span class="relative z-10 font-bold uppercase tracking-widest text-sm">Explore Work</span>
                         </a>
@@ -240,6 +240,29 @@
 
             </section>
         </div>
+
+        <!-- About Section -->
+        <section id="about" class="py-24 px-6 md:px-20 bg-dark relative overflow-hidden border-b border-white/5">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(0,242,255,0.03),transparent_50%)] pointer-events-none"></div>
+            <div class="max-w-4xl mx-auto relative z-20 flex flex-col md:flex-row gap-12 items-center">
+                <div class="w-full md:w-1/3 flex justify-center">
+                    <div class="relative w-48 h-48 rounded-full overflow-hidden border border-primary/20 bg-white/5 p-2 shadow-[0_0_30px_rgba(0,242,255,0.05)]">
+                        <img src="logo.png" alt="Raj Simaria" class="w-full h-full object-contain rounded-full">
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3 text-center md:text-left">
+                    <h2 class="text-3xl md:text-5xl font-black mb-6 uppercase italic tracking-tight">
+                        Beyond <span class="text-primary border-text">The Code</span>
+                    </h2>
+                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-light mb-4">
+                        I’m Raj Simaria, a creative developer obsessed with bridging the gap between raw performance and cinematic design. I don't just build websites; I craft digital narratives that command attention and drive conversion.
+                    </p>
+                    <p class="text-sm text-white/40 font-mono tracking-widest uppercase mt-4">
+                        // CREATING MEMORABLE WEB EXPERIENCES
+                    </p>
+                </div>
+            </div>
+        </section>
 
         <!-- Expertise Section (The Stack) -->
         <section id="expertise" class="py-32 px-6 md:px-20 bg-dark/50 relative overflow-hidden">
@@ -255,33 +278,19 @@
 
                 <!-- Premium Tech Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mt-12">
-                    <!-- HTML5 -->
+                    <!-- Next.js -->
                     <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
-                        <div class="w-12 h-12 rounded-xl mb-4 bg-[#FF4D00]/10 flex items-center justify-center text-[#FF4D00] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,77,0,0.1)]">
-                            <span class="font-bold">H5</span>
+                        <div class="w-12 h-12 rounded-xl mb-4 bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            <span class="font-bold">NX</span>
                         </div>
-                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">HTML5</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">Next.js</h3>
                     </div>
-                    <!-- CSS3 -->
+                    <!-- Three.js -->
                     <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
-                        <div class="w-12 h-12 rounded-xl mb-4 bg-[#00A8FF]/10 flex items-center justify-center text-[#00A8FF] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(0,168,255,0.1)]">
-                            <span class="font-bold">C3</span>
+                        <div class="w-12 h-12 rounded-xl mb-4 bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            <span class="font-bold">3JS</span>
                         </div>
-                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">CSS3</h3>
-                    </div>
-                    <!-- JavaScript -->
-                    <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
-                        <div class="w-12 h-12 rounded-xl mb-4 bg-[#FFD700]/10 flex items-center justify-center text-[#FFD700] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,215,0,0.1)]">
-                            <span class="font-bold">JS</span>
-                        </div>
-                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">JavaScript</h3>
-                    </div>
-                    <!-- Tailwind -->
-                    <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
-                        <div class="w-12 h-12 rounded-xl mb-4 bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.1)]">
-                            <span class="font-bold">TW</span>
-                        </div>
-                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">Tailwind</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">Three.js</h3>
                     </div>
                     <!-- GSAP -->
                     <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
@@ -290,12 +299,26 @@
                         </div>
                         <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">GSAP</h3>
                     </div>
-                    <!-- Three.js -->
+                    <!-- Framer Motion -->
                     <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
-                        <div class="w-12 h-12 rounded-xl mb-4 bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                            <span class="font-bold">3JS</span>
+                        <div class="w-12 h-12 rounded-xl mb-4 bg-[#BF00FF]/10 flex items-center justify-center text-[#BF00FF] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(191,0,255,0.1)]">
+                            <span class="font-bold">FM</span>
                         </div>
-                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">Three.js</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">Framer Motion</h3>
+                    </div>
+                    <!-- React -->
+                    <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-xl mb-4 bg-[#61DAFB]/10 flex items-center justify-center text-[#61DAFB] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(97,218,251,0.1)]">
+                            <span class="font-bold">RE</span>
+                        </div>
+                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">React</h3>
+                    </div>
+                    <!-- WebGL & Shaders -->
+                    <div class="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:bg-white/10 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-xl mb-4 bg-[#FF3333]/10 flex items-center justify-center text-[#FF3333] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,51,51,0.1)]">
+                            <span class="font-bold">GL</span>
+                        </div>
+                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">WebGL & Shaders</h3>
                     </div>
                 </div>
             </div>
@@ -327,12 +350,13 @@
                                 <a href="https://shadesofhue.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary">Visit Project</a>
                             </div>
                         </div>
-                        <div class="flex justify-between items-end px-4">
-                            <div>
+                        <div class="flex justify-between items-start px-4 gap-6">
+                            <div class="max-w-md">
                                 <p class="text-primary font-mono text-[10px] mb-2 tracking-widest uppercase">01 / Creative Dev</p>
-                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter">SHADES OF HUE<span class="sr-only"> - Creative Development Portfolio Project by Raj Simaria</span></h3>
+                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter mb-3">SHADES OF HUE</h3>
+                                <p class="text-sm text-white/60 leading-relaxed font-light">An interactive design gallery built for digital creators. Solved static layouts with a WebGL-based image transition system. Boosted session duration by 150% with perfect Core Web Vitals.</p>
                             </div>
-                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-primary/10 transition-colors">01</div>
+                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-primary/10 transition-colors shrink-0">01</div>
                         </div>
                     </div>
 
@@ -345,12 +369,13 @@
                                 <a href="https://klulla.com" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-secondary hover:text-white">Visit Project</a>
                             </div>
                         </div>
-                        <div class="flex justify-between items-end px-4">
-                            <div>
+                        <div class="flex justify-between items-start px-4 gap-6">
+                            <div class="max-w-md">
                                 <p class="text-secondary font-mono text-[10px] mb-2 tracking-widest uppercase">02 / Web Solutions</p>
-                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter">K LULLA ENT.<span class="sr-only"> - Custom Web Solutions Portfolio Project by Raj Simaria</span></h3>
+                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter mb-3">K LULLA ENT.</h3>
+                                <p class="text-sm text-white/60 leading-relaxed font-light">Engineered a high-speed B2B textile catalog using Next.js. Solved slow search speeds and complex category filtering, reducing query latency by 70%. Lifted direct client inquiries by 35%.</p>
                             </div>
-                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-secondary/10 transition-colors">02</div>
+                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-secondary/10 transition-colors shrink-0">02</div>
                         </div>
                     </div>
 
@@ -363,12 +388,13 @@
                                 <a href="https://shreeji-earcare.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary">Visit Project</a>
                             </div>
                         </div>
-                        <div class="flex justify-between items-end px-4">
-                            <div>
+                        <div class="flex justify-between items-start px-4 gap-6">
+                            <div class="max-w-md">
                                 <p class="text-primary font-mono text-[10px] mb-2 tracking-widest uppercase">03 / Medical UX</p>
-                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter">EAR CARE PLATFORM<span class="sr-only"> - Medical UX Design Portfolio Project by Raj Simaria</span></h3>
+                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter mb-3">EAR CARE PLATFORM</h3>
+                                <p class="text-sm text-white/60 leading-relaxed font-light">Designed a patient-triage and diagnostic consultation dashboard for Shreeji Ear Clinic. Streamlined bookings and clinical assessments, reducing scheduling errors to zero. Enhanced patient satisfaction scores by 40%.</p>
                             </div>
-                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-primary/10 transition-colors">03</div>
+                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-primary/10 transition-colors shrink-0">03</div>
                         </div>
                     </div>
 
@@ -381,15 +407,17 @@
                                 <a href="https://shreeji-collection.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-secondary hover:text-white">Visit Project</a>
                             </div>
                         </div>
-                        <div class="flex justify-between items-end px-4">
-                            <div>
+                        <div class="flex justify-between items-start px-4 gap-6">
+                            <div class="max-w-md">
                                 <p class="text-secondary font-mono text-[10px] mb-2 tracking-widest uppercase">04 / E-Commerce</p>
-                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter">SHREEJI STORE<span class="sr-only"> - E-Commerce Web Design Portfolio Project by Raj Simaria</span></h3>
+                                <h3 class="text-3xl md:text-4xl font-black tracking-tighter mb-3">SHREEJI STORE</h3>
+                                <p class="text-sm text-white/60 leading-relaxed font-light">Developed a high-performance storefront for a boutique fashion brand. Streamlined checkout flows and implemented smooth animations. Lifted overall conversion rates by 22% within 30 days.</p>
                             </div>
-                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-secondary/10 transition-colors">04</div>
+                            <div class="text-white/10 font-black text-6xl select-none group-hover:text-secondary/10 transition-colors shrink-0">04</div>
                         </div>
                     </div>
-                </div>
+
+</div>
             </div>
         </section>
 
@@ -553,15 +581,15 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-6 group cursor-pointer" onclick="window.location.href='https://wa.me/919702531718'">
+                        <div class="flex items-center gap-6 group cursor-pointer" onclick="window.open('https://wa.me/919702531718', '_blank')">
                             <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-[#25D366] group-hover:bg-[#25D366]/10 transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-[#25D366]">
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-[10px] uppercase tracking-widest font-bold text-white/40">Whatsapp / Call</p>
-                                <p class="text-lg font-bold">+91 9702531718</p>
+                                <p class="text-[10px] uppercase tracking-widest font-bold text-white/40">Chat on WhatsApp</p>
+                                <p class="text-lg font-bold">Send a Message</p>
                             </div>
                         </div>
 

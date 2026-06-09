@@ -431,7 +431,8 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Hero Effects
+    // Hero Effects - Commented out to keep the hero title static on scroll
+    /*
     gsap.to('#hero-title', {
         scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
         y: 150, scale: 0.9, opacity: 0, ease: 'none'
@@ -441,9 +442,10 @@ window.addEventListener('DOMContentLoaded', () => {
         scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
         x: 100, ease: 'none'
     });
+    */
 
     // Scrollspy
-    const sections = ['hero', 'expertise', 'work', 'contact'];
+    const sections = ['hero', 'about', 'expertise', 'work', 'contact'];
     sections.forEach(id => {
         ScrollTrigger.create({
             trigger: `#${id}`, start: 'top 20%', end: 'bottom 20%',
@@ -538,8 +540,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const loadDetails = document.getElementById('load-details');
     const tl = gsap.timeline({ paused: true });
 
+    let autoInitTimeout;
+
     if (bootTrigger) {
         bootTrigger.addEventListener('click', (e) => {
+            if (autoInitTimeout) clearTimeout(autoInitTimeout);
             e.stopPropagation(); 
             speakVibeInit(); 
             
@@ -550,6 +555,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 startLoading();
             }, 300);
         });
+
+        // Auto-initialize after 2 seconds if user hasn't clicked
+        autoInitTimeout = setTimeout(() => {
+            if (!vibeSpoken) {
+                vibeLog('AUTO_INITIALIZING_BOOT_SEQUENCE');
+                bootTrigger.click();
+            }
+        }, 2000);
     }
     // --- Scrollytelling & Preloader Logic ---
     const frameCount = 65;
@@ -681,7 +694,7 @@ window.addEventListener('DOMContentLoaded', () => {
     tl.to('#hero-title', { opacity: 1, duration: 1.5, ease: 'power4.out', delay: 0.5 });
 
     // Scroll-Linked Reveal for Intro Text
-    gsap.to(['#hero-tagline-scroll', '#hero-desc-scroll', '#hero-cta-scroll'], {
+    gsap.to(['#hero-tagline-scroll', '#hero-cta-scroll'], {
         opacity: 1,
         y: 0,
         stagger: 0.2,
@@ -1103,66 +1116,78 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const DEFAULT_TESTIMONIALS = [
+        {
+            name: "Sunil",
+            role: "Founder, K Lulla Enterprises",
+            rating: 5,
+            message: "Raj transformed our B2B digital catalog into a sleek, high-performing platform. His expertise in performance optimization and eye for motion design led to a 35% increase in direct customer inquiries. Highly recommended for premium, custom web work.",
+            date: "2026-05-15T10:30:00.000Z"
+        }
+    ];
+
     // Fetch and Display Testimonials
     async function fetchTestimonials() {
         const container = document.getElementById('testimonials-container');
-        if (!container || !window.db) return;
+        if (!container) return;
         
+        let approvedTestimonials = [];
         try {
-            const snapshot = await window.db.collection('testimonials')
-                .orderBy('date', 'desc')
-                .limit(20)
-                .get();
-                
-            const approvedTestimonials = [];
-            snapshot.forEach(doc => {
-                if (doc.data().status === 'approved') {
-                    approvedTestimonials.push(doc.data());
-                }
-            });
-
-            if (approvedTestimonials.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center text-white/40 italic">No testimonials yet. Be the first!</div>`;
-                return;
-            }
-
-            
-            container.innerHTML = '';
-            approvedTestimonials.slice(0, 6).forEach(data => {
-                const starsHTML = Array(5).fill(0).map((_, i) => 
-                    `<svg class="w-4 h-4 ${i < data.rating ? 'text-primary' : 'text-white/20'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>`
-                ).join('');
-
-                
-                const card = document.createElement('div');
-                card.className = 'p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-primary/30 transition-all flex flex-col justify-between h-full';
-                card.innerHTML = `
-                    <div>
-                        <div class="flex gap-1 mb-4">${starsHTML}</div>
-                        <p class="text-white/80 leading-relaxed mb-6 italic">"${data.message}"</p>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-lg text-primary">${data.name}</h4>
-                        <p class="text-xs text-white/40 uppercase tracking-widest font-mono mt-1">${data.role}</p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            
-            // Add ScrollSpy for Testimonials section if not already added
-            if (!sections.includes('testimonials')) {
-                sections.push('testimonials');
-                ScrollTrigger.create({
-                    trigger: '#testimonials', start: 'top 20%', end: 'bottom 20%',
-                    onEnter: () => updateNav('testimonials'), onEnterBack: () => updateNav('testimonials'),
+            if (window.db) {
+                const snapshot = await window.db.collection('testimonials')
+                    .orderBy('date', 'desc')
+                    .limit(20)
+                    .get();
+                    
+                snapshot.forEach(doc => {
+                    if (doc.data().status === 'approved') {
+                        approvedTestimonials.push(doc.data());
+                    }
                 });
             }
-            ScrollTrigger.refresh();
-            
         } catch (error) {
-            console.error("Error fetching testimonials:", error);
-            container.innerHTML = `<div class="col-span-full text-center text-red-500/80">Unable to load testimonials at this time.</div>`;
+            console.warn("Firestore testimonials fetch failed, using fallback:", error);
         }
+
+        const allTestimonials = [...DEFAULT_TESTIMONIALS, ...approvedTestimonials].filter(data => {
+            // Hide the test review submitted via the UI form
+            return !(data.name === 'Sunil' && data.message.includes('good experience'));
+        });
+
+        if (allTestimonials.length === 0) {
+            container.innerHTML = `<div class="col-span-full text-center text-white/40 italic">No testimonials yet. Be the first!</div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        allTestimonials.slice(0, 6).forEach(data => {
+            const starsHTML = Array(5).fill(0).map((_, i) => 
+                `<svg class="w-4 h-4 ${i < data.rating ? 'text-primary' : 'text-white/20'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>`
+            ).join('');
+
+            const card = document.createElement('div');
+            card.className = 'p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-primary/30 transition-all flex flex-col justify-between h-full';
+            card.innerHTML = `
+                <div>
+                    <div class="flex gap-1 mb-4">${starsHTML}</div>
+                    <p class="text-white/80 leading-relaxed mb-6 italic">"${data.message}"</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-primary">${data.name}</h4>
+                    <p class="text-xs text-white/40 uppercase tracking-widest font-mono mt-1">${data.role}</p>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        
+        if (!sections.includes('testimonials')) {
+            sections.push('testimonials');
+            ScrollTrigger.create({
+                trigger: '#testimonials', start: 'top 20%', end: 'bottom 20%',
+                onEnter: () => updateNav('testimonials'), onEnterBack: () => updateNav('testimonials'),
+            });
+        }
+        ScrollTrigger.refresh();
     }
     
     // Call fetch once DB might be ready. We wait a bit to ensure Firebase init.
@@ -1171,23 +1196,28 @@ window.addEventListener('DOMContentLoaded', () => {
     // --- FAQs Logic ---
     const DEFAULT_FAQS = [
         {
-            question: "What technologies do you specialize in?",
-            answer: "I specialize in Next.js, React, HTML5, CSS3, JavaScript (ESNext), Tailwind CSS, GSAP for fluid animations, and Three.js for immersive 3D experiences.",
+            question: "What types of clients do you work with?",
+            answer: "I partner primarily with D2C brands, luxury fashion labels, premium hospitality groups, and high-end real estate agencies looking to stand out. If your brand needs to justify premium pricing or capture attention instantly, my cinematic web experiences are built for you.",
             askedByName: "System"
         },
         {
-            question: "What is your typical turnaround time?",
-            answer: "Turnaround time varies by project size: MVP setups typically take 1-2 weeks, standard professional sites take 3-4 weeks, and premium custom interactive web apps take 6+ weeks.",
+            question: "What is your pricing model, and what does a project cost?",
+            answer: "Custom interactive web projects typically range from ₹30,000 to ₹80,000+ depending on the complexity of 3D elements, animations, and integrations. I provide clear, milestone-based quotes and ensure full transparency on costs before we write a single line of code.",
             askedByName: "System"
         },
         {
-            question: "Do you offer post-launch support?",
-            answer: "Yes, I provide post-launch support including maintenance, speed optimization, and custom monthly retainers depending on your needs.",
+            question: "How do you ensure cinematic websites are also fast and SEO-friendly?",
+            answer: "Every cinematic site I build utilizes Next.js and React for Server-Side Rendering (SSR) and optimized asset delivery, combined with highly-compressed WebP/GLTF media. Animation libraries like GSAP are decoupled and load asynchronously, ensuring page load times remain under 1.5 seconds and SEO performance is top-tier.",
             askedByName: "System"
         },
         {
-            question: "How do we get started?",
-            answer: "You can send an inquiry via the Connect form below, initiate the inquiry flow in the Vibe Terminal (type 'start'), or schedule a free 15-minute call.",
+            question: "How long does a typical custom project take to launch?",
+            answer: "A typical custom creative landing page takes 2–3 weeks, while a comprehensive B2B catalog or e-commerce storefront experience takes 4–6 weeks. This timeline includes planning, UI/UX concept design, interactive implementation, testing, and launch support.",
+            askedByName: "System"
+        },
+        {
+            question: "How do we get started and track progress?",
+            answer: "We kick off with a brief alignment call to discuss your goals and budget. Once approved, I build in public using staging URLs, allowing you to review and interact with the design and animations at every phase of the project.",
             askedByName: "System"
         }
     ];
@@ -1454,18 +1484,17 @@ window.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
 
         const techItems = [
-            { name: 'HTML5', color: '#FF4D00' },
-            { name: 'CSS3', color: '#00A8FF' },
-            { name: 'JS_ESNext', color: '#FFD700' },
-            { name: 'Tailwind', color: '#00F2FF' },
-            { name: 'GSAP', color: '#88CE02' },
-            { name: 'SASS', color: '#FF66B2' },
+            { name: 'Next.js', color: '#FFFFFF' },
+            { name: 'React', color: '#61DAFB' },
             { name: 'Three.js', color: '#FFFFFF' },
+            { name: 'GSAP', color: '#88CE02' },
+            { name: 'Framer Motion', color: '#BF00FF' },
             { name: 'WebGL', color: '#FF3333' },
             { name: 'Shaders', color: '#BF00FF' },
+            { name: 'Tailwind', color: '#00F2FF' },
             { name: 'Firebase', color: '#FFCA28' },
             { name: 'Supabase', color: '#3ECF8E' },
-            { name: 'PostgreSQL', color: '#4D90FE' },
+            { name: 'Matter.js', color: '#88CE02' },
             { name: 'VibeEngine', color: '#00F2FF' }
         ];
 
@@ -1680,8 +1709,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     initDotGrid();
 
-    // Final Engine Refresh
-    ScrollTrigger.refresh();
     vibeLog('VIBE_PROTOCOL: FULLY_SYNCED');
 });
 
