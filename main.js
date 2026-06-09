@@ -466,88 +466,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Custom Cursor Removed ---
 
-    // --- Robotic Welcome Voice Optimization ---
-    let vibeSpoken = false;
-    let vibeUtterance = new SpeechSynthesisUtterance("WELCOME. INITIALIZING VIBE PROTOCOL.");
-    vibeUtterance.pitch = 0.1;
-    vibeUtterance.rate = 0.85;
-    vibeUtterance.volume = 1;
 
-    // Pre-load voices as soon as possible
-    function loadVoices() {
-        let voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-            vibeUtterance.voice = voices.find(v => v.name.includes('Google UK English Male')) || 
-                           voices.find(v => v.lang.includes('en')) || 
-                           voices[0];
-        }
-    }
-
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
-
-    let audioCtx = null;
-
-    // Immediate click feedback using Web Audio API (no lag)
-    function playClickSound(freq = 150, duration = 0.1, gainVal = 0.05) {
-        try {
-            if (!audioCtx) return; // Don't play if context doesn't exist yet
-            if (audioCtx.state === 'suspended') return;
-
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + duration);
-            
-            gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + duration);
-        } catch (e) {
-            console.warn('Web Audio click failed', e);
-        }
-    }
-
-       function speakVibeInit() {
-        if (vibeSpoken) return;
-        
-        // If AudioContext is suspended (browser block), defer marking as spoken
-        // so the fallback gesture listener can trigger it when unblocked.
-        if (audioCtx && audioCtx.state === 'suspended') {
-            return;
-        }
-
-        vibeSpoken = true;
-        playClickSound(800, 0.1, 0.08); // Clean welcome chime beep
-
-        if (window.speechSynthesis.speaking) {
-            window.speechSynthesis.cancel();
-        }
-        
-        // Ensure voice is set
-        if (!vibeUtterance.voice) loadVoices();
-        
-        try {
-            window.speechSynthesis.speak(vibeUtterance);
-        } catch (e) {
-            console.warn("Speech synthesis failed", e);
-        }
-
-        // Update the audio status line if it exists
-        const audioLine = document.getElementById('terminal-audio-status');
-        if (audioLine) {
-            audioLine.innerHTML = `<span class="text-white/40">[  OK  ] </span>SYSTEM AUDIO: INITIALIZED`;
-            audioLine.className = 'text-green-400 font-bold transition-colors duration-500';
-        }
-    }
     // --- Cinematic Preloader Logic (Terminal Format & Auto-Init) ---
     const terminalLog = document.getElementById('terminal-boot-log');
     const tl = gsap.timeline({ paused: true });
@@ -573,10 +492,6 @@ window.addEventListener('DOMContentLoaded', () => {
         // Auto scroll to bottom
         terminalLog.scrollTop = terminalLog.scrollHeight;
 
-        // Play key clack sound (random pitch for realism!)
-        const pitch = 700 + Math.random() * 300;
-        playClickSound(pitch, 0.03, 0.02);
-        
         return line;
     }
 
@@ -596,21 +511,6 @@ window.addEventListener('DOMContentLoaded', () => {
         const l1 = document.createElement('div');
         l1.innerHTML = `<span class="text-white/40">> </span>VIBE_OS v1.0.0`;
         terminalLog.appendChild(l1);
-
-        // Try to initialize AudioContext automatically on load
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        // Print audio status at the top
-        const audioStatusLine = appendTerminalLine('SYSTEM AUDIO: INITIALIZING...', 'info');
-        if (audioStatusLine) {
-            audioStatusLine.id = 'terminal-audio-status';
-        }
-        await new Promise(resolve => setTimeout(resolve, 400));
-
-        // Auto-run speech greeting immediately
-        speakVibeInit();
 
         const lines = [
             { text: 'CONNECTING SECURE PROTOCOL...', delay: 350 },
@@ -649,11 +549,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (progressLine) {
                         progressLine.innerHTML = `<span class="text-white/40">> </span>PRELOADING IMAGES: ${createProgressBar(displayedProgress)}`;
                     }
-                    
-                    // Periodically play a tick sound (every 8%)
-                    if (Math.floor(displayedProgress) % 8 === 0) {
-                        playClickSound(600, 0.02, 0.02);
-                    }
                 }
                 
                 if (displayedProgress >= 100 && targetProgress >= 100) {
@@ -670,40 +565,8 @@ window.addEventListener('DOMContentLoaded', () => {
         finishLoading();
     }
 
-    let audioUnmuted = false;
-
-    async function unmuteSystemAudio() {
-        if (audioUnmuted) return;
-
-        // Setup & Resume AudioContext
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            try {
-                await audioCtx.resume();
-            } catch (e) {
-                console.warn('AudioContext resume failed', e);
-            }
-        }
-
-        // Trigger welcome voice greeting
-        speakVibeInit();
-
-        // If AudioContext successfully resumed, mark as unmuted and remove listeners
-        if (audioCtx && audioCtx.state === 'running') {
-            audioUnmuted = true;
-            document.removeEventListener('click', unmuteSystemAudio);
-            document.removeEventListener('keydown', unmuteSystemAudio);
-        }
-    }
-
     // Auto-start full boot sequence immediately on load
     runBootSequence();
-
-    // Event listeners to unmute system audio at any point
-    document.addEventListener('click', unmuteSystemAudio);
-    document.addEventListener('keydown', unmuteSystemAudio);
 
     // --- Scrollytelling & Preloader Logic ---
     const frameCount = 65;
