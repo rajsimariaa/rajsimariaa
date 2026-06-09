@@ -488,82 +488,223 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     loadVoices();
 
+    let audioCtx = null;
+
     // Immediate click feedback using Web Audio API (no lag)
-    function playClickSound() {
+    function playClickSound(freq = 150, duration = 0.1, gainVal = 0.05) {
         try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) return; // Don't play if context doesn't exist yet
+            if (audioCtx.state === 'suspended') return;
+
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
 
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + duration);
             
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
             oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
+            oscillator.stop(audioCtx.currentTime + duration);
         } catch (e) {
             console.warn('Web Audio click failed', e);
         }
     }
 
-    function speakVibeInit() {
+       function speakVibeInit() {
         if (vibeSpoken) return;
         
-        playClickSound(); // Instant feedback
+        // If AudioContext is suspended (browser block), defer marking as spoken
+        // so the fallback gesture listener can trigger it when unblocked.
+        if (audioCtx && audioCtx.state === 'suspended') {
+            return;
+        }
+
+        vibeSpoken = true;
+        playClickSound(800, 0.1, 0.08); // Clean welcome chime beep
 
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
         }
-
-        vibeSpoken = true;
         
         // Ensure voice is set
         if (!vibeUtterance.voice) loadVoices();
         
-        window.speechSynthesis.speak(vibeUtterance);
+        try {
+            window.speechSynthesis.speak(vibeUtterance);
+        } catch (e) {
+            console.warn("Speech synthesis failed", e);
+        }
 
-        // Clean up document listeners
-        document.removeEventListener('click', speakVibeInit);
-        document.removeEventListener('keydown', speakVibeInit);
+        // Update the audio status line if it exists
+        const audioLine = document.getElementById('terminal-audio-status');
+        if (audioLine) {
+            audioLine.innerHTML = `<span class="text-white/40">[  OK  ] </span>SYSTEM AUDIO: INITIALIZED`;
+            audioLine.className = 'text-green-400 font-bold transition-colors duration-500';
+        }
     }
-    // --- Cinematic Preloader Logic ---
-    const bootTrigger = document.getElementById('boot-trigger');
-    const loadingSequence = document.getElementById('loading-sequence');
-    const loadBar = document.getElementById('load-bar');
-    const loadPercent = document.getElementById('load-percent');
-    const loadDetails = document.getElementById('load-details');
+    // --- Cinematic Preloader Logic (Terminal Format & Auto-Init) ---
+    const terminalLog = document.getElementById('terminal-boot-log');
     const tl = gsap.timeline({ paused: true });
 
-    let autoInitTimeout;
+    // Helper to print a line to our terminal boot log
+    function appendTerminalLine(text, type = 'info') {
+        if (!terminalLog) return null;
+        const line = document.createElement('div');
+        line.className = 'opacity-0 transform translate-y-1 transition-all duration-300';
+        
+        let prefix = '> ';
+        if (type === 'success') prefix = '[  OK  ] ';
+        if (type === 'warning') prefix = '[ WARN ] ';
+        
+        line.innerHTML = `<span class="text-white/40">${prefix}</span>${text}`;
+        terminalLog.appendChild(line);
+        
+        // Force reflow and animate
+        setTimeout(() => {
+            line.classList.remove('opacity-0', 'translate-y-1');
+        }, 10);
+        
+        // Auto scroll to bottom
+        terminalLog.scrollTop = terminalLog.scrollHeight;
 
-    if (bootTrigger) {
-        bootTrigger.addEventListener('click', (e) => {
-            if (autoInitTimeout) clearTimeout(autoInitTimeout);
-            e.stopPropagation(); 
-            speakVibeInit(); 
-            
-            bootTrigger.classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                bootTrigger.classList.add('hidden');
-                if (loadingSequence) loadingSequence.classList.remove('hidden');
-                startLoading();
-            }, 300);
+        // Play key clack sound (random pitch for realism!)
+        const pitch = 700 + Math.random() * 300;
+        playClickSound(pitch, 0.03, 0.02);
+        
+        return line;
+    }
+
+    function createProgressBar(percent) {
+        const width = 15; // width in characters
+        const filled = Math.round((percent / 100) * width);
+        const empty = width - filled;
+        const barStr = '='.repeat(filled) + (filled < width ? '>' : '') + ' '.repeat(Math.max(0, empty - (filled < width ? 1 : 0)));
+        return `[${barStr}] ${Math.floor(percent)}%`;
+    }
+
+    async function runBootSequence() {
+        if (!terminalLog) return;
+        terminalLog.innerHTML = '';
+
+        // Print OS header immediately
+        const l1 = document.createElement('div');
+        l1.innerHTML = `<span class="text-white/40">> </span>VIBE_OS v1.0.0`;
+        terminalLog.appendChild(l1);
+
+        // Try to initialize AudioContext automatically on load
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Print audio status at the top
+        const audioStatusLine = appendTerminalLine('SYSTEM AUDIO: INITIALIZING...', 'info');
+        if (audioStatusLine) {
+            audioStatusLine.id = 'terminal-audio-status';
+        }
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+        // Auto-run speech greeting immediately
+        speakVibeInit();
+
+        const lines = [
+            { text: 'CONNECTING SECURE PROTOCOL...', delay: 350 },
+            { text: 'INITIALIZING VIBE_KERNEL v1.0.0...', delay: 500 },
+            { text: 'ESTABLISHING HANDSHAKE WITH CLIENT NODE...', delay: 400 },
+            { text: 'LOADING PORTFOLIO ENGINE SYSTEM:', delay: 300 },
+            { text: '  - NEXT.JS CORE DEPS...............', type: 'success', delay: 350 },
+            { text: '  - THREE.JS 3D WEBGL ENGINE........', type: 'success', delay: 350 },
+            { text: '  - GSAP SCROLLYTELLING PROTOCOL....', type: 'success', delay: 350 },
+            { text: '  - MATTER.JS PHYSICS GRAPHICS......', type: 'success', delay: 350 },
+            { text: 'SECURITY HANDSHAKE... SECURE_MODE_ON', delay: 450 },
+            { text: 'CACHING HIGH-PERFORMANCE WEB ASSETS...', delay: 400 }
+        ];
+
+        for (const line of lines) {
+            appendTerminalLine(line.text, line.type || 'info');
+            await new Promise(resolve => setTimeout(resolve, line.delay));
+        }
+
+        // Start preloading frames with simulated slower progression
+        let progressLine = appendTerminalLine('PRELOADING IMAGES: ' + createProgressBar(0), 'info');
+        
+        let displayedProgress = 0;
+        let targetProgress = 0;
+        
+        preloadFrames((progress) => {
+            targetProgress = progress * 100;
         });
 
-        // Auto-initialize after 2 seconds if user hasn't clicked
-        autoInitTimeout = setTimeout(() => {
-            if (!vibeSpoken) {
-                vibeLog('AUTO_INITIALIZING_BOOT_SEQUENCE');
-                bootTrigger.click();
-            }
-        }, 2000);
+        await new Promise((resolve) => {
+            const progressInterval = setInterval(() => {
+                if (displayedProgress < targetProgress) {
+                    displayedProgress += 2; // Ticks of 2%
+                    if (displayedProgress > 100) displayedProgress = 100;
+                    
+                    if (progressLine) {
+                        progressLine.innerHTML = `<span class="text-white/40">> </span>PRELOADING IMAGES: ${createProgressBar(displayedProgress)}`;
+                    }
+                    
+                    // Periodically play a tick sound (every 8%)
+                    if (Math.floor(displayedProgress) % 8 === 0) {
+                        playClickSound(600, 0.02, 0.02);
+                    }
+                }
+                
+                if (displayedProgress >= 100 && targetProgress >= 100) {
+                    clearInterval(progressInterval);
+                    resolve();
+                }
+            }, 80); // 50 steps * 80ms = 4.0 seconds for progress bar
+        });
+
+        appendTerminalLine('ASSET CACHE SYNCED. 65 FRAMES LOADED.', 'success');
+        await new Promise(resolve => setTimeout(resolve, 300));
+        appendTerminalLine('STARTING VIBE_OS GRAPHICAL INTERFACE...', 'success');
+        await new Promise(resolve => setTimeout(resolve, 400));
+        finishLoading();
     }
+
+    let audioUnmuted = false;
+
+    async function unmuteSystemAudio() {
+        if (audioUnmuted) return;
+
+        // Setup & Resume AudioContext
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            try {
+                await audioCtx.resume();
+            } catch (e) {
+                console.warn('AudioContext resume failed', e);
+            }
+        }
+
+        // Trigger welcome voice greeting
+        speakVibeInit();
+
+        // If AudioContext successfully resumed, mark as unmuted and remove listeners
+        if (audioCtx && audioCtx.state === 'running') {
+            audioUnmuted = true;
+            document.removeEventListener('click', unmuteSystemAudio);
+            document.removeEventListener('keydown', unmuteSystemAudio);
+        }
+    }
+
+    // Auto-start full boot sequence immediately on load
+    runBootSequence();
+
+    // Event listeners to unmute system audio at any point
+    document.addEventListener('click', unmuteSystemAudio);
+    document.addEventListener('keydown', unmuteSystemAudio);
+
     // --- Scrollytelling & Preloader Logic ---
     const frameCount = 65;
     const frames = [];
@@ -642,31 +783,6 @@ window.addEventListener('DOMContentLoaded', () => {
             };
             frames.push(img);
         }
-    }
-
-    function startLoading() {
-        const details = [
-            'LOAD_SYSTEM_CORE...',
-            'SYNC_VIBE_PROTOCOL...',
-            'CACHING_HERO_FRAMES...',
-            'INIT_GSAP_ENGINE...',
-            'STABILIZING_INTERFACE...',
-            'READY_FOR_DEPLOYMENT'
-        ];
-
-        preloadFrames((progress) => {
-            const totalProgress = progress * 100;
-            if (loadBar) loadBar.style.width = `${totalProgress}%`;
-            if (loadPercent) loadPercent.innerText = `${Math.floor(totalProgress)}%`;
-            
-            if (Math.random() > 0.8 && loadDetails) {
-                loadDetails.innerText = details[Math.floor(Math.random() * details.length)];
-            }
-
-            if (totalProgress >= 100) {
-                setTimeout(finishLoading, 500);
-            }
-        });
     }
 
     function finishLoading() {

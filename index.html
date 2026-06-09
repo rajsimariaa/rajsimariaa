@@ -146,29 +146,19 @@
     <canvas id="dot-grid-canvas" class="fixed inset-0 z-[-2] pointer-events-none opacity-40"></canvas>
 
     <!-- Cinematic Preloader -->
-    <div id="vibe-splash" class="fixed inset-0 z-[9999] bg-dark flex flex-col items-center justify-center text-center p-6 transition-all duration-1000">
-        <!-- Initial Interaction Trigger (Required for Audio) -->
-        <div id="boot-trigger" class="flex flex-col items-center cursor-pointer group">
-            <div class="relative mb-8">
-                <div class="w-20 h-20 border-2 border-primary/20 rounded-full animate-ping absolute inset-0"></div>
-                <div class="w-20 h-20 border border-primary/30 flex items-center justify-center rounded-full overflow-hidden group-hover:scale-110 transition-transform bg-dark/50 backdrop-blur-sm">
-                    <img src="logo.png" alt="RS" width="1024" height="1024" class="w-20 h-20 object-contain">
-                </div>
+    <div id="vibe-splash" class="fixed inset-0 z-[9999] bg-dark flex flex-col items-center justify-center p-6 transition-all duration-1000">
+        <!-- Terminal Container -->
+        <div class="w-full max-w-lg bg-black/60 border border-primary/20 rounded-xl p-6 font-mono text-xs md:text-sm text-primary shadow-[0_0_40px_rgba(0,242,255,0.05)] backdrop-blur-xl">
+            <div class="flex items-center gap-2 mb-4 border-b border-primary/10 pb-3">
+                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                <span class="ml-2 text-white/30 text-[9px] uppercase tracking-[0.2em]">vibe_kernel_bootloader v1.0.0</span>
             </div>
-            <h2 class="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-2">Click to Initialize</h2>
-            <div class="text-[8px] font-mono text-white/20 uppercase tracking-widest">Protocol_v1.0 // Auth_Required</div>
-        </div>
-
-        <!-- Loading Sequence (Hidden initially) -->
-        <div id="loading-sequence" class="hidden w-full max-w-xs">
-            <div class="flex justify-between items-end mb-4 font-mono text-[10px]">
-                <div class="text-primary tracking-widest uppercase" id="load-status">System_Booting...</div>
-                <div class="text-white/40" id="load-percent">0%</div>
+            <!-- Scrollable Terminal Log Lines -->
+            <div id="terminal-boot-log" class="space-y-1.5 h-56 md:h-64 overflow-y-auto pr-2 scrollbar-thin text-left leading-relaxed text-[11px] md:text-xs">
+                <!-- Lines will print here dynamically -->
             </div>
-            <div class="w-full h-px bg-white/10 relative overflow-hidden">
-                <div id="load-bar" class="absolute top-0 left-0 h-full bg-primary w-0 transition-all duration-300 shadow-[0_0_10px_var(--primary)]"></div>
-            </div>
-            <div class="mt-8 text-[8px] font-mono text-white/10 uppercase tracking-widest" id="load-details">Loading_Core_Modules...</div>
         </div>
     </div>
 
