@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="shortcut icon" type="image/png" href="logo.png">
+    <!-- Quill CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,6 +29,14 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        /* Quill Dark Mode */
+        .ql-toolbar.ql-snow { border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 1rem 1rem 0 0; }
+        .ql-container.ql-snow { border-color: rgba(255,255,255,0.1); border-radius: 0 0 1rem 1rem; color: white; font-family: 'Outfit', sans-serif; font-size: 1rem; }
+        .ql-snow .ql-stroke { stroke: white; }
+        .ql-snow .ql-fill { fill: white; }
+        .ql-snow .ql-picker { color: white; }
+        .ql-snow .ql-picker-options { background: #111; border-color: rgba(255,255,255,0.1); }
+        .ql-editor { min-height: 300px; }
     </style>
 </head>
 <body class="bg-dark text-white font-sans min-h-screen overflow-x-hidden">
@@ -88,6 +98,7 @@
             <button onclick="switchTab('contracts')" id="tab-contracts" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Completed Contracts</button>
             <button onclick="switchTab('affiliates')" id="tab-affiliates" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Affiliate Network</button>
             <button onclick="switchTab('faqs')" id="tab-faqs" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">FAQs Management</button>
+            <button onclick="switchTab('blogs')" id="tab-blogs" class="px-8 py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest rounded-full transition-all hover:bg-white/10 text-xs">Blogs & Docs</button>
         </div>
 
         <div id="enquiries-section">
@@ -157,6 +168,20 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="blogs-section" class="hidden">
+            <div class="mb-12 flex justify-between items-end">
+                <div>
+                    <h2 class="text-5xl font-black tracking-tighter mb-2 uppercase italic text-white font-sans">Blogs & <span class="text-primary">Docs</span></h2>
+                    <p class="text-white/40 font-mono text-sm tracking-widest" id="blogs-stats-line">// 0 PUBLISHED POSTS</p>
+                </div>
+                <button onclick="openBlogEditor()" class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-105 transition-transform text-xs">New Post</button>
+            </div>
+
+            <div id="blog-list" class="grid grid-cols-1 gap-6">
+                <!-- Blog cards injected here -->
             </div>
         </div>
 
@@ -241,8 +266,63 @@
         </div>
     </div>
 
+    <!-- Blog Editor Modal -->
+    <div id="blog-modal" class="fixed inset-0 z-[200] bg-dark/95 backdrop-blur-xl flex flex-col p-6 hidden overflow-y-auto">
+        <div class="max-w-5xl w-full mx-auto glass p-10 rounded-[40px] flex-1 my-auto flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-3xl font-black tracking-tighter uppercase" id="blog-modal-title">New Blog</h3>
+                <button onclick="closeBlogModal()" class="text-white/40 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div class="space-y-6 flex-1 flex flex-col">
+                <div>
+                    <label class="block text-[10px] text-white/40 uppercase font-bold tracking-widest mb-2 ml-2">Title</label>
+                    <input type="text" id="blog-title" placeholder="Enter blog title" class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl outline-none focus:border-primary transition-all text-xl font-bold text-white">
+                </div>
+                
+                <div class="flex-1 flex flex-col">
+                    <label class="block text-[10px] text-white/40 uppercase font-bold tracking-widest mb-2 ml-2">Content</label>
+                    <div class="flex-1 bg-white/5 rounded-2xl border border-white/10 flex flex-col">
+                        <div id="blog-editor"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+                    <button onclick="deleteBlogModal()" id="delete-blog-btn" class="px-8 py-4 text-red-400 font-black uppercase tracking-widest rounded-full hover:bg-white/5 transition-all hidden text-[10px]">Delete Post</button>
+                    <div class="flex gap-4 ml-auto">
+                        <button onclick="closeBlogModal()" class="px-8 py-4 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all">Cancel</button>
+                        <button onclick="saveBlog()" id="save-blog-btn" class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-105 transition-transform text-[10px]">Publish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Comments Modal -->
+    <div id="comments-modal" class="fixed inset-0 z-[200] bg-dark/95 backdrop-blur-xl flex flex-col p-6 hidden overflow-y-auto">
+        <div class="max-w-2xl w-full mx-auto glass p-10 rounded-[40px] flex-1 my-auto flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-6">
+                <div>
+                    <h3 class="text-3xl font-black tracking-tighter uppercase">Comments</h3>
+                    <p class="text-white/40 font-mono text-xs tracking-widest mt-1" id="comments-blog-title">// BLOG TITLE</p>
+                </div>
+                <button onclick="closeCommentsModal()" class="text-white/40 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div id="comments-list" class="space-y-6 flex-1 overflow-y-auto pr-2">
+                <!-- Comments injected here -->
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Quill JS -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.js"></script>
     <script src="firebase-config.js"></script>
     <script src="admin.js"></script>
 </body>

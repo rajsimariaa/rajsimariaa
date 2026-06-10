@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Vault | Blogs & Documentations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="shortcut icon" type="image/png" href="logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#00f2ff', secondary: '#bf00ff', dark: '#050505', accent: '#ff0055' },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        .truncate-2-lines {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-dark text-white font-sans min-h-screen overflow-x-hidden">
+
+    <!-- Header -->
+    <nav class="p-6 md:p-12 flex justify-between items-center border-b border-white/5 glass sticky top-0 z-50">
+        <a href="index.html" class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+            <img src="logo.png" alt="RS" class="h-12 w-auto">
+            <div class="text-2xl font-black tracking-tighter">VIBE <span class="text-primary">VAULT.</span></div>
+        </a>
+        
+        <div class="hidden md:flex gap-6">
+            <a href="index.html" class="text-white/60 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">Home</a>
+            <a href="affiliate.html" class="text-white/60 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">Affiliates</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-8 md:p-12 pt-20">
+        <div class="mb-16 text-center">
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-4 uppercase italic">Blogs & <span class="text-primary">Docs</span></h1>
+            <p class="text-white/40 font-mono text-sm tracking-widest uppercase">// EXPLORE MY LATEST THOUGHTS AND WORK DOCUMENTATIONS</p>
+        </div>
+
+        <div id="loading-state" class="text-center py-20 text-white/40 font-mono uppercase tracking-widest animate-pulse">
+            LOADING TRANSMISSIONS...
+        </div>
+
+        <div id="blogs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 hidden">
+            <!-- Blogs injected here -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 p-12 text-center mt-20">
+        <div class="text-[10px] text-white/20 font-mono uppercase tracking-widest">&copy; <span id="year"></span> VIBE VAULT. ALL RIGHTS RESERVED.</div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="blogs.js"></script>
+</body>
+</html>

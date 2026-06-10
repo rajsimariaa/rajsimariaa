@@ -255,20 +255,23 @@ function logout() {
 }
 
 // --- Tab System ---
+// --- Tab System ---
 window.switchTab = (tab) => {
     const enqSec = document.getElementById('enquiries-section');
     const conSec = document.getElementById('contracts-section');
     const affSec = document.getElementById('affiliates-section');
     const faqSec = document.getElementById('faqs-section');
+    const blogSec = document.getElementById('blogs-section');
     
     const enqBtn = document.getElementById('tab-enquiries');
     const conBtn = document.getElementById('tab-contracts');
     const affBtn = document.getElementById('tab-affiliates');
     const faqBtn = document.getElementById('tab-faqs');
+    const blogBtn = document.getElementById('tab-blogs');
 
     // Reset all
-    [enqSec, conSec, affSec, faqSec].forEach(s => { if (s) s.classList.add('hidden'); });
-    [enqBtn, conBtn, affBtn, faqBtn].forEach(b => {
+    [enqSec, conSec, affSec, faqSec, blogSec].forEach(s => { if (s) s.classList.add('hidden'); });
+    [enqBtn, conBtn, affBtn, faqBtn, blogBtn].forEach(b => {
         if (b) {
             b.classList.replace('bg-primary', 'bg-white/5');
             b.classList.replace('text-black', 'text-white/40');
@@ -301,6 +304,13 @@ window.switchTab = (tab) => {
             faqBtn.classList.replace('text-white/40', 'text-black');
         }
         loadFAQs();
+    } else if (tab === 'blogs') {
+        if (blogSec) blogSec.classList.remove('hidden');
+        if (blogBtn) {
+            blogBtn.classList.replace('bg-white/5', 'bg-primary');
+            blogBtn.classList.replace('text-white/40', 'text-black');
+        }
+        loadBlogs();
     }
 };
 
@@ -871,5 +881,300 @@ window.deleteFAQ = async function(id) {
         
         alert(dbDeleted ? "FAQ deleted from Cloud!" : "FAQ deleted locally!");
         loadFAQs();
+    }
+};
+
+// --- Blogs & Documentations Management ---
+let quill;
+let currentBlogId = null;
+
+// Initialize Quill
+function initQuill() {
+    if (!quill) {
+        quill = new Quill('#blog-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'font': [] }, { 'size': [] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],
+                    [{ 'header': '1'}, { 'header': '2'}, 'blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet'}, { 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'direction': 'rtl' }, { 'align': [] }],
+                    ['link', 'image', 'video'],
+                    ['clean']
+                ]
+            }
+        });
+    }
+}
+
+async function loadBlogs() {
+    if (!window.db) return;
+    try {
+        const snapshot = await window.db.collection('blogs').orderBy('createdAt', 'desc').get();
+        const blogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderBlogs(blogs);
+    } catch (error) {
+        console.error("Blogs Load Error:", error);
+    }
+}
+
+function renderBlogs(blogs) {
+    const listContainer = document.getElementById('blog-list');
+    const statsLine = document.getElementById('blogs-stats-line');
+    
+    listContainer.innerHTML = '';
+    statsLine.innerText = `// ${blogs.length} PUBLISHED POSTS`;
+
+    if (blogs.length === 0) {
+        listContainer.innerHTML = `
+            <div class="text-center py-20 opacity-20 font-mono uppercase tracking-widest bg-white/5 rounded-3xl border border-white/5 md:col-span-2">
+                No blogs yet.
+            </div>
+        `;
+        return;
+    }
+
+    blogs.forEach(blog => {
+        const date = new Date(blog.createdAt).toLocaleString('en-IN', {
+            day: '2-digit', month: 'short', year: 'numeric'
+        });
+        const card = document.createElement('div');
+        card.className = 'glass p-8 rounded-[32px] border border-white/5 hover:border-primary/30 transition-all flex flex-col justify-between';
+        card.innerHTML = `
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-2xl font-black tracking-tighter truncate" title="${blog.title}">${blog.title}</h3>
+                </div>
+                <div class="text-white/40 text-xs font-mono mb-6">${date}</div>
+                <div class="flex gap-6 mb-6">
+                    <div class="text-center">
+                        <div class="text-xl font-black text-primary">${blog.likes || 0}</div>
+                        <div class="text-[8px] uppercase tracking-widest text-white/40 font-bold">Likes</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xl font-black text-secondary">${blog.shares || 0}</div>
+                        <div class="text-[8px] uppercase tracking-widest text-white/40 font-bold">Shares</div>
+                    </div>
+                    <div class="text-center cursor-pointer hover:bg-white/5 rounded-lg px-2 transition-colors" onclick="openCommentsModal('${blog.id}', '${blog.title.replace(/'/g, "\\\\'")}')">
+                        <div class="text-xl font-black text-white">${blog.commentsCount || 0}</div>
+                        <div class="text-[8px] uppercase tracking-widest text-white/40 font-bold">Comments</div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="editBlog('${blog.id}')" class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest text-[10px] rounded-full transition-colors border border-white/10">Edit</button>
+            </div>
+        `;
+        listContainer.appendChild(card);
+    });
+}
+
+window.openBlogEditor = function() {
+    currentBlogId = null;
+    document.getElementById('blog-modal-title').innerText = "New Blog";
+    document.getElementById('blog-title').value = "";
+    document.getElementById('delete-blog-btn').classList.add('hidden');
+    initQuill();
+    quill.root.innerHTML = "";
+    document.getElementById('blog-modal').classList.remove('hidden');
+};
+
+window.editBlog = async function(id) {
+    if (!window.db) return;
+    try {
+        const doc = await window.db.collection('blogs').doc(id).get();
+        if (doc.exists) {
+            const data = doc.data();
+            currentBlogId = id;
+            document.getElementById('blog-modal-title').innerText = "Edit Blog";
+            document.getElementById('blog-title').value = data.title || "";
+            document.getElementById('delete-blog-btn').classList.remove('hidden');
+            initQuill();
+            quill.root.innerHTML = data.content || "";
+            document.getElementById('blog-modal').classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error("Error fetching blog", e);
+    }
+};
+
+window.closeBlogModal = function() {
+    document.getElementById('blog-modal').classList.add('hidden');
+};
+
+window.saveBlog = async function() {
+    const title = document.getElementById('blog-title').value.trim();
+    if (!title) { alert("Please enter a title"); return; }
+    const content = quill.root.innerHTML;
+    if (quill.getText().trim().length === 0) { alert("Please enter some content"); return; }
+
+    const blogData = {
+        title: title,
+        content: content,
+        updatedAt: new Date().toISOString()
+    };
+
+    if (!window.db) return;
+    const saveBtn = document.getElementById('save-blog-btn');
+    saveBtn.innerText = "Publishing...";
+    
+    try {
+        if (currentBlogId) {
+            await window.db.collection('blogs').doc(currentBlogId).update(blogData);
+        } else {
+            blogData.createdAt = new Date().toISOString();
+            blogData.likes = 0;
+            blogData.shares = 0;
+            blogData.commentsCount = 0;
+            blogData.published = true;
+            await window.db.collection('blogs').add(blogData);
+        }
+        closeBlogModal();
+        loadBlogs();
+    } catch (error) {
+        console.error("Error saving blog", error);
+        alert("Failed to save blog.");
+    } finally {
+        saveBtn.innerText = "Publish";
+    }
+};
+
+window.deleteBlogModal = async function() {
+    if (!currentBlogId) return;
+    if (confirm("Are you sure you want to delete this post? This action is permanent.")) {
+        try {
+            await window.db.collection('blogs').doc(currentBlogId).delete();
+            closeBlogModal();
+            loadBlogs();
+        } catch (e) {
+            console.error("Error deleting blog", e);
+            alert("Failed to delete blog.");
+        }
+    }
+};
+
+// --- Comments Management ---
+let currentCommentsBlogId = null;
+
+window.openCommentsModal = async function(blogId, blogTitle) {
+    currentCommentsBlogId = blogId;
+    document.getElementById('comments-blog-title').innerText = `// ${blogTitle}`;
+    document.getElementById('comments-list').innerHTML = `<div class="text-white/40 text-center font-mono">Loading...</div>`;
+    document.getElementById('comments-modal').classList.remove('hidden');
+    loadComments(blogId);
+};
+
+window.closeCommentsModal = function() {
+    document.getElementById('comments-modal').classList.add('hidden');
+};
+
+async function loadComments(blogId) {
+    if (!window.db) return;
+    try {
+        const snapshot = await window.db.collection('blogComments')
+            .where('blogId', '==', blogId)
+            .orderBy('createdAt', 'desc')
+            .get();
+        const comments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderComments(comments);
+    } catch (error) {
+        console.error("Comments Load Error:", error);
+        // Error here often means missing composite index for where+orderBy
+        // We'll fallback to unsorted if it fails
+        try {
+            const snapshot2 = await window.db.collection('blogComments').where('blogId', '==', blogId).get();
+            const comments = snapshot2.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            comments.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+            renderComments(comments);
+        } catch (e) {
+             document.getElementById('comments-list').innerHTML = `<div class="text-red-400 text-center font-mono">Failed to load.</div>`;
+        }
+    }
+}
+
+function renderComments(comments) {
+    const list = document.getElementById('comments-list');
+    list.innerHTML = '';
+    
+    if (comments.length === 0) {
+        list.innerHTML = `<div class="text-center py-10 opacity-20 font-mono uppercase tracking-widest bg-white/5 rounded-3xl border border-white/5">No comments yet.</div>`;
+        return;
+    }
+
+    comments.forEach(comment => {
+        const date = new Date(comment.createdAt).toLocaleString('en-IN', {
+            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+        });
+        
+        let repliesHtml = '';
+        if (comment.replies && comment.replies.length > 0) {
+            repliesHtml = `<div class="mt-4 space-y-3 pl-4 border-l border-white/10">`;
+            comment.replies.forEach(reply => {
+                const rDate = new Date(reply.createdAt).toLocaleString('en-IN', {
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+                repliesHtml += `
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold text-sm text-primary">${reply.author}</span>
+                            <span class="text-[10px] text-white/40 font-mono">${rDate}</span>
+                        </div>
+                        <p class="text-white/80 text-sm">${reply.text}</p>
+                    </div>
+                `;
+            });
+            repliesHtml += `</div>`;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'glass p-6 rounded-[24px] border border-white/5';
+        div.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <span class="font-bold text-white text-lg">${comment.author}</span>
+                <span class="text-[10px] text-white/40 font-mono">${date}</span>
+            </div>
+            <p class="text-white/80 mb-4">${comment.text}</p>
+            
+            ${repliesHtml}
+            
+            <div class="mt-4 flex gap-2">
+                <input type="text" id="reply-input-${comment.id}" placeholder="Write a reply..." class="flex-1 bg-white/5 border border-white/10 py-2 px-4 rounded-xl outline-none focus:border-primary transition-all text-sm">
+                <button onclick="replyToComment('${comment.id}')" class="px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all border border-primary/20">Reply</button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+window.replyToComment = async function(commentId) {
+    const input = document.getElementById(`reply-input-${commentId}`);
+    const text = input.value.trim();
+    if (!text) return;
+    
+    if (!window.db) return;
+    
+    const reply = {
+        author: 'Admin',
+        text: text,
+        createdAt: new Date().toISOString()
+    };
+    
+    try {
+        const commentRef = window.db.collection('blogComments').doc(commentId);
+        const doc = await commentRef.get();
+        if (doc.exists) {
+            const data = doc.data();
+            const replies = data.replies || [];
+            replies.push(reply);
+            await commentRef.update({ replies: replies });
+            input.value = '';
+            loadComments(currentCommentsBlogId); // Refresh list
+        }
+    } catch (e) {
+        console.error("Failed to reply", e);
+        alert("Failed to send reply");
     }
 };

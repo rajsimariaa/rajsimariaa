@@ -44,6 +44,18 @@ service cloud.firestore {
       allow update, delete: if true;
     }
 
+    // BLOGS & DOCUMENTATIONS
+    match /blogs/{blog} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+    
+    // BLOG COMMENTS
+    match /blogComments/{comment} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
     // GLOBAL: Protective fallback
     match /{document=**} {
       allow read: if true;

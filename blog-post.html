@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Vault | Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="shortcut icon" type="image/png" href="logo.png">
+    <!-- Quill Snow CSS for formatting -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#00f2ff', secondary: '#bf00ff', dark: '#050505', accent: '#ff0055' },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        
+        /* Viewer quill styling overrides */
+        .ql-container.ql-snow { border: none; font-family: 'Outfit', sans-serif; font-size: 1.125rem; }
+        .ql-editor { padding: 0; }
+        .ql-editor h1, .ql-editor h2, .ql-editor h3 { color: white; margin-bottom: 1rem; font-weight: 900; }
+        .ql-editor h1 { font-size: 2.5rem; }
+        .ql-editor h2 { font-size: 2rem; }
+        .ql-editor p { margin-bottom: 1rem; line-height: 1.7; color: rgba(255,255,255,0.8); }
+        .ql-editor a { color: #00f2ff; text-decoration: underline; }
+        .ql-editor img { border-radius: 1rem; margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .ql-editor blockquote { border-left: 4px solid #bf00ff; padding-left: 1rem; color: rgba(255,255,255,0.6); font-style: italic; }
+        .ql-editor ul, .ql-editor ol { margin-bottom: 1rem; padding-left: 1.5rem; color: rgba(255,255,255,0.8); }
+        .ql-editor pre { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); color: #00f2ff; }
+    </style>
+</head>
+<body class="bg-dark text-white font-sans min-h-screen overflow-x-hidden">
+
+    <!-- Header -->
+    <nav class="p-6 md:p-12 flex justify-between items-center border-b border-white/5 glass sticky top-0 z-50">
+        <a href="index.html" class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+            <img src="logo.png" alt="RS" class="h-12 w-auto">
+            <div class="text-2xl font-black tracking-tighter">VIBE <span class="text-primary">VAULT.</span></div>
+        </a>
+        
+        <div class="hidden md:flex gap-6">
+            <a href="blogs.html" class="text-primary hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">&larr; Back to Blogs</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-6 md:p-12 pt-12">
+        <div id="loading-state" class="text-center py-40 text-white/40 font-mono uppercase tracking-widest animate-pulse">
+            DECRYPTING TRANSMISSION...
+        </div>
+
+        <article id="blog-article" class="hidden">
+            <header class="mb-12 border-b border-white/10 pb-10">
+                <div class="text-[10px] text-primary font-mono tracking-widest uppercase mb-4" id="blog-date">// DATE</div>
+                <h1 class="text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-tight" id="blog-title">Blog Title</h1>
+                <div class="flex gap-4 items-center">
+                    <button onclick="likeBlog()" id="like-btn" class="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-primary group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        <span id="likes-count" class="font-bold text-sm">0</span>
+                    </button>
+                    <button onclick="shareBlog()" class="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-secondary group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                        <span class="font-bold text-sm">Share</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="ql-snow">
+                <div class="ql-editor" id="blog-content">
+                    <!-- Content injected here -->
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <section class="mt-20 pt-12 border-t border-white/10">
+                <h3 class="text-3xl font-black tracking-tighter uppercase mb-8">Comments <span class="text-primary" id="comments-count">(0)</span></h3>
+                
+                <div class="glass p-6 md:p-8 rounded-[32px] mb-10">
+                    <h4 class="text-lg font-bold mb-4">Leave a comment</h4>
+                    <input type="text" id="comment-author" placeholder="Your Name" class="w-full bg-white/5 border border-white/10 py-3 px-5 rounded-xl outline-none focus:border-primary transition-all mb-4 text-sm">
+                    <textarea id="comment-text" placeholder="Your Thoughts..." class="w-full bg-white/5 border border-white/10 py-3 px-5 rounded-xl outline-none focus:border-primary transition-all mb-4 text-sm min-h-[100px]"></textarea>
+                    <button onclick="submitComment()" class="px-8 py-3 bg-primary text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-transform">Post Comment</button>
+                </div>
+
+                <div id="comments-list" class="space-y-6">
+                    <!-- Comments injected here -->
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 p-12 text-center mt-20">
+        <div class="text-[10px] text-white/20 font-mono uppercase tracking-widest">&copy; <span id="year"></span> VIBE VAULT. ALL RIGHTS RESERVED.</div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="blogs.js"></script>
+</body>
+</html>
