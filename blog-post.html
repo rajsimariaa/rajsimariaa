@@ -11,18 +11,7 @@
     <link rel="shortcut icon" type="image/png" href="logo.png">
     <!-- Quill Snow CSS for formatting -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.snow.css" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: { primary: '#00f2ff', secondary: '#bf00ff', dark: '#050505', accent: '#ff0055' },
-                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
+    
     <style>
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
         ::-webkit-scrollbar { width: 5px; }
@@ -42,6 +31,8 @@
         .ql-editor ul, .ql-editor ol { margin-bottom: 1rem; padding-left: 1.5rem; color: rgba(255,255,255,0.8); }
         .ql-editor pre { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); color: #00f2ff; }
     </style>
+    <link rel="preload" href="output.css" as="style">
+    <link rel="stylesheet" href="output.css">
 </head>
 <body class="bg-dark text-white font-sans min-h-screen overflow-x-hidden">
 

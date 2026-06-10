@@ -99,29 +99,9 @@
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="shortcut icon" type="image/png" href="logo.png">
 
-    <!-- Tailwind CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#00f2ff',
-                        secondary: '#bf00ff',
-                        dark: '#050505',
-                    },
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                }
-            }
-        }
-    </script>
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Built CSS -->
+    <link rel="preload" href="output.css" as="style">
+    <link rel="stylesheet" href="output.css">
     <style>
         #tech-balls-container canvas {
             display: block;
@@ -165,7 +145,7 @@
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 w-full z-[100] p-6 md:p-10 flex justify-between items-center">
         <div class="hover:scale-110 transition-transform cursor-pointer relative z-[101]" id="nav-logo">
-            <img src="logo.png" alt="RS" width="1024" height="1024" class="h-14 md:h-16 w-auto">
+            <img src="logo.webp" alt="RS" width="1024" height="1024" class="h-14 md:h-16 w-auto" fetchpriority="high" decoding="async">
         </div>
         <div id="nav-links-container" class="hidden md:flex gap-12 text-sm font-medium tracking-widest uppercase items-center">
             <a href="#hero" class="nav-link hover:text-primary transition-colors">Intro</a>
@@ -239,7 +219,7 @@
             <div class="max-w-4xl mx-auto relative z-20 flex flex-col md:flex-row gap-12 items-center">
                 <div class="w-full md:w-1/3 flex justify-center">
                     <div class="relative w-48 h-48 rounded-full overflow-hidden border border-primary/20 bg-white/5 p-2 shadow-[0_0_30px_rgba(0,242,255,0.05)]">
-                        <img src="logo.png" alt="Raj Simaria" class="w-full h-full object-contain rounded-full">
+                        <img src="logo.webp" alt="Raj Simaria" class="w-full h-full object-contain rounded-full" loading="lazy" decoding="async">
                     </div>
                 </div>
                 <div class="w-full md:w-2/3 text-center md:text-left">
@@ -336,7 +316,7 @@
                     <!-- Project Item 01 -->
                     <div class="work-item group" data-parallax="0.05">
                         <div class="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 mb-8 cursor-pointer group-hover:border-primary/30 transition-colors">
-                            <img src="Shades of Hue.jpeg" alt="Shades of Hue - Creative Development portfolio project by Raj Simaria" loading="lazy" width="1600" height="880" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:rotate-1 grayscale group-hover:grayscale-0">
+                            <img src="Shades of Hue.webp" alt="Shades of Hue - Creative Development portfolio project by Raj Simaria" loading="lazy" decoding="async" width="1600" height="880" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:rotate-1 grayscale group-hover:grayscale-0">
                             <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
                                 <a href="https://shadesofhue.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary">Visit Project</a>
@@ -355,7 +335,7 @@
                     <!-- Project Item 02 -->
                     <div class="work-item group mt-12 md:mt-24" data-parallax="-0.05">
                         <div class="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 mb-8 cursor-pointer group-hover:border-secondary/30 transition-colors">
-                            <img src="K Lulla.jpeg" alt="K Lulla Enterprises - Custom web solutions portfolio project by Raj Simaria" loading="lazy" width="1600" height="882" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:-rotate-1 grayscale group-hover:grayscale-0">
+                            <img src="K Lulla.webp" alt="K Lulla Enterprises - Custom web solutions portfolio project by Raj Simaria" loading="lazy" decoding="async" width="1600" height="882" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:-rotate-1 grayscale group-hover:grayscale-0">
                             <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
                                 <a href="https://klulla.com" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-secondary hover:text-white">Visit Project</a>
@@ -374,7 +354,7 @@
                     <!-- Project Item 03 -->
                     <div class="work-item group" data-parallax="0.08">
                         <div class="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 mb-8 cursor-pointer group-hover:border-primary/30 transition-colors">
-                            <img src="Shreeji Ear Collection.jpeg" alt="Shreeji Ear Care Platform - Medical UX design portfolio project by Raj Simaria" loading="lazy" width="1600" height="886" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:rotate-1 grayscale group-hover:grayscale-0">
+                            <img src="Shreeji Ear Collection.webp" alt="Shreeji Ear Care Platform - Medical UX design portfolio project by Raj Simaria" loading="lazy" decoding="async" width="1600" height="886" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:rotate-1 grayscale group-hover:grayscale-0">
                             <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
                                 <a href="https://shreeji-earcare.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary">Visit Project</a>
@@ -393,7 +373,7 @@
                     <!-- Project Item 04 -->
                     <div class="work-item group mt-12 md:mt-24" data-parallax="-0.08">
                         <div class="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 mb-8 cursor-pointer group-hover:border-secondary/30 transition-colors">
-                            <img src="Shreeji Collection.jpeg" alt="Shreeji Collection - E-Commerce store portfolio project by Raj Simaria" loading="lazy" width="1600" height="871" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:-rotate-1 grayscale group-hover:grayscale-0">
+                            <img src="Shreeji Collection.webp" alt="Shreeji Collection - E-Commerce store portfolio project by Raj Simaria" loading="lazy" decoding="async" width="1600" height="871" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:-rotate-1 grayscale group-hover:grayscale-0">
                             <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
                                 <a href="https://shreeji-collection.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-secondary hover:text-white">Visit Project</a>
@@ -412,7 +392,7 @@
                     <!-- Project Item 05 -->
                     <div class="work-item group" data-parallax="0.05">
                         <div class="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 mb-8 cursor-pointer group-hover:border-primary/30 transition-colors">
-                            <img src="Raj Textiles.jpeg" alt="Raj Textiles - Wholesale White Cloth Merchant portfolio project by Raj Simaria" loading="lazy" width="1600" height="900" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:rotate-1 grayscale group-hover:grayscale-0">
+                            <img src="Raj Textiles.webp" alt="Raj Textiles - Wholesale White Cloth Merchant portfolio project by Raj Simaria" loading="lazy" decoding="async" width="1600" height="900" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:rotate-1 grayscale group-hover:grayscale-0">
                             <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
                                 <a href="https://raj-textiles.vercel.app" target="_blank" class="px-10 py-5 bg-white text-black font-black rounded-full uppercase text-[10px] tracking-[0.2em] transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary">Visit Project</a>

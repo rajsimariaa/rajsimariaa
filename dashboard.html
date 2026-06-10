@@ -11,32 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#030303',
-                        sidebar: '#0a0a0a',
-                        card: 'rgba(15, 15, 15, 0.6)',
-                        border: 'rgba(255, 255, 255, 0.08)',
-                        cyan: {
-                            DEFAULT: '#22d3ee',
-                            light: '#67e8f9',
-                        },
-                        emerald: {
-                            DEFAULT: '#34d399',
-                            light: '#6ee7b7',
-                        },
-                    },
-                    fontFamily: {
-                        outfit: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    
     <style>
         .glass {
             background: rgba(15, 15, 15, 0.6);
@@ -67,6 +42,8 @@
     </style>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preload" href="output.css" as="style">
+    <link rel="stylesheet" href="output.css">
 </head>
 
 <body class="bg-dark text-white font-outfit antialiased min-h-screen selection:bg-cyan selection:text-black">

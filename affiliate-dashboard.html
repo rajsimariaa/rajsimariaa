@@ -9,18 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: { primary: '#ffffff', accent: '#00ffcc', dark: '#080808', darker: '#050505' },
-                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
+    
     <style>
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .text-gradient { background: linear-gradient(to right, #fff, #00ffcc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -29,6 +18,8 @@
         ::-webkit-scrollbar-track { background: #080808; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     </style>
+    <link rel="preload" href="output.css" as="style">
+    <link rel="stylesheet" href="output.css">
 </head>
 <body class="bg-dark text-white font-sans min-h-screen overflow-x-hidden">
 
