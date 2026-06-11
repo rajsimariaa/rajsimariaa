@@ -56,11 +56,12 @@ body {
 .border-text-thick {
     color: transparent;
     -webkit-text-stroke: 2px white;
-    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
 }
 
 /* Custom Cursor */
-#cursor, #cursor-follower {
+#cursor,
+#cursor-follower {
     pointer-events: none;
     transform: translate(-50%, -50%);
 }
@@ -109,8 +110,15 @@ html.lenis {
 
 /* Animations */
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 .floating {
@@ -127,7 +135,7 @@ html.lenis {
 .nav-link {
     position: relative;
     color: white !important;
-    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .nav-link::after {
@@ -169,14 +177,16 @@ html.lenis {
 
 /* Touch Device Optimization */
 @media (hover: none) and (pointer: coarse) {
-    #cursor, #cursor-follower {
+
+    #cursor,
+    #cursor-follower {
         display: none !important;
     }
-    
+
     .expertise-card:hover {
         transform: none;
     }
-    
+
     .expertise-card:active {
         transform: scale(0.98);
         border-color: var(--primary);
@@ -188,20 +198,22 @@ html.lenis {
     .border-text {
         -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.3);
     }
-    .expertise-card, .work-item {
+
+    .expertise-card,
+    .work-item {
         margin-bottom: 2rem;
     }
 }
 
 /* Premium Tech Arsenal Effects */
 .expertise-card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
-    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 .expertise-card:hover {
-    box-shadow: 0 20px 40px -15px rgba(0,242,255,0.2);
-    background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    box-shadow: 0 20px 40px -15px rgba(0, 242, 255, 0.2);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .work-item img {
