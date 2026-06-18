@@ -81,327 +81,9 @@ window.addEventListener('DOMContentLoaded', () => {
         if (referralInput) referralInput.value = activeRef;
     }
     
-    // --- Terminal Controls ---
-    const vibeConsole = document.getElementById('vibe-console');
-    const closeBtn = document.getElementById('vibe-close');
-    const minimizeBtn = document.getElementById('vibe-minimize');
-    const maximizeBtn = document.getElementById('vibe-maximize');
-    
-    const terminalTrigger = document.getElementById('terminal-trigger');
-    
-    let isMinimized = false;
 
-    if (closeBtn && vibeConsole && terminalTrigger) {
-        closeBtn.addEventListener('click', () => {
-            vibeLog('TERMINATING_TERMINAL...');
-            gsap.to(vibeConsole, { 
-                scale: 0.8, 
-                opacity: 0, 
-                duration: 0.5, 
-                ease: 'power4.in',
-                onComplete: () => {
-                    vibeConsole.classList.add('hidden');
-                    // Show small trigger button
-                    gsap.to(terminalTrigger, { 
-                        scale: 1, 
-                        opacity: 1, 
-                        duration: 0.5, 
-                        ease: 'back.out(1.7)',
-                        onStart: () => {
-                            terminalTrigger.classList.remove('pointer-events-none');
-                        }
-                    });
-                }
-            });
-        });
 
-        terminalTrigger.addEventListener('click', () => {
-            vibeConsole.classList.remove('hidden');
-            vibeLog('RESTORING_FROM_VOID...');
-            
-            // Hide trigger button
-            gsap.to(terminalTrigger, { 
-                scale: 0, 
-                opacity: 0, 
-                duration: 0.3, 
-                ease: 'back.in(1.7)',
-                onComplete: () => {
-                    terminalTrigger.classList.add('pointer-events-none');
-                }
-            });
 
-            // Show terminal
-            gsap.to(vibeConsole, { 
-                scale: 1, 
-                opacity: 1, 
-                duration: 0.5, 
-                ease: 'power4.out'
-            });
-        });
-    }
-
-    if (minimizeBtn && vibeConsole) {
-        minimizeBtn.addEventListener('click', () => {
-            if (!isMinimized) {
-                vibeLog('MINIMIZING_TERMINAL...');
-                gsap.to(vibeConsole, { 
-                    height: '32px', 
-                    width: '220px',
-                    duration: 0.6, 
-                    ease: 'expo.inOut' 
-                });
-                gsap.to('#console-logs', { opacity: 0, duration: 0.3 });
-                isMinimized = true;
-            } else {
-                restoreTerminal();
-            }
-        });
-    }
-
-    function restoreTerminal() {
-        if (!isMinimized) return;
-        vibeLog('RESTORING_TERMINAL...');
-        gsap.to(vibeConsole, { 
-            height: '160px', 
-            width: '288px', 
-            duration: 0.6, 
-            ease: 'expo.inOut' 
-        });
-        gsap.to('#console-logs', { opacity: 1, duration: 0.3, delay: 0.3 });
-        isMinimized = false;
-    }
-
-    if (maximizeBtn) {
-        maximizeBtn.addEventListener('click', () => {
-            if (isMinimized) {
-                restoreTerminal();
-            } else {
-                vibeLog('STAYING_AS_IS...');
-            }
-        });
-    }
-
-    // --- Interactive Terminal Logic ---
-    const terminalInput = document.getElementById('terminal-input');
-    let terminalFlow = {
-        active: false,
-        type: 'inquiry', // 'inquiry' or 'faq'
-        step: 0,
-        data: {}
-    };
-
-    const inquirySteps = [
-        { key: 'name', prompt: 'ENTER_YOUR_NAME:' },
-        { key: 'email', prompt: 'ENTER_EMAIL_ADDRESS:' },
-        { key: 'phone', prompt: 'ENTER_PHONE_NUMBER:' },
-        { key: 'budget', prompt: 'ENTER_ESTIMATED_BUDGET (INR, e.g. 50000):' },
-        { key: 'details', prompt: 'DESCRIBE_REQUIREMENTS:' },
-        { key: 'referralCode', prompt: 'REFERRAL_CODE_(OPTIONAL):' }
-    ];
-
-    const faqSteps = [
-        { key: 'askedByName', prompt: 'ENTER_YOUR_NAME (OPTIONAL):' },
-        { key: 'question', prompt: 'ENTER_YOUR_QUESTION:' }
-    ];
-
-    if (terminalInput) {
-        terminalInput.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter') {
-                const rawInput = terminalInput.value.trim();
-                if (!rawInput) return;
-
-                vibeLog(`$ ${rawInput}`, 'command');
-                terminalInput.value = '';
-                
-                if (terminalFlow.active) {
-                    await handleFlowStep(rawInput);
-                } else {
-                    const parts = rawInput.split(' ');
-                    const baseCmd = parts[0].toLowerCase();
-                    const args = parts.slice(1);
-                    await processCommand(baseCmd, args, rawInput);
-                }
-            }
-        });
-    }
-
-    async function handleFlowStep(input) {
-        const steps = terminalFlow.type === 'faq' ? faqSteps : inquirySteps;
-        const currentStep = steps[terminalFlow.step];
-        terminalFlow.data[currentStep.key] = input;
-        
-        terminalFlow.step++;
-        
-        if (terminalFlow.step < steps.length) {
-            // Skip referral step if already auto-filled
-            if (terminalFlow.type === 'inquiry' && steps[terminalFlow.step].key === 'referralCode' && terminalFlow.data.referralCode) {
-                vibeLog(`CONFIRMING_REFERRAL: ${terminalFlow.data.referralCode}`);
-                await handleFlowStep(terminalFlow.data.referralCode);
-                return;
-            }
-            vibeLog(steps[terminalFlow.step].prompt);
-            terminalInput.placeholder = `Provide ${steps[terminalFlow.step].key}...`;
-        } else {
-            if (terminalFlow.type === 'faq') {
-                vibeLog('TRANSMITTING_QUESTION...');
-                await submitFAQFromTerminal(terminalFlow.data);
-            } else {
-                vibeLog('COMPILING_TRANSMISSION...');
-                await submitFinalInquiry(terminalFlow.data);
-            }
-            resetTerminalFlow();
-        }
-    }
-
-    function resetTerminalFlow() {
-        terminalFlow = { active: false, type: 'inquiry', step: 0, data: {} };
-        terminalInput.placeholder = "Type 'help'...";
-    }
-
-    async function processCommand(baseCmd, args, rawInput) {
-        switch (baseCmd) {
-            case 'help':
-                vibeLog('AVAILABLE_COMMANDS:');
-                vibeLog(' - start: Begin inquiry flow');
-                vibeLog(' - faq: View knowledge base FAQs');
-                vibeLog(' - ask: Submit a new FAQ question');
-                vibeLog(' - book: Schedule a 1:1 call');
-                vibeLog(' - about: Core bio');
-                vibeLog(' - work: View portfolio');
-                vibeLog(' - instagram: My social profile');
-                vibeLog(' - clear: Flush console');
-                break;
-            case 'start':
-            case 'inquiry':
-                vibeLog('INITIATING_INQUIRY_PROTOCOL...');
-                terminalFlow.active = true;
-                terminalFlow.type = 'inquiry';
-                terminalFlow.step = 0;
-                
-                // Pre-fill referral if available
-                const storedRef = sessionStorage.getItem('active_referral');
-                const storedAffId = sessionStorage.getItem('active_affiliate_id');
-
-                if (storedRef) {
-                    terminalFlow.data.referralCode = storedRef;
-                    vibeLog(`APPLYING_STORED_REFERRAL: ${storedRef}`);
-                }
-                if (storedAffId) {
-                    terminalFlow.data.affiliateId = storedAffId;
-                    vibeLog(`DIRECT_AFFILIATE_ID_ATTACHED`);
-                }
-
-                vibeLog(inquirySteps[0].prompt);
-                terminalInput.placeholder = "Provide name...";
-                break;
-            case 'faq':
-                vibeLog('SYSTEM_KNOWLEDGE_BASE (FAQs):');
-                const faqsToPrint = window.loadedFAQs || DEFAULT_FAQS;
-                faqsToPrint.forEach((f, idx) => {
-                    vibeLog(`Q${idx + 1}: ${f.question}`);
-                    vibeLog(`A: ${f.answer}`);
-                    vibeLog('---------------------------');
-                });
-                vibeLog("TYPE 'ask' TO SUBMIT A NEW QUESTION.");
-                break;
-            case 'ask':
-                vibeLog('INITIATING_QUESTION_PROTOCOL...');
-                terminalFlow.active = true;
-                terminalFlow.type = 'faq';
-                terminalFlow.step = 0;
-                vibeLog(faqSteps[0].prompt);
-                terminalInput.placeholder = "Provide name...";
-                break;
-            case 'book':
-            case 'meet':
-            case 'schedule':
-                vibeLog('OPENING_MEETING_PORTAL...');
-                window.open('https://calendar.app.google/F7Qg6tBBHf3MCRBE7', '_blank');
-                break;
-            case 'about':
-                vibeLog('RAJ SIMARIA: WEBSITE DEVELOPER.');
-                vibeLog('FOCUSED ON HIGH-PERFORMANCE DIGITAL SOLUTIONS.');
-                vibeLog('TECH: NEXT.JS | THREE.JS | GSAP');
-                vibeLog('STATUS: OPEN_FOR_CONTRACTS');
-                break;
-            case 'work':
-                vibeLog('NAVIGATING_TO_WORK...');
-                document.querySelector('#work').scrollIntoView({ behavior: 'smooth' });
-                break;
-            case 'instagram':
-            case 'social':
-                vibeLog('OPENING_INSTAGRAM_PROFILE...');
-                window.open('https://www.instagram.com/raj.simaria', '_blank');
-                break;
-            case 'clear':
-                consoleLogs.innerHTML = '';
-                vibeLog('CONSOLE_FLUSHED');
-                break;
-            default:
-                vibeLog(`UNKNOWN_COMMAND: ${baseCmd}`, 'error');
-                vibeLog("TYPE 'help' FOR AVAILABLE PROTOCOLS");
-        }
-    }
-
-    async function submitFinalInquiry(data) {
-        vibeLog('SENDING_TO_VAULT...');
-        if (data.budget && !data.budget.toString().includes('₹')) {
-            const rawVal = parseInt(data.budget.toString().replace(/[^\d]/g, '')) || 2500;
-            data.budget = `₹${rawVal.toLocaleString('en-IN')}`;
-        }
-        const formData = {
-            ...data,
-            affiliateId: sessionStorage.getItem('active_affiliate_id') || null,
-            countryCode: '', // Captured in phone usually in terminal
-            date: new Date().toISOString(),
-            id: Date.now(),
-            source: 'terminal_flow'
-        };
-
-        try {
-            if (window.db) {
-                await window.db.collection('enquiries').add(formData);
-                vibeLog('TRANSMISSION_COMPLETE', 'success');
-                vibeLog('SYSTEM_IDLE');
-            } else {
-                const vault = JSON.parse(localStorage.getItem('vibe_vault') || '[]');
-                vault.push(formData);
-                localStorage.setItem('vibe_vault', JSON.stringify(vault));
-                vibeLog('LOCAL_SYNC_COMPLETE', 'success');
-            }
-        } catch (e) {
-            vibeLog('TRANSMISSION_FAILED', 'error');
-        }
-    }
-
-    async function submitFAQFromTerminal(data) {
-        vibeLog('SENDING_TO_FAQ_VAULT...');
-        const faqData = {
-            question: data.question,
-            askedByName: data.askedByName || 'Anonymous',
-            answer: '',
-            isAnswered: false,
-            isApproved: false,
-            dateAsked: new Date().toISOString()
-        };
-
-        try {
-            if (window.db) {
-                await window.db.collection('faqs').add(faqData);
-                vibeLog('TRANSMISSION_COMPLETE', 'success');
-                vibeLog('QUESTION_RECEIVED: SYSTEM_PENDING_ANSWER');
-            } else {
-                const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
-                localFaqs.push({ ...faqData, id: Date.now() });
-                localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
-                vibeLog('LOCAL_SYNC_COMPLETE', 'success');
-                vibeLog('QUESTION_RECEIVED_LOCALLY');
-            }
-        } catch (e) {
-            console.error("Terminal FAQ submission error:", e);
-            vibeLog('TRANSMISSION_FAILED', 'error');
-        }
-    }
 
     // --- Smooth Section Transitions (Vibe Warp) ---
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -467,106 +149,37 @@ window.addEventListener('DOMContentLoaded', () => {
     // --- Custom Cursor Removed ---
 
 
-    // --- Cinematic Preloader Logic (Terminal Format & Auto-Init) ---
-    const terminalLog = document.getElementById('terminal-boot-log');
+    // --- Simple Preloader Logic ---
     const tl = gsap.timeline({ paused: true });
-
-    // Helper to print a line to our terminal boot log
-    function appendTerminalLine(text, type = 'info') {
-        if (!terminalLog) return null;
-        const line = document.createElement('div');
-        line.className = 'opacity-0 transform translate-y-1 transition-all duration-300';
-        
-        let prefix = '> ';
-        if (type === 'success') prefix = '[  OK  ] ';
-        if (type === 'warning') prefix = '[ WARN ] ';
-        
-        line.innerHTML = `<span class="text-white/40">${prefix}</span>${text}`;
-        terminalLog.appendChild(line);
-        
-        // Force reflow and animate
-        setTimeout(() => {
-            line.classList.remove('opacity-0', 'translate-y-1');
-        }, 10);
-        
-        // Auto scroll to bottom
-        terminalLog.scrollTop = terminalLog.scrollHeight;
-
-        return line;
-    }
-
-    function createProgressBar(percent) {
-        const width = 15; // width in characters
-        const filled = Math.round((percent / 100) * width);
-        const empty = width - filled;
-        const barStr = '='.repeat(filled) + (filled < width ? '>' : '') + ' '.repeat(Math.max(0, empty - (filled < width ? 1 : 0)));
-        return `[${barStr}] ${Math.floor(percent)}%`;
-    }
+    const progressBar = document.getElementById('loading-progress-bar');
+    const progressText = document.getElementById('loading-percentage');
 
     async function runBootSequence() {
-        if (!terminalLog) return;
-        terminalLog.innerHTML = '';
-
-        // Print OS header immediately
-        const l1 = document.createElement('div');
-        l1.innerHTML = `<span class="text-white/40">> </span>VIBE_OS v1.0.0`;
-        terminalLog.appendChild(l1);
-
-        const lines = [
-            { text: 'CONNECTING SECURE PROTOCOL...', delay: 350 },
-            { text: 'INITIALIZING VIBE_KERNEL v1.0.0...', delay: 500 },
-            { text: 'ESTABLISHING HANDSHAKE WITH CLIENT NODE...', delay: 400 },
-            { text: 'LOADING PORTFOLIO ENGINE SYSTEM:', delay: 300 },
-            { text: '  - NEXT.JS CORE DEPS...............', type: 'success', delay: 350 },
-            { text: '  - THREE.JS 3D WEBGL ENGINE........', type: 'success', delay: 350 },
-            { text: '  - GSAP SCROLLYTELLING PROTOCOL....', type: 'success', delay: 350 },
-            { text: '  - MATTER.JS PHYSICS GRAPHICS......', type: 'success', delay: 350 },
-            { text: 'SECURITY HANDSHAKE... SECURE_MODE_ON', delay: 450 },
-            { text: 'CACHING HIGH-PERFORMANCE WEB ASSETS...', delay: 400 }
-        ];
-
-        for (const line of lines) {
-            appendTerminalLine(line.text, line.type || 'info');
-            await new Promise(resolve => setTimeout(resolve, line.delay));
-        }
-
-        // Start preloading frames with simulated slower progression
-        let progressLine = appendTerminalLine('PRELOADING IMAGES: ' + createProgressBar(0), 'info');
-        
         let displayedProgress = 0;
-        let targetProgress = 0;
         
-        preloadFrames((progress) => {
-            targetProgress = progress * 100;
-        });
+        // Load frames in the background without blocking the UI
+        preloadFrames(() => {});
 
         await new Promise((resolve) => {
             const progressInterval = setInterval(() => {
-                if (displayedProgress < targetProgress) {
-                    displayedProgress += 2; // Ticks of 2%
-                    if (displayedProgress > 100) displayedProgress = 100;
-                    
-                    if (progressLine) {
-                        progressLine.innerHTML = `<span class="text-white/40">> </span>PRELOADING IMAGES: ${createProgressBar(displayedProgress)}`;
-                    }
-                }
-                
-                if (displayedProgress >= 100 && targetProgress >= 100) {
+                displayedProgress += 2; // Slower constant speed (2% per tick)
+                if (displayedProgress >= 100) {
+                    displayedProgress = 100;
                     clearInterval(progressInterval);
                     resolve();
                 }
-            }, 80); // 50 steps * 80ms = 4.0 seconds for progress bar
+                
+                if (progressBar && progressText) {
+                    progressBar.style.width = `${displayedProgress}%`;
+                    progressText.innerText = `${Math.floor(displayedProgress)}%`;
+                }
+            }, 30); // ~1.5 seconds total loading animation time
         });
 
-        appendTerminalLine('ASSET CACHE SYNCED. 65 FRAMES LOADED.', 'success');
-        await new Promise(resolve => setTimeout(resolve, 300));
-        appendTerminalLine('STARTING VIBE_OS GRAPHICAL INTERFACE...', 'success');
+        // Brief pause at 100% so the user can see it completed
         await new Promise(resolve => setTimeout(resolve, 400));
         finishLoading();
     }
-
-    // Auto-start full boot sequence immediately on load
-    runBootSequence();
 
     // --- Scrollytelling & Preloader Logic ---
     const frameCount = 65;
@@ -574,6 +187,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const airbnb = { frame: 0 };
     const canvas = document.getElementById('hero-canvas');
     const context = canvas ? canvas.getContext('2d') : null;
+
+    // Auto-start full boot sequence immediately on load
+    runBootSequence();
 
     function initHeroScrollytelling() {
         if (!canvas || !context) return;
@@ -652,7 +268,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const splash = document.getElementById('vibe-splash');
         if (splash) {
             splash.classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => splash.remove(), 1000);
+            setTimeout(() => splash.remove(), 300);
         }
         
         // Show Canvas & Nav
@@ -1005,95 +621,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Testimonials Logic ---
-    const leaveBtn = document.getElementById('leave-testimonial-btn');
-    const tModal = document.getElementById('testimonial-modal');
-    const tModalContent = document.getElementById('testimonial-modal-content');
-    const closeTBtn = document.getElementById('close-testimonial-modal');
-    
-    if (leaveBtn && tModal) {
-        leaveBtn.addEventListener('click', () => {
-            tModal.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => tModalContent.classList.remove('scale-95'), 50);
-        });
-        
-        closeTBtn.addEventListener('click', () => {
-            tModalContent.classList.add('scale-95');
-            setTimeout(() => tModal.classList.add('opacity-0', 'pointer-events-none'), 300);
-        });
-    }
 
-    // Star Rating
-    const starBtns = document.querySelectorAll('.star-btn');
-    const ratingInput = document.getElementById('t-form-rating');
-    let currentRating = 0;
-    
-    starBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const value = parseInt(btn.getAttribute('data-value'));
-            currentRating = value;
-            ratingInput.value = value;
-            
-            starBtns.forEach(sb => {
-                const sv = parseInt(sb.getAttribute('data-value'));
-                if (sv <= value) {
-                    sb.classList.add('text-primary');
-                    sb.classList.remove('text-white/20');
-                } else {
-                    sb.classList.remove('text-primary');
-                    sb.classList.add('text-white/20');
-                }
-            });
-        });
-    });
-
-    // Submit Testimonial
-    const tForm = document.getElementById('testimonial-form');
-    if (tForm) {
-        tForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentRating) {
-                alert('Please provide a rating.');
-                return;
-            }
-            
-            const tData = {
-                name: document.getElementById('t-form-name').value,
-                role: document.getElementById('t-form-role').value || 'Client',
-                rating: currentRating,
-                message: document.getElementById('t-form-message').value,
-                date: new Date().toISOString(),
-                status: 'approved' // Automatically show for demo purposes
-            };
-            
-            document.getElementById('t-submit-loader').classList.remove('hidden');
-            
-            try {
-                if (window.db) {
-                    await window.db.collection('testimonials').add(tData);
-                    fetchTestimonials();
-                }
-                
-                document.getElementById('t-submit-loader').classList.add('hidden');
-                document.getElementById('t-success-msg').classList.remove('opacity-0', 'pointer-events-none');
-                tForm.reset();
-                currentRating = 0;
-                starBtns.forEach(sb => {
-                    sb.classList.remove('text-primary');
-                    sb.classList.add('text-white/20');
-                });
-                
-                setTimeout(() => {
-                    document.getElementById('t-success-msg').classList.add('opacity-0', 'pointer-events-none');
-                    closeTBtn.click();
-                }, 3000);
-            } catch (error) {
-                console.error("Testimonial Error:", error);
-                document.getElementById('t-submit-loader').classList.add('hidden');
-                alert('Failed to submit testimonial.');
-            }
-        });
-    }
 
     const DEFAULT_TESTIMONIALS = [
         {
@@ -1181,7 +709,7 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         {
             question: "What is your pricing model, and what does a project cost?",
-            answer: "Custom interactive web projects typically range from ₹30,000 to ₹80,000+ depending on the complexity of 3D elements, animations, and integrations. I provide clear, milestone-based quotes and ensure full transparency on costs before we write a single line of code.",
+            answer: "Custom interactive web projects are quoted based on the unique value, scope, and complexity of your requirements. I provide clear, milestone-based quotes and ensure full transparency on costs before we write a single line of code.",
             askedByName: "System"
         },
         {
@@ -1305,76 +833,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // Call fetch once DB might be ready
     setTimeout(fetchFAQs, 1000);
 
-    // --- FAQ Modal Logic ---
-    const askFaqBtn = document.getElementById('ask-question-btn');
-    const faqModal = document.getElementById('faq-modal');
-    const faqModalContent = document.getElementById('faq-modal-content');
-    const closeFaqBtn = document.getElementById('close-faq-modal');
-    
-    if (askFaqBtn && faqModal) {
-        askFaqBtn.addEventListener('click', () => {
-            faqModal.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => faqModalContent.classList.remove('scale-95'), 50);
-        });
-        
-        closeFaqBtn.addEventListener('click', () => {
-            faqModalContent.classList.add('scale-95');
-            setTimeout(() => faqModal.classList.add('opacity-0', 'pointer-events-none'), 300);
-        });
-    }
 
-    const faqForm = document.getElementById('faq-form');
-    if (faqForm) {
-        faqForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const questionText = document.getElementById('faq-form-question').value.trim();
-            const askedBy = document.getElementById('faq-form-name').value.trim() || 'Anonymous';
-            
-            if (!questionText) return;
-            
-            const faqData = {
-                question: questionText,
-                askedByName: askedBy,
-                answer: '',
-                isAnswered: false,
-                isApproved: false,
-                dateAsked: new Date().toISOString()
-            };
-            
-            const loader = document.getElementById('faq-submit-loader');
-            if (loader) loader.classList.remove('hidden');
-            
-            try {
-                if (window.db) {
-                    await window.db.collection('faqs').add(faqData);
-                } else {
-                    const localFaqs = JSON.parse(localStorage.getItem('vibe_faqs') || '[]');
-                    localFaqs.push({ ...faqData, id: Date.now() });
-                    localStorage.setItem('vibe_faqs', JSON.stringify(localFaqs));
-                }
-                
-                if (loader) loader.classList.add('hidden');
-                
-                const successMsg = document.getElementById('faq-success-msg');
-                if (successMsg) successMsg.classList.remove('opacity-0', 'pointer-events-none');
-                
-                faqForm.reset();
-                
-                setTimeout(() => {
-                    if (successMsg) successMsg.classList.add('opacity-0', 'pointer-events-none');
-                    if (closeFaqBtn) closeFaqBtn.click();
-                }, 3000);
-            } catch (error) {
-                console.error("FAQ Submission Error:", error);
-                if (loader) loader.classList.add('hidden');
-                alert('Failed to submit question. Please try again.');
-            }
-        });
-    }
 
-    document.addEventListener('click', speakVibeInit);
-    document.addEventListener('keydown', speakVibeInit);
 
     // --- Isometric Dot Grid Background ---
     function initDotGrid() {

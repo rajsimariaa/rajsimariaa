@@ -125,19 +125,16 @@
     <!-- Background Effects -->
     <canvas id="dot-grid-canvas" class="fixed inset-0 z-[-2] pointer-events-none opacity-40"></canvas>
 
-    <!-- Cinematic Preloader -->
-    <div id="vibe-splash" class="fixed inset-0 z-[9999] bg-dark flex flex-col items-center justify-center p-6 transition-all duration-1000">
-        <!-- Terminal Container -->
-        <div class="w-full max-w-lg bg-black/60 border border-primary/20 rounded-xl p-6 font-mono text-xs md:text-sm text-primary shadow-[0_0_40px_rgba(0,242,255,0.05)] backdrop-blur-xl">
-            <div class="flex items-center gap-2 mb-4 border-b border-primary/10 pb-3">
-                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-                <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
-                <span class="ml-2 text-white/30 text-[9px] uppercase tracking-[0.2em]">vibe_kernel_bootloader v1.0.0</span>
+    <!-- Simple Preloader -->
+    <div id="vibe-splash" class="fixed inset-0 z-[9999] bg-dark flex flex-col items-center justify-center p-6 transition-all duration-300">
+        <div class="flex flex-col items-center justify-center animate-pulse">
+            <img src="logo.webp" alt="Loading" class="h-24 md:h-32 w-auto mb-8 opacity-80" />
+            <div class="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
+                <div id="loading-progress-bar" class="h-full bg-primary w-0 transition-all duration-100"></div>
             </div>
-            <!-- Scrollable Terminal Log Lines -->
-            <div id="terminal-boot-log" class="space-y-1.5 h-56 md:h-64 overflow-y-auto pr-2 scrollbar-thin text-left leading-relaxed text-[11px] md:text-xs">
-                <!-- Lines will print here dynamically -->
+            <div class="w-64 mt-4 flex items-center justify-between text-primary font-mono text-xs uppercase tracking-widest">
+                <span class="text-white/60">Loading Experience...</span>
+                <span id="loading-percentage">0%</span>
             </div>
         </div>
     </div>
@@ -148,13 +145,7 @@
             <img src="logo.webp" alt="RS" width="1024" height="1024" class="h-14 md:h-16 w-auto" fetchpriority="high" decoding="async">
         </div>
         <div id="nav-links-container" class="hidden md:flex gap-12 text-sm font-medium tracking-widest uppercase items-center">
-            <a href="#hero" class="nav-link hover:text-primary transition-colors">Intro</a>
-            <a href="#about" class="nav-link hover:text-primary transition-colors">About</a>
-            <a href="#expertise" class="nav-link hover:text-primary transition-colors">Skills</a>
-            <a href="#work" class="nav-link hover:text-primary transition-colors">Work</a>
-            <a href="#testimonials" class="nav-link hover:text-primary transition-colors">Testimonials</a>
-            <a href="#faq" class="nav-link hover:text-primary transition-colors">FAQ</a>
-            <a href="#contact" class="nav-link hover:text-primary transition-colors">Connect</a>
+
             <a href="blogs.html" class="hover:text-primary transition-colors">Blogs</a>
             <a href="affiliate.html" class="hover:text-accent transition-colors">Affiliate</a>
         </div>
@@ -169,13 +160,7 @@
 
     <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="fixed inset-0 bg-dark/95 backdrop-blur-2xl z-[45] flex flex-col justify-center items-center gap-8 text-3xl font-black tracking-tighter transition-all duration-500 translate-x-full opacity-0 pointer-events-none">
-        <a href="#hero" class="mobile-nav-link hover:text-primary">INTRO</a>
-        <a href="#about" class="mobile-nav-link hover:text-primary">ABOUT</a>
-        <a href="#expertise" class="mobile-nav-link hover:text-primary">SKILLS</a>
-        <a href="#work" class="mobile-nav-link hover:text-primary">WORK</a>
-        <a href="#testimonials" class="mobile-nav-link hover:text-primary">TESTIMONIALS</a>
-        <a href="#faq" class="mobile-nav-link hover:text-primary">FAQ</a>
-        <a href="#contact" class="mobile-nav-link hover:text-primary">CONNECT</a>
+
         <a href="blogs.html" class="hover:text-primary">BLOGS</a>
         <a href="affiliate.html" class="hover:text-accent">AFFILIATE</a>
     </div>
@@ -193,20 +178,11 @@
                 
                 <div class="max-w-5xl relative z-10">
                     <p class="text-primary font-mono mb-4 tracking-tighter text-lg md:text-xl overflow-hidden h-7 opacity-0 translate-y-10" id="hero-tagline-scroll">
-                        <span class="inline-block">// VIBE_PROTOCOL_INITIALIZED...</span>
+                        <span class="inline-block">// CRAFTING DIGITAL EXCELLENCE</span>
                     </p>
                     <h1 class="text-6xl md:text-9xl font-black mb-16 md:mb-24 leading-[0.9] tracking-tighter text-white drop-shadow-2xl" id="hero-title">
                         RAJ <br> <span class="border-text-thick">SIMARIA</span><span class="sr-only"> - Expert Website Developer &amp; Cinematic Designer</span>
                     </h1>
-
-                    <div class="flex flex-wrap gap-6 mt-8 md:mt-12 opacity-0 translate-y-10" id="hero-cta-scroll">
-                        <a href="#work" class="group relative px-8 py-4 overflow-hidden rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm transition-all hover:bg-primary hover:text-black">
-                            <span class="relative z-10 font-bold uppercase tracking-widest text-sm">Explore Work</span>
-                        </a>
-                        <a href="#contact" class="px-8 py-4 font-bold uppercase tracking-widest text-sm border-b border-white/20 hover:border-primary transition-colors">
-                            Hire Me
-                        </a>
-                    </div>
                 </div>
 
 
@@ -423,9 +399,6 @@
                         </h2>
                         <p class="text-white/40 font-mono tracking-widest">// PROVEN RESULTS</p>
                     </div>
-                    <button id="leave-testimonial-btn" class="group flex items-center gap-4 text-primary font-bold uppercase tracking-widest text-sm py-4 px-8 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary hover:text-black transition-all">
-                        Leave a Review
-                    </button>
                 </div>
                 
                 <!-- Testimonials Grid -->
@@ -438,57 +411,6 @@
             </div>
         </section>
 
-        <!-- Testimonial Modal -->
-        <div id="testimonial-modal" class="fixed inset-0 z-[200] bg-dark/95 backdrop-blur-2xl flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-500">
-            <div class="w-full max-w-lg bg-white/5 border border-white/10 p-10 rounded-[40px] relative transform scale-95 transition-transform duration-500" id="testimonial-modal-content">
-                <button id="close-testimonial-modal" class="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                
-                <h3 class="text-3xl font-black mb-2 uppercase tracking-tighter">Your Feedback</h3>
-                <p class="text-white/40 font-mono text-[10px] uppercase tracking-widest mb-8">// RATE YOUR EXPERIENCE</p>
-                
-                <form id="testimonial-form" class="space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Full Name</label>
-                        <input type="text" id="t-form-name" required placeholder="John Doe" class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-primary transition-colors text-lg">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Role / Company (Optional)</label>
-                        <input type="text" id="t-form-role" placeholder="CEO, Example Inc." class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-primary transition-colors text-lg">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Rating</label>
-                        <div class="flex gap-2" id="star-rating">
-                            <!-- SVG stars here -->
-                            <button type="button" class="star-btn text-white/20 hover:text-primary transition-colors" data-value="1"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg></button>
-                            <button type="button" class="star-btn text-white/20 hover:text-primary transition-colors" data-value="2"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg></button>
-                            <button type="button" class="star-btn text-white/20 hover:text-primary transition-colors" data-value="3"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg></button>
-                            <button type="button" class="star-btn text-white/20 hover:text-primary transition-colors" data-value="4"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg></button>
-                            <button type="button" class="star-btn text-white/20 hover:text-primary transition-colors" data-value="5"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg></button>
-                        </div>
-                        <input type="hidden" id="t-form-rating" required>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Testimonial</label>
-                        <textarea id="t-form-message" required rows="4" placeholder="Your experience..." class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-primary transition-colors text-lg resize-none"></textarea>
-                    </div>
-                    <button type="submit" id="t-form-submit" class="w-full py-5 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-[1.02] transition-transform active:scale-95 flex justify-center items-center gap-3">
-                        <span>Submit Review</span>
-                        <div id="t-submit-loader" class="hidden w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
-                    </button>
-                </form>
-                
-                <div id="t-success-msg" class="absolute inset-0 bg-dark/95 backdrop-blur-xl rounded-[40px] flex flex-col items-center justify-center text-center p-10 opacity-0 pointer-events-none transition-opacity duration-500">
-                    <div class="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <h3 class="text-3xl font-black mb-2 uppercase tracking-tighter">Thank You!</h3>
-                    <p class="text-white/60">Your feedback has been successfully submitted.</p>
-                </div>
-            </div>
-        </div>
-
         <!-- FAQ Section -->
         <section id="faq" class="py-32 px-6 md:px-20 bg-dark relative overflow-hidden border-t border-white/5">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(191,0,255,0.03),transparent_50%)] pointer-events-none"></div>
@@ -500,9 +422,6 @@
                         </h2>
                         <p class="text-white/40 font-mono tracking-widest">// SYSTEM_KNOWLEDGE_BASE</p>
                     </div>
-                    <button id="ask-question-btn" class="group flex items-center gap-4 text-primary font-bold uppercase tracking-widest text-sm py-4 px-8 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary hover:text-black transition-all">
-                        Ask a Question
-                    </button>
                 </div>
                 
                 <!-- Accordion Container -->
@@ -515,40 +434,7 @@
             </div>
         </section>
 
-        <!-- Ask Question Modal -->
-        <div id="faq-modal" class="fixed inset-0 z-[200] bg-dark/95 backdrop-blur-2xl flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-500">
-            <div class="w-full max-w-lg bg-white/5 border border-white/10 p-10 rounded-[40px] relative transform scale-95 transition-transform duration-500" id="faq-modal-content">
-                <button id="close-faq-modal" class="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                
-                <h3 class="text-3xl font-black mb-2 uppercase tracking-tighter text-white">Submit a Question</h3>
-                <p class="text-white/40 font-mono text-[10px] uppercase tracking-widest mb-8">// BROADCAST_INQUIRY</p>
-                
-                <form id="faq-form" class="space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Your Name (Optional)</label>
-                        <input type="text" id="faq-form-name" placeholder="Anonymous" class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-primary transition-colors text-lg text-white">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest font-bold text-white/40">Question</label>
-                        <textarea id="faq-form-question" required rows="4" placeholder="What is your question?" class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-primary transition-colors text-lg resize-none text-white"></textarea>
-                    </div>
-                    <button type="submit" id="faq-form-submit" class="w-full py-5 bg-primary text-black font-black uppercase tracking-widest rounded-full hover:scale-[1.02] transition-transform active:scale-95 flex justify-center items-center gap-3">
-                        <span>Send Question</span>
-                        <div id="faq-submit-loader" class="hidden w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
-                    </button>
-                </form>
-                
-                <div id="faq-success-msg" class="absolute inset-0 bg-dark/95 backdrop-blur-xl rounded-[40px] flex flex-col items-center justify-center text-center p-10 opacity-0 pointer-events-none transition-opacity duration-500">
-                    <div class="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <h3 class="text-3xl font-black mb-2 uppercase tracking-tighter text-white">Transmission Sent!</h3>
-                    <p class="text-white/60">Your question has been received. Admin will reply soon.</p>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Contact Section -->
         <section id="contact" class="min-h-screen py-32 px-6 md:px-20 flex flex-col justify-center relative">
@@ -690,33 +576,7 @@
         <a href="affiliate.html" class="text-white/40 hover:text-accent transition-colors border-b border-white/10 hover:border-accent/50 pb-1">Affiliate Program</a>
     </footer>
 
-    <!-- Vibe Console -->
-    <div id="vibe-console" class="fixed bottom-6 left-6 w-72 h-40 bg-black/80 border border-primary/20 rounded-xl backdrop-blur-xl z-[100] p-4 font-mono text-[10px] text-primary/70 overflow-hidden pointer-events-auto hidden md:block transition-all duration-500">
-        <div class="flex items-center flex-nowrap gap-2 mb-2 border-b border-primary/10 pb-1">
-            <div id="vibe-close" class="w-2 h-2 rounded-full bg-red-500 cursor-pointer hover:scale-125 transition-transform"></div>
-            <div id="vibe-minimize" class="w-2 h-2 rounded-full bg-yellow-500 cursor-pointer hover:scale-125 transition-transform"></div>
-            <div id="vibe-maximize" class="w-2 h-2 rounded-full bg-green-500 cursor-pointer hover:scale-125 transition-transform"></div>
-            <span class="ml-2 text-white/40 uppercase tracking-widest">vibe_terminal</span>
-        </div>
-        <div class="flex flex-col h-[calc(100%-25px)]">
-            <div id="console-logs" class="flex-grow space-y-1 overflow-y-auto no-scrollbar pr-2">
-                <div class="opacity-100">SYSTEM READY...</div>
-                <div class="opacity-60">THREE_JS_ENGINE: LOADED</div>
-                <div class="opacity-60">GSAP_PROTOCOL: ACTIVE</div>
-            </div>
-            <div class="mt-2 flex items-center gap-2 border-t border-primary/10 pt-2 shrink-0">
-                <span class="text-primary animate-pulse">></span>
-                <input type="text" id="terminal-input" class="bg-transparent border-none outline-none text-primary w-full placeholder:text-primary/20" placeholder="Type 'help'..." autocomplete="off">
-            </div>
-        </div>
-    </div>
-    
-    <!-- Terminal Trigger Button (Hidden by default) -->
-    <div id="terminal-trigger" class="fixed bottom-6 left-6 w-12 h-12 bg-black/80 border border-primary/20 rounded-full backdrop-blur-xl z-[100] flex items-center justify-center cursor-pointer hover:border-primary transition-all opacity-0 pointer-events-none hidden md:flex scale-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-    </div>
+
 
     <!-- Firebase SDK (v8 Compatibility) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
